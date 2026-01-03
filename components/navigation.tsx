@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { ShoppingCart, User, ChevronDown, Menu, X, ArrowRight, Search } from "lucide-react"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/lib/store"
@@ -133,6 +133,7 @@ const navItems = [
 
 export function Navigation() {
   const pathname = usePathname()
+  const router = useRouter()
   const cartItems = useSelector((state: RootState) => state.cart.items)
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -167,6 +168,7 @@ export function Navigation() {
                 <div key={item.label} onMouseEnter={() => item.megaMenu && setActiveMenu(item.label)} className="relative">
                   {item.megaMenu ? (
                     <button
+                      onClick={() => router.push(item.href)}
                       className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${
                         item.highlighted
                           ? activeMenu === item.label

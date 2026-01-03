@@ -17,6 +17,7 @@ export default function CheckoutPage() {
   const { items, total } = useSelector((state: RootState) => state.cart)
   const [step, setStep] = useState(1)
   const [orderComplete, setOrderComplete] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card")
 
   const shipping = total > 500 ? 0 : 49.99
   const tax = total * 0.0825
@@ -318,32 +319,87 @@ export default function CheckoutPage() {
                         <span className="text-sm text-muted font-light">Secure 256-bit SSL encryption</span>
                       </div>
 
-                      <div className="space-y-4">
-                        <div>
-                          <label className="text-sm text-muted font-light mb-2 block">Card Number</label>
-                          <div className="relative">
-                            <Input
-                              placeholder="4242 4242 4242 4242"
-                              className="bg-white/5 border-white/10 text-white pl-12"
-                            />
-                            <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
-                          </div>
-                        </div>
+                      {/* Payment Method Selection */}
+                      <div className="mb-6">
+                        <label className="text-sm text-muted font-light mb-3 block">Payment Method</label>
                         <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm text-muted font-light mb-2 block">Expiry Date</label>
-                            <Input placeholder="MM/YY" className="bg-white/5 border-white/10 text-white" />
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted font-light mb-2 block">CVV</label>
-                            <Input placeholder="123" className="bg-white/5 border-white/10 text-white" />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="text-sm text-muted font-light mb-2 block">Cardholder Name</label>
-                          <Input placeholder="John Doe" className="bg-white/5 border-white/10 text-white" />
+                          <button
+                            onClick={() => setPaymentMethod("card")}
+                            className={`p-4 rounded-lg border transition-all ${
+                              paymentMethod === "card"
+                                ? "border-accent bg-accent/10"
+                                : "border-white/10 bg-white/5 hover:border-white/20"
+                            }`}
+                          >
+                            <CreditCard className="h-6 w-6 mx-auto mb-2 text-white" />
+                            <p className="text-white font-light text-sm">Credit/Debit Card</p>
+                          </button>
+                          <button
+                            onClick={() => setPaymentMethod("cash")}
+                            className={`p-4 rounded-lg border transition-all ${
+                              paymentMethod === "cash"
+                                ? "border-accent bg-accent/10"
+                                : "border-white/10 bg-white/5 hover:border-white/20"
+                            }`}
+                          >
+                            <Truck className="h-6 w-6 mx-auto mb-2 text-white" />
+                            <p className="text-white font-light text-sm">Cash on Delivery</p>
+                          </button>
                         </div>
                       </div>
+
+                      {/* Card Payment Form */}
+                      {paymentMethod === "card" && (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-sm text-muted font-light mb-2 block">Card Number</label>
+                            <div className="relative">
+                              <Input
+                                placeholder="4242 4242 4242 4242"
+                                className="bg-white/5 border-white/10 text-white pl-12"
+                              />
+                              <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm text-muted font-light mb-2 block">Expiry Date</label>
+                              <Input placeholder="MM/YY" className="bg-white/5 border-white/10 text-white" />
+                            </div>
+                            <div>
+                              <label className="text-sm text-muted font-light mb-2 block">CVV</label>
+                              <Input placeholder="123" className="bg-white/5 border-white/10 text-white" />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="text-sm text-muted font-light mb-2 block">Cardholder Name</label>
+                            <Input placeholder="John Doe" className="bg-white/5 border-white/10 text-white" />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Cash on Delivery Info */}
+                      {paymentMethod === "cash" && (
+                        <div className="bg-white/5 rounded-lg p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                              <Truck className="h-6 w-6 text-accent" />
+                            </div>
+                            <div>
+                              <h3 className="text-white font-light mb-2">Cash on Delivery</h3>
+                              <p className="text-muted font-light text-sm leading-relaxed">
+                                Pay with cash when your order is delivered to your doorstep. Our delivery partner will
+                                collect the payment upon delivery.
+                              </p>
+                              <div className="mt-4 p-3 bg-white/5 rounded border border-white/10">
+                                <p className="text-accent font-light text-sm">
+                                  Please have exact amount ready: ${grandTotal.toFixed(2)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex gap-4 mt-6">
@@ -352,7 +408,7 @@ export default function CheckoutPage() {
                       </Button>
                       <Button onClick={handlePlaceOrder} className="flex-1 bg-accent hover:bg-accent/90">
                         <Lock className="h-4 w-4 mr-2" />
-                        Place Order • ${grandTotal.toFixed(2)}
+                        {paymentMethod === "card" ? "Pay Now" : "Confirm Order"} • ${grandTotal.toFixed(2)}
                       </Button>
                     </div>
                   </motion.div>

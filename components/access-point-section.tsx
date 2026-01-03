@@ -10,7 +10,7 @@ const tiers = [
   {
     icon: Users,
     title: "Individual Enthusiasts",
-    stat: "100+",
+    stat: "3M+",
     statLabel: "Parts Available",
     subtitle: "For passionate car owners",
     description:
@@ -63,7 +63,7 @@ const tiers = [
     cta: "Contact Sales",
     href: "/contact",
     gradient: "from-green-600/20 to-teal-600/20",
-    image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=600&fit=crop&q=80",
+    image: "/new/",
   },
 ]
 
