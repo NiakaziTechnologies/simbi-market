@@ -2,13 +2,14 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { ShoppingCart, User, ChevronDown, Menu, X, ArrowRight, Search } from "lucide-react"
+import { ShoppingCart, User, ChevronDown, Menu, X, ArrowRight, Search, Plus } from "lucide-react"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/lib/store"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
+import { SearchFilters } from "@/components/search-filters"
 
 const navItems = [
   {
@@ -137,6 +138,7 @@ export function Navigation() {
   const cartItems = useSelector((state: RootState) => state.cart.items)
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -150,9 +152,8 @@ export function Navigation() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled || activeMenu ? "bg-background/95 backdrop-blur-xl border-b border-white/10" : "bg-transparent"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled || activeMenu ? "bg-background/95 backdrop-blur-xl border-b border-white/10" : "bg-transparent"
+          }`}
         onMouseLeave={() => setActiveMenu(null)}
       >
         <div className="max-w-[1400px] mx-auto px-6">
@@ -169,21 +170,19 @@ export function Navigation() {
                   {item.megaMenu ? (
                     <button
                       onClick={() => router.push(item.href)}
-                      className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${
-                        item.highlighted
-                          ? activeMenu === item.label
-                            ? "text-white bg-blue-600"
-                            : "text-white bg-blue-500 hover:bg-blue-600"
-                          : activeMenu === item.label
+                      className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${item.highlighted
+                        ? activeMenu === item.label
+                          ? "text-white bg-blue-600"
+                          : "text-white bg-blue-500 hover:bg-blue-600"
+                        : activeMenu === item.label
                           ? "text-white bg-white/10"
                           : "text-white/80 hover:text-white hover:bg-white/5"
-                      }`}
+                        }`}
                     >
                       {item.label}
                       <ChevronDown
-                        className={`h-3.5 w-3.5 transition-transform duration-200 ${
-                          activeMenu === item.label ? "rotate-180" : ""
-                        }`}
+                        className={`h-3.5 w-3.5 transition-transform duration-200 ${activeMenu === item.label ? "rotate-180" : ""
+                          }`}
                       />
                     </button>
                   ) : (
@@ -202,10 +201,14 @@ export function Navigation() {
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
-                size="icon"
-                className="hidden lg:flex text-white/80 hover:text-white hover:bg-white/10"
+                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isSearchOpen
+                  ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+                  : "text-white border-white/40 hover:bg-white/10 hover:border-white/60"
+                  }`}
               >
-                <Search className="h-5 w-5" />
+                <Search className="h-4 w-4" />
+                <span className="text-sm font-medium">Search</span>
               </Button>
 
               <Link href="/checkout">
@@ -309,6 +312,53 @@ export function Navigation() {
                       )}
                     </div>
                   ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Global Search Dropdown */}
+        <AnimatePresence>
+          {isSearchOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute top-full left-0 right-0 bg-background/98 backdrop-blur-2xl border-b border-white/10 overflow-hidden"
+            >
+              <div className="max-w-[1000px] mx-auto px-6 py-12">
+                <div className="space-y-8">
+                  <div className="text-center space-y-2">
+                    <h3 className="text-2xl font-light text-white">Find Your <span className="font-semibold text-accent">Parts</span></h3>
+                    <p className="text-sm text-muted font-light">Search over 3 million premium automotive components</p>
+                  </div>
+
+                  <div className="flex flex-col gap-0 max-w-4xl mx-auto">
+                    <SearchFilters />
+                  </div>
+
+                  <div className="relative group max-w-2xl mx-auto">
+                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                      <Search className="h-5 w-5 text-white/40 group-focus-within:text-accent transition-colors" />
+                    </div>
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Search by part name, number, or VIN..."
+                      className="w-full h-16 bg-white/5 border border-white/10 rounded-xl pl-12 pr-32 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all text-lg"
+                    />
+                    <Button className="absolute right-2 top-2 bottom-2 px-8 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg">
+                      Search
+                    </Button>
+                  </div>
+
+                  <div className="flex justify-center gap-8 text-xs text-white/40 font-light">
+                    <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Free Expert Shipping</span>
+                    <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Genuine OEM Parts</span>
+                    <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-accent" /> 24/7 Support</span>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}

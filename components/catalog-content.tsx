@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import Link from "next/link"
+import { SearchFilters } from "@/components/search-filters"
 
 const categories = ["All", "Brakes", "Engine", "Suspension", "Exhaust", "Wheels"]
 
@@ -64,7 +65,7 @@ export function CatalogContent() {
           className="text-center mb-16"
         >
           <h1 className="text-5xl md:text-7xl font-light tracking-tight text-white mb-4">
-            Parts <span className="font-semibold">Catalogue</span>
+            Explore Parts <span className="font-semibold">Catalogue</span>
           </h1>
           <p className="text-muted font-light leading-relaxed max-w-2xl mx-auto">
             Premium automotive components engineered for excellence
@@ -76,56 +77,23 @@ export function CatalogContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="glass-card rounded-lg p-6 mb-12"
+          className="glass-card rounded-xl p-8 mb-12 border border-white/10 bg-white/5 backdrop-blur-xl"
         >
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted" />
+          <div className="space-y-8">
+            <div className="flex flex-col gap-0 overflow-hidden">
+              <SearchFilters />
+            </div>
+
+            <div className="relative group max-w-3xl mx-auto">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40 group-focus-within:text-accent transition-colors" />
               <Input
                 type="text"
-                placeholder="Search parts by name, category, or description..."
+                placeholder="Search by part name, category, or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-12 pl-12 bg-white/5 border-white/10 text-white placeholder:text-muted"
+                className="h-14 pl-12 bg-white/5 border-white/10 text-white placeholder:text-white/30 text-lg transition-all focus:ring-accent focus:border-accent rounded-xl"
               />
             </div>
-
-            {/* View Toggle */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === "grid" ? "default" : "ghost"}
-                size="icon"
-                onClick={() => setViewMode("grid")}
-              >
-                <Grid3X3 className="h-5 w-5" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "ghost"}
-                size="icon"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Category Filters */}
-          <div className="flex flex-wrap gap-3 mt-6">
-            <Filter className="h-5 w-5 text-muted mr-2" />
-            {categories.map((category) => (
-              <Button
-                key={category}
-                variant={
-                  (category === "All" && !selectedCategory) || selectedCategory === category ? "default" : "outline"
-                }
-                size="sm"
-                onClick={() => handleCategoryClick(category)}
-                className="font-light tracking-wide"
-              >
-                {category}
-              </Button>
-            ))}
           </div>
         </motion.div>
 

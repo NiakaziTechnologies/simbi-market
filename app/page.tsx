@@ -1,6 +1,5 @@
 import { Navigation } from "@/components/navigation"
 import { HeroSection } from "@/components/hero-section"
-import { SearchSection } from "@/components/search-section"
 import { BrandsSection } from "@/components/brands-section"
 import { SegmentSection } from "@/components/segment-section"
 import { AccessPointSection } from "@/components/access-point-section"
@@ -14,7 +13,6 @@ export default function HomePage() {
     <main className="min-h-screen bg-background">
       <Navigation />
       <HeroSection />
-      <SearchSection />
       <BrandsSection />
       <SegmentSection />
       <AccessPointSection />

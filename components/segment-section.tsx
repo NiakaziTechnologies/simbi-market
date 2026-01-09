@@ -21,7 +21,7 @@ const segments = [
     cta: "Start Shopping",
     href: "/catalog",
     image: "/new/oil_change.jpeg",
-    stats: { label: "Parts Available", value: "100+" },
+    stats: { label: "Parts Available", value: "3M+" },
     accent: "from-accent/20 to-transparent",
   },
   {
@@ -39,7 +39,7 @@ const segments = [
     cta: "Apply for Trade",
     href: "/contact",
     image: "/new/work.jpeg",
-    stats: { label: "Active Pros", value: "500+" },
+    stats: { label: "", value: "" },
     accent: "from-blue-500/20 to-transparent",
   },
   // {
