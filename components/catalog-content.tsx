@@ -98,14 +98,47 @@ export function CatalogContent() {
         </motion.div>
 
         {/* Results Count */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-muted font-light mb-8"
-        >
-          Showing {displayItems.length} {displayItems.length === 1 ? "result" : "results"}
-        </motion.p>
+        {/* Results Count & View Toggle */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-muted font-light"
+          >
+            Showing {displayItems.length} {displayItems.length === 1 ? "result" : "results"}
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/10"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewMode("grid")}
+              className={`h-9 w-9 p-0 transition-all ${viewMode === "grid"
+                  ? "bg-accent/20 text-accent shadow-inner"
+                  : "text-muted hover:text-white hover:bg-white/5"
+                }`}
+            >
+              <Grid3X3 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className={`h-9 w-9 p-0 transition-all ${viewMode === "list"
+                  ? "bg-accent/20 text-accent shadow-inner"
+                  : "text-muted hover:text-white hover:bg-white/5"
+                }`}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </motion.div>
+        </div>
 
         {/* Products Grid */}
         <AnimatePresence mode="wait">

@@ -13,75 +13,6 @@ import { SearchFilters } from "@/components/search-filters"
 
 const navItems = [
   {
-    label: "Home",
-    href: "/",
-    megaMenu: null,
-  },
-  {
-    label: "Services",
-    href: "/catalog",
-    megaMenu: {
-      categories: [
-        {
-          title: "For Individuals",
-          items: [
-            { name: "Part Finder", href: "/catalog" },
-            { name: "VIN Lookup", href: "/catalog" },
-            { name: "Installation Guides", href: "/blog" },
-            { name: "Warranty Claims", href: "/contact" },
-          ],
-        },
-        {
-          title: "For Professionals",
-          items: [
-            { name: "Bulk Ordering", href: "/contact" },
-            { name: "Trade Accounts", href: "/contact" },
-            { name: "API Access", href: "/contact" },
-            { name: "Priority Support", href: "/contact" },
-          ],
-        },
-      ],
-      featured: {
-        title: "Expert Services",
-        name: "Professional Installation",
-        price: "Book Now",
-        image: "/new/shocks.jpeg",
-        href: "/contact",
-      },
-    },
-  },
-  {
-    label: "Company",
-    href: "/about",
-    megaMenu: {
-      categories: [
-        {
-          title: "About Us",
-          items: [
-            { name: "Our Story", href: "/about" },
-            { name: "Mission & Values", href: "/about" },
-            { name: "Quality Assurance", href: "/about" },
-          ],
-        },
-        {
-          title: "Resources",
-          items: [
-            { name: "Blog", href: "/blog" },
-            { name: "Contact", href: "/contact" },
-            { name: "Support", href: "/contact" },
-          ],
-        },
-      ],
-      featured: {
-        title: "Quality You Can Trust",
-        name: "Premium Parts Supplier",
-        price: "Learn More",
-        image: "/new/engineworks.jpeg",
-        href: "/about",
-      },
-    },
-  },
-  {
     label: "Shop Online",
     href: "/catalog",
     highlighted: true,
@@ -130,6 +61,42 @@ const navItems = [
       },
     },
   },
+  {
+    label: "Home",
+    href: "/",
+    megaMenu: null,
+  },
+  {
+    label: "About Us",
+    href: "/about",
+    megaMenu: {
+      categories: [
+        {
+          title: "About Us",
+          items: [
+            { name: "Our Story", href: "/about" },
+            { name: "Mission & Values", href: "/about" },
+            { name: "Quality Assurance", href: "/about" },
+          ],
+        },
+        {
+          title: "Resources",
+          items: [
+            { name: "Blog", href: "/blog" },
+            { name: "Contact", href: "/contact" },
+            { name: "Support", href: "/contact" },
+          ],
+        },
+      ],
+      featured: {
+        title: "Quality You Can Trust",
+        name: "Premium Parts Supplier",
+        price: "Learn More",
+        image: "/new/engineworks.jpeg",
+        href: "/about",
+      },
+    },
+  },
 ]
 
 export function Navigation() {
@@ -139,6 +106,8 @@ export function Navigation() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [isSellerOpen, setIsSellerOpen] = useState(false)
+  const [isBuyerOpen, setIsBuyerOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -154,7 +123,11 @@ export function Navigation() {
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled || activeMenu ? "bg-background/95 backdrop-blur-xl border-b border-white/10" : "bg-transparent"
           }`}
-        onMouseLeave={() => setActiveMenu(null)}
+        onMouseLeave={() => {
+          setActiveMenu(null)
+          setIsSellerOpen(false)
+          setIsBuyerOpen(false)
+        }}
       >
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex items-center justify-between h-16">
@@ -199,9 +172,97 @@ export function Navigation() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
+              {/* Seller Account Button & Dropdown */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setIsSellerOpen(!isSellerOpen)
+                    setIsBuyerOpen(false)
+                    setIsSearchOpen(false)
+                  }}
+                  className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isSellerOpen
+                    ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+                    : "text-white border-white/40 hover:bg-white/10 hover:border-white/60"
+                    }`}
+                >
+                  <span className="text-sm font-medium">Seller Account</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isSellerOpen ? "rotate-180" : ""}`} />
+                </Button>
+                <AnimatePresence>
+                  {isSellerOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute top-full right-0 mt-2 w-48 bg-background/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-xl"
+                    >
+                      <div className="p-1">
+                        <Link href="/auth/seller/login">
+                          <Button variant="ghost" className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10">
+                            Login
+                          </Button>
+                        </Link>
+                        <Link href="/auth/seller/register">
+                          <Button variant="ghost" className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10">
+                            Create Account
+                          </Button>
+                        </Link>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Buyer Account Button & Dropdown */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    setIsBuyerOpen(!isBuyerOpen)
+                    setIsSellerOpen(false)
+                    setIsSearchOpen(false)
+                  }}
+                  className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isBuyerOpen
+                    ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+                    : "text-white border-white/40 hover:bg-white/10 hover:border-white/60"
+                    }`}
+                >
+                  <span className="text-sm font-medium">Buyer Account</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBuyerOpen ? "rotate-180" : ""}`} />
+                </Button>
+                <AnimatePresence>
+                  {isBuyerOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute top-full right-0 mt-2 w-48 bg-background/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-xl"
+                    >
+                      <div className="p-1">
+                        <Link href="/auth/buyer/login">
+                          <Button variant="ghost" className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10">
+                            Login
+                          </Button>
+                        </Link>
+                        <Link href="/auth/buyer/register">
+                          <Button variant="ghost" className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10">
+                            Create Account
+                          </Button>
+                        </Link>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <Button
                 variant="ghost"
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                onClick={() => {
+                  setIsSearchOpen(!isSearchOpen)
+                  setIsSellerOpen(false)
+                  setIsBuyerOpen(false)
+                }}
                 className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isSearchOpen
                   ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
                   : "text-white border-white/40 hover:bg-white/10 hover:border-white/60"
@@ -259,58 +320,60 @@ export function Navigation() {
                 {navItems
                   .filter((item) => item.label === activeMenu)
                   .map((item) => (
-                    <div key={item.label} className="flex gap-12">
-                      {/* Categories */}
-                      <div className="flex-1 grid grid-cols-3 gap-10">
-                        {item.megaMenu.categories.map((category) => (
-                          <div key={category.title}>
-                            <h4 className="text-xs font-semibold uppercase tracking-wider text-muted mb-4">
-                              {category.title}
-                            </h4>
-                            <ul className="space-y-3">
-                              {category.items.map((subItem) => (
-                                <li key={subItem.name}>
-                                  <Link
-                                    href={subItem.href}
-                                    className="text-white/80 hover:text-white transition-colors font-light flex items-center group"
-                                    onClick={() => setActiveMenu(null)}
-                                  >
-                                    {subItem.name}
-                                    <ArrowRight className="h-3.5 w-3.5 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                                  </Link>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ))}
-                      </div>
+                    item.megaMenu ? (
+                      <div key={item.label} className="flex gap-12">
+                        {/* Categories */}
+                        <div className="flex-1 grid grid-cols-3 gap-10">
+                          {item.megaMenu.categories.map((category) => (
+                            <div key={category.title}>
+                              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted mb-4">
+                                {category.title}
+                              </h4>
+                              <ul className="space-y-3">
+                                {category.items.map((subItem) => (
+                                  <li key={subItem.name}>
+                                    <Link
+                                      href={subItem.href}
+                                      className="text-white/80 hover:text-white transition-colors font-light flex items-center group"
+                                      onClick={() => setActiveMenu(null)}
+                                    >
+                                      {subItem.name}
+                                      <ArrowRight className="h-3.5 w-3.5 ml-2 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                                    </Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
 
-                      {/* Featured Card */}
-                      {item.megaMenu.featured && (
-                        <Link
-                          href={item.megaMenu.featured.href}
-                          className="w-72 group"
-                          onClick={() => setActiveMenu(null)}
-                        >
-                          <div className="relative h-48 rounded-lg overflow-hidden mb-4">
-                            <Image
-                              src={item.megaMenu.featured.image || "/placeholder.svg"}
-                              alt={item.megaMenu.featured.name}
-                              fill
-                              className="object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                          </div>
-                          <p className="text-xs text-muted uppercase tracking-wider mb-1">
-                            {item.megaMenu.featured.title}
-                          </p>
-                          <h4 className="text-white font-medium mb-1 group-hover:text-accent transition-colors">
-                            {item.megaMenu.featured.name}
-                          </h4>
-                          <p className="text-accent font-semibold">{item.megaMenu.featured.price}</p>
-                        </Link>
-                      )}
-                    </div>
+                        {/* Featured Card */}
+                        {item.megaMenu.featured && (
+                          <Link
+                            href={item.megaMenu.featured.href}
+                            className="w-72 group"
+                            onClick={() => setActiveMenu(null)}
+                          >
+                            <div className="relative h-48 rounded-lg overflow-hidden mb-4">
+                              <Image
+                                src={item.megaMenu.featured.image || "/placeholder.svg"}
+                                alt={item.megaMenu.featured.name}
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                            </div>
+                            <p className="text-xs text-muted uppercase tracking-wider mb-1">
+                              {item.megaMenu.featured.title}
+                            </p>
+                            <h4 className="text-white font-medium mb-1 group-hover:text-accent transition-colors">
+                              {item.megaMenu.featured.name}
+                            </h4>
+                            <p className="text-accent font-semibold">{item.megaMenu.featured.price}</p>
+                          </Link>
+                        )}
+                      </div>
+                    ) : null
                   ))}
               </div>
             </motion.div>
@@ -421,6 +484,18 @@ export function Navigation() {
                 )
               ))}
               <div className="pt-6 space-y-3">
+                {/* Mobile Account Links */}
+                <div className="flex flex-col gap-2 mb-4 p-4 rounded-lg bg-white/5">
+                  <h4 className="text-white font-semibold mb-2">Seller Account</h4>
+                  <Link href="/auth/seller/login" className="text-sm text-white/70 hover:text-white" onClick={() => setMobileOpen(false)}>Login</Link>
+                  <Link href="/auth/seller/register" className="text-sm text-white/70 hover:text-white" onClick={() => setMobileOpen(false)}>Create Account</Link>
+                </div>
+                <div className="flex flex-col gap-2 mb-4 p-4 rounded-lg bg-white/5">
+                  <h4 className="text-white font-semibold mb-2">Buyer Account</h4>
+                  <Link href="/auth/buyer/login" className="text-sm text-white/70 hover:text-white" onClick={() => setMobileOpen(false)}>Login</Link>
+                  <Link href="/auth/buyer/register" className="text-sm text-white/70 hover:text-white" onClick={() => setMobileOpen(false)}>Create Account</Link>
+                </div>
+
                 <Link href="/catalog" onClick={() => setMobileOpen(false)}>
                   <Button className="w-full bg-accent hover:bg-accent/90 text-white">Shop All Parts</Button>
                 </Link>
