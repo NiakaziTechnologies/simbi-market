@@ -1,7 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Check, ChevronsUpDown, Search } from "lucide-react"
+import { useDispatch, useSelector } from "react-redux"
+import type { RootState } from "@/lib/store"
+import { setFilters, clearFilters } from "@/lib/features/parts-slice"
+import { Check, ChevronsUpDown, Search, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -138,18 +141,30 @@ function SearchableSelect({ options, placeholder, value, onValueChange, classNam
 }
 
 export function SearchFilters({ className }: { className?: string }) {
-    const [year, setYear] = React.useState("")
-    const [make, setMake] = React.useState("")
-    const [model, setModel] = React.useState("")
-    const [category, setCategory] = React.useState("")
+    const dispatch = useDispatch()
+    const { filters } = useSelector((state: RootState) => state.parts)
+
+    const handleFilterChange = (key: keyof typeof filters, value: string) => {
+        const newFilters = { [key]: value }
+        // Reset dependent filters
+        if (key === 'make') {
+            newFilters.model = ""
+        }
+        dispatch(setFilters(newFilters))
+    }
+
+    const handleClearFilters = () => {
+        dispatch(clearFilters())
+    }
 
     const modelOptions = React.useMemo(() => {
-        if (!make) return []
-        const models = vehicleData.models[make as keyof typeof vehicleData.models] || []
+        if (!filters.make) return []
+        const models = vehicleData.models[filters.make as keyof typeof vehicleData.models] || []
         return models.map(m => ({ value: m.toLowerCase().replace(/\s+/g, '-'), label: m }))
-    }, [make])
+    }, [filters.make])
 
-    const showResults = !!(year || make || model || category)
+    const showResults = !!(filters.year || filters.make || filters.model || filters.category)
+    const hasActiveFilters = showResults
 
     return (
         <div className="relative w-full">
@@ -157,35 +172,46 @@ export function SearchFilters({ className }: { className?: string }) {
                 <SearchableSelect
                     options={years}
                     placeholder="Year"
-                    value={year}
-                    onValueChange={setYear}
+                    value={filters.year}
+                    onValueChange={(value) => handleFilterChange('year', value)}
                 />
                 <SearchableSelect
                     options={vehicleData.makes}
                     placeholder="Make"
-                    value={make}
-                    onValueChange={(val) => {
-                        setMake(val)
-                        setModel("") // Reset model when make changes
-                    }}
+                    value={filters.make}
+                    onValueChange={(value) => handleFilterChange('make', value)}
                 />
                 <SearchableSelect
                     options={modelOptions}
-                    placeholder={make ? "Model" : "Select Make First"}
-                    value={model}
-                    onValueChange={setModel}
+                    placeholder={filters.make ? "Model" : "Select Make First"}
+                    value={filters.model}
+                    onValueChange={(value) => handleFilterChange('model', value)}
                 />
                 <SearchableSelect
                     options={vehicleData.categories}
                     placeholder="Category"
-                    value={category}
-                    onValueChange={setCategory}
+                    value={filters.category}
+                    onValueChange={(value) => handleFilterChange('category', value)}
                 />
             </div>
 
+            {hasActiveFilters && (
+                <div className="mt-4 flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleClearFilters}
+                        className="h-8 px-3 text-xs bg-white/5 border-white/20 hover:bg-white/10"
+                    >
+                        <X className="w-3 h-3 mr-1" />
+                        Clear Filters
+                    </Button>
+                </div>
+            )}
+
             <LiveSearchResults
                 isVisible={showResults}
-                filters={{ year, make, model, category }}
+                filters={filters}
             />
         </div>
     )

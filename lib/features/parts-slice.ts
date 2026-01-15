@@ -23,12 +23,23 @@ export interface Part {
   videos?: { title: string; url: string; thumbnail: string }[]
   relatedParts?: string[]
   reviews?: { author: string; rating: number; comment: string; date: string }[]
+  // New fields for filtering
+  vehicleModels?: string[]
+  vehicleYears?: number[]
+  partCategory?: string
 }
 
 interface PartsState {
   items: Part[]
   filteredItems: Part[]
   selectedCategory: string | null
+  hasCategoryFilter: boolean
+  filters: {
+    year: string
+    make: string
+    model: string
+    category: string
+  }
 }
 
 const initialState: PartsState = {
@@ -98,6 +109,9 @@ const initialState: PartsState = {
           date: "Nov 15, 2025",
         },
       ],
+      vehicleModels: ["Model S", "Model 3", "Range Rover Sport"],
+      vehicleYears: [2018, 2019, 2020, 2021, 2022, 2023, 2024],
+      partCategory: "brakes",
     },
     {
       id: "2",
@@ -154,6 +168,9 @@ const initialState: PartsState = {
           date: "Nov 20, 2025",
         },
       ],
+      vehicleModels: ["Range Rover", "Discovery", "Defender"],
+      vehicleYears: [2019, 2020, 2021, 2022, 2023, 2024],
+      partCategory: "engine",
     },
     {
       id: "3",
@@ -203,10 +220,13 @@ const initialState: PartsState = {
         {
           author: "Chris P.",
           rating: 5,
-          comment: "The app control is a game changer. Soft for daily, firm for weekends.",
+          comment: "The app control is a changer. Soft for daily, firm for weekends.",
           date: "Dec 12, 2025",
         },
       ],
+      vehicleModels: ["Model X", "Range Rover Velar"],
+      vehicleYears: [2020, 2021, 2022, 2023, 2024],
+      partCategory: "suspension",
     },
     {
       id: "4",
@@ -253,6 +273,9 @@ const initialState: PartsState = {
       ],
       relatedParts: ["2", "5"],
       reviews: [],
+      vehicleModels: ["Model S Plaid", "Range Rover Sport SVR"],
+      vehicleYears: [2021, 2022, 2023, 2024],
+      partCategory: "exhaust",
     },
     {
       id: "5",
@@ -303,6 +326,9 @@ const initialState: PartsState = {
           date: "Dec 1, 2025",
         },
       ],
+      vehicleModels: ["Range Rover", "Discovery Sport"],
+      vehicleYears: [2019, 2020, 2021, 2022, 2023, 2024],
+      partCategory: "engine",
     },
     {
       id: "6",
@@ -355,9 +381,19 @@ const initialState: PartsState = {
           date: "Nov 25, 2025",
         },
       ],
+      vehicleModels: ["Model 3", "Model Y", "Evoque"],
+      vehicleYears: [2018, 2019, 2020, 2021, 2022, 2023, 2024],
+      partCategory: "wheels",
     }  ],
-  filteredItems: [],
+  filteredItems: [], // Will be set to in-stock items on first load
   selectedCategory: null,
+  hasCategoryFilter: false,
+  filters: {
+    year: "",
+    make: "",
+    model: "",
+    category: "",
+  },
 }
 
 const partsSlice = createSlice({
@@ -366,23 +402,78 @@ const partsSlice = createSlice({
   reducers: {
     filterByCategory: (state, action: PayloadAction<string | null>) => {
       state.selectedCategory = action.payload
-      if (action.payload) {
-        state.filteredItems = state.items.filter((item) => item.category === action.payload)
-      } else {
-        state.filteredItems = state.items
-      }
+      state.hasCategoryFilter = !!action.payload
+      // Apply all current filters including category
+      state.filteredItems = state.items.filter((item) => {
+        // Check stock
+        if (!item.inStock) return false
+
+        // Check category filter
+        if (action.payload && item.category !== action.payload) return false
+
+        // Check advanced filters
+        if (state.filters.year && item.vehicleYears && !item.vehicleYears.includes(parseInt(state.filters.year))) return false
+        if (state.filters.make && item.vehicleModels && !item.vehicleModels.some(model => model.toLowerCase().includes(state.filters.make.toLowerCase()))) return false
+        if (state.filters.model && item.vehicleModels && !item.vehicleModels.some(model => model.toLowerCase().includes(state.filters.model.toLowerCase()))) return false
+        if (state.filters.category && item.partCategory !== state.filters.category) return false
+
+        return true
+      })
     },
     searchParts: (state, action: PayloadAction<string>) => {
       const query = action.payload.toLowerCase()
-      state.filteredItems = state.items.filter(
-        (item) =>
-          item.name.toLowerCase().includes(query) ||
+      state.filteredItems = state.items.filter((item) => {
+        // Check stock
+        if (!item.inStock) return false
+
+        // Check search query
+        const matchesSearch = item.name.toLowerCase().includes(query) ||
           item.description.toLowerCase().includes(query) ||
-          item.category.toLowerCase().includes(query),
-      )
+          item.category.toLowerCase().includes(query)
+
+        if (!matchesSearch) return false
+
+        // Check advanced filters
+        if (state.filters.year && item.vehicleYears && !item.vehicleYears.includes(parseInt(state.filters.year))) return false
+        if (state.filters.make && item.vehicleModels && !item.vehicleModels.some(model => model.toLowerCase().includes(state.filters.make.toLowerCase()))) return false
+        if (state.filters.model && item.vehicleModels && !item.vehicleModels.some(model => model.toLowerCase().includes(state.filters.model.toLowerCase()))) return false
+        if (state.filters.category && item.partCategory !== state.filters.category) return false
+
+        return true
+      })
+    },
+    setFilters: (state, action: PayloadAction<Partial<PartsState['filters']>>) => {
+      state.filters = { ...state.filters, ...action.payload }
+      // Apply all filters including advanced filters, category selection, and search
+      state.filteredItems = state.items.filter((item) => {
+        // Check stock
+        if (!item.inStock) return false
+
+        // Check selected category
+        if (state.selectedCategory && item.category !== state.selectedCategory) return false
+
+        // Check advanced filters
+        if (state.filters.year && item.vehicleYears && !item.vehicleYears.includes(parseInt(state.filters.year))) return false
+        if (state.filters.make && item.vehicleModels && !item.vehicleModels.some(model => model.toLowerCase().includes(state.filters.make.toLowerCase()))) return false
+        if (state.filters.model && item.vehicleModels && !item.vehicleModels.some(model => model.toLowerCase().includes(state.filters.model.toLowerCase()))) return false
+        if (state.filters.category && item.partCategory !== state.filters.category) return false
+
+        return true
+      })
+    },
+    clearFilters: (state) => {
+      state.filters = {
+        year: "",
+        make: "",
+        model: "",
+        category: "",
+      }
+      state.selectedCategory = null
+      state.hasCategoryFilter = false
+      state.filteredItems = state.items.filter(item => item.inStock)
     },
   },
 })
 
-export const { filterByCategory, searchParts } = partsSlice.actions
+export const { filterByCategory, searchParts, setFilters, clearFilters } = partsSlice.actions
 export default partsSlice.reducer

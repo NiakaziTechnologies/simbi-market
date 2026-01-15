@@ -4,39 +4,39 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Premium automotive color palette - Tesla meets Range Rover */
-  --background: #000000; /* Onyx Black */
-  --foreground: #ffffff; /* Chalk White */
-  --card: #1d1d1f; /* Space Grey */
-  --card-foreground: #ffffff;
-  --popover: #1d1d1f;
-  --popover-foreground: #ffffff;
-  --primary: #ffffff;
-  --primary-foreground: #000000;
-  --secondary: #1d1d1f;
-  --secondary-foreground: #ffffff;
-  --muted: #86868b; /* Aluminum */
-  --muted-foreground: #86868b;
+  /* Light theme - Premium automotive color palette */
+  --background: #ffffff; /* Clean White */
+  --foreground: #000000; /* Deep Black */
+  --card: #f8f9fa; /* Light Grey */
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #000000;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f3f4;
+  --secondary-foreground: #000000;
+  --muted: #6c757d; /* Medium Grey */
+  --muted-foreground: #6c757d;
   --accent: #007aff; /* Precision Blue */
   --accent-foreground: #ffffff;
-  --destructive: #ff3b30;
+  --destructive: #dc3545;
   --destructive-foreground: #ffffff;
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.1);
+  --border: rgba(0, 0, 0, 0.1);
+  --input: rgba(0, 0, 0, 0.1);
   --ring: #007aff;
   --chart-1: #007aff;
-  --chart-2: #86868b;
-  --chart-3: #1d1d1f;
-  --chart-4: #ffffff;
-  --chart-5: #000000;
+  --chart-2: #6c757d;
+  --chart-3: #f1f3f4;
+  --chart-4: #000000;
+  --chart-5: #ffffff;
   --radius: 0.25rem;
-  --sidebar: #000000;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #ffffff;
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #1d1d1f;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #000000;
+  --sidebar-primary: #000000;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f1f3f4;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-border: rgba(0, 0, 0, 0.1);
   --sidebar-ring: #007aff;
 }
 

@@ -18,24 +18,14 @@ interface LiveSearchResultsProps {
 }
 
 export function LiveSearchResults({ isVisible, filters }: LiveSearchResultsProps) {
-    const { items } = useSelector((state: RootState) => state.parts)
+    const { filteredItems } = useSelector((state: RootState) => state.parts)
 
-    // Filter items based on selected filters (loose matching for demo)
-    const filteredItems = items.filter(item => {
-        const hasActiveFilters = filters.year || filters.make || filters.model || filters.category
-        if (!hasActiveFilters) return false
-
-        let match = true
-        if (filters.category && item.category.toLowerCase() !== filters.category.toLowerCase()) match = false
-
-        // In a real app, we'd have more complex matching here
-        // For now, if category matches, we show it
-        return match
-    }).slice(0, 4) // Show top 4 results
+    // Use the filtered items from Redux (already filtered by the slice)
+    const displayItems = filteredItems.slice(0, 4) // Show top 4 results
 
     return (
         <AnimatePresence>
-            {isVisible && filteredItems.length > 0 && (
+            {isVisible && displayItems.length > 0 && (
                 <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.98 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -49,12 +39,12 @@ export function LiveSearchResults({ isVisible, filters }: LiveSearchResultsProps
                                 Matching Results
                             </span>
                             <span className="text-[10px] text-white/40 uppercase tracking-wide">
-                                Showing {filteredItems.length} of {filteredItems.length} items
+                                Showing {displayItems.length} of {displayItems.length} items
                             </span>
                         </div>
 
                         <div className="divide-y divide-white/10">
-                            {filteredItems.map((item) => (
+                            {displayItems.map((item) => (
                                 <Link
                                     key={item.id}
                                     href={`/parts/${item.id}`}

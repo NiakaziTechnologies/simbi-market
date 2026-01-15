@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSelector, useDispatch } from "react-redux"
 import type { RootState } from "@/lib/store"
-import { filterByCategory, searchParts } from "@/lib/features/parts-slice"
+import { filterByCategory, searchParts, clearFilters, setFilters } from "@/lib/features/parts-slice"
 import { addToCart } from "@/lib/features/cart-slice"
-import { Search, Filter, Grid3X3, List, Plus, Check, Eye } from "lucide-react"
+import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -16,13 +16,20 @@ import { SearchFilters } from "@/components/search-filters"
 const categories = ["All", "Brakes", "Engine", "Suspension", "Exhaust", "Wheels"]
 
 export function CatalogContent() {
-  const dispatch = useDispatch()
-  const { items, filteredItems, selectedCategory } = useSelector((state: RootState) => state.parts)
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [addedItems, setAddedItems] = useState<Set<string>>(new Set())
+   const dispatch = useDispatch()
+   const { items, filteredItems, selectedCategory, hasCategoryFilter, filters } = useSelector((state: RootState) => state.parts)
+   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+   const [searchQuery, setSearchQuery] = useState("")
+   const [addedItems, setAddedItems] = useState<Set<string>>(new Set())
 
-  const displayItems = filteredItems.length > 0 || selectedCategory || searchQuery ? filteredItems : items
+   const hasActiveFilters = !!(filters.year || filters.make || filters.model || filters.category || hasCategoryFilter || searchQuery)
+   const displayItems = hasActiveFilters ? filteredItems : items
+   const hasNoResults = hasActiveFilters && displayItems.length === 0
+
+  // Initialize with in-stock items on mount
+  useEffect(() => {
+    dispatch(filterByCategory(null))
+  }, [dispatch])
 
   useEffect(() => {
     if (searchQuery) {
@@ -30,17 +37,14 @@ export function CatalogContent() {
     } else if (selectedCategory) {
       dispatch(filterByCategory(selectedCategory))
     } else {
+      // Show only in-stock items by default when no filters are active
       dispatch(filterByCategory(null))
     }
   }, [searchQuery, selectedCategory, dispatch])
 
   const handleCategoryClick = (category: string) => {
     setSearchQuery("")
-    if (category === "All") {
-      dispatch(filterByCategory(null))
-    } else {
-      dispatch(filterByCategory(category))
-    }
+    dispatch(filterByCategory(category === "All" ? null : category))
   }
 
   const handleAddToCart = (item: (typeof items)[0]) => {
@@ -55,6 +59,11 @@ export function CatalogContent() {
     }, 2000)
   }
 
+  const handleClearAllFilters = () => {
+    dispatch(clearFilters())
+    setSearchQuery("")
+  }
+
   return (
     <section className="pt-32 pb-16 px-6">
       <div className="max-w-7xl mx-auto">
@@ -64,7 +73,7 @@ export function CatalogContent() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h1 className="text-5xl md:text-7xl font-light tracking-tight text-white mb-4">
+          <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground mb-4">
             Explore Parts <span className="font-semibold">Catalogue</span>
           </h1>
           <p className="text-muted font-light leading-relaxed max-w-2xl mx-auto">
@@ -85,13 +94,13 @@ export function CatalogContent() {
             </div>
 
             <div className="relative group max-w-3xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/40 group-focus-within:text-accent transition-colors" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
               <Input
                 type="text"
                 placeholder="Search by part name, category, or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-14 pl-12 bg-white/5 border-white/10 text-white placeholder:text-white/30 text-lg transition-all focus:ring-accent focus:border-accent rounded-xl"
+                className="h-14 pl-12 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground text-lg transition-all focus:ring-accent focus:border-accent rounded-xl"
               />
             </div>
           </div>
@@ -113,7 +122,7 @@ export function CatalogContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex items-center gap-2 bg-white/5 p-1 rounded-lg border border-white/10"
+            className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg border border-border"
           >
             <Button
               variant="ghost"
@@ -121,7 +130,7 @@ export function CatalogContent() {
               onClick={() => setViewMode("grid")}
               className={`h-9 w-9 p-0 transition-all ${viewMode === "grid"
                   ? "bg-accent/20 text-accent shadow-inner"
-                  : "text-muted hover:text-white hover:bg-white/5"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
             >
               <Grid3X3 className="h-4 w-4" />
@@ -132,7 +141,7 @@ export function CatalogContent() {
               onClick={() => setViewMode("list")}
               className={`h-9 w-9 p-0 transition-all ${viewMode === "list"
                   ? "bg-accent/20 text-accent shadow-inner"
-                  : "text-muted hover:text-white hover:bg-white/5"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 }`}
             >
               <List className="h-4 w-4" />
@@ -140,9 +149,32 @@ export function CatalogContent() {
           </motion.div>
         </div>
 
+        {/* No Results State */}
+        {hasNoResults && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-16"
+          >
+            <div className="glass-card rounded-xl p-12 max-w-md mx-auto border border-border">
+              <PackageX className="w-16 h-16 text-muted-foreground mx-auto mb-6" />
+              <h3 className="text-2xl font-light text-foreground mb-4">No Results Found</h3>
+              <p className="text-muted font-light mb-8 leading-relaxed">
+                We couldn't find any parts matching your current filters. Try adjusting your search criteria or clearing the filters.
+              </p>
+              <Button
+                onClick={handleClearAllFilters}
+                className="bg-accent hover:bg-accent/90 text-white"
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
         {/* Products Grid */}
         <AnimatePresence mode="wait">
-          {viewMode === "grid" ? (
+          {!hasNoResults && viewMode === "grid" ? (
             <motion.div
               key="grid"
               initial={{ opacity: 0 }}
@@ -181,17 +213,17 @@ export function CatalogContent() {
                     <div className="p-6">
                       <Link href={`/parts/${item.id}`}>
                         <span className="text-xs text-accent font-medium tracking-wider uppercase">{item.category}</span>
-                        <h3 className="text-xl font-light text-white mt-2 mb-2 group-hover:text-accent transition-colors">
+                        <h3 className="text-xl font-light text-foreground mt-2 mb-2 group-hover:text-accent transition-colors">
                           {item.name}
                         </h3>
                         <p className="text-muted font-light text-sm leading-relaxed mb-4">{item.description}</p>
                       </Link>
 
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-2xl font-light text-white">${item.price.toLocaleString()}</span>
+                        <span className="text-2xl font-light text-foreground">${item.price.toLocaleString()}</span>
                         <div className="flex gap-2">
                           <Link href={`/parts/${item.id}`}>
-                            <Button variant="outline" size="sm" className="border-white/20 hover:bg-white/10">
+                            <Button variant="outline" size="sm" className="border-border hover:bg-muted">
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
@@ -209,7 +241,7 @@ export function CatalogContent() {
                 </motion.div>
               ))}
             </motion.div>
-          ) : (
+          ) : !hasNoResults && (
             <motion.div
               key="list"
               initial={{ opacity: 0 }}
@@ -253,7 +285,7 @@ export function CatalogContent() {
                             )}
                           </div>
                           <Link href={`/parts/${item.id}`}>
-                            <h3 className="text-2xl font-light text-white mb-2 group-hover:text-accent transition-colors">
+                            <h3 className="text-2xl font-light text-foreground mb-2 group-hover:text-accent transition-colors">
                               {item.name}
                             </h3>
                           </Link>
@@ -264,10 +296,10 @@ export function CatalogContent() {
                         </div>
 
                         <div className="flex items-center justify-between mt-6 gap-4">
-                          <span className="text-3xl font-light text-white">${item.price.toLocaleString()}</span>
+                          <span className="text-3xl font-light text-foreground">${item.price.toLocaleString()}</span>
                           <div className="flex gap-2">
                             <Link href={`/parts/${item.id}`}>
-                              <Button variant="outline" className="border-white/20 hover:bg-white/10">
+                              <Button variant="outline" className="border-border hover:bg-muted">
                                 <Eye className="h-4 w-4 mr-2" />
                                 View Details
                               </Button>

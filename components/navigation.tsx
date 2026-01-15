@@ -10,6 +10,7 @@ import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { SearchFilters } from "@/components/search-filters"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const navItems = [
   {
@@ -132,7 +133,7 @@ export function Navigation() {
         <div className="max-w-[1400px] mx-auto px-6">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="text-xl font-semibold tracking-tight text-white">
+            <Link href="/" className="text-xl font-semibold tracking-tight text-foreground">
               SIMBI<span className="text-accent">.</span>
             </Link>
 
@@ -148,8 +149,8 @@ export function Navigation() {
                           ? "text-white bg-blue-600"
                           : "text-white bg-blue-500 hover:bg-blue-600"
                         : activeMenu === item.label
-                          ? "text-white bg-white/10"
-                          : "text-white/80 hover:text-white hover:bg-white/5"
+                          ? "text-foreground bg-muted"
+                          : "text-foreground/80 hover:text-foreground hover:bg-muted/50"
                         }`}
                     >
                       {item.label}
@@ -161,7 +162,7 @@ export function Navigation() {
                   ) : (
                     <Link
                       href={item.href}
-                      className="flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full text-white/80 hover:text-white hover:bg-white/5"
+                      className="flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full text-foreground/80 hover:text-foreground hover:bg-muted/50"
                     >
                       {item.label}
                     </Link>
@@ -183,7 +184,7 @@ export function Navigation() {
                   }}
                   className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isSellerOpen
                     ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
-                    : "text-white border-white/40 hover:bg-white/10 hover:border-white/60"
+                    : "text-foreground border-border hover:bg-muted hover:border-border"
                     }`}
                 >
                   <span className="text-sm font-medium">Seller Account</span>
@@ -195,7 +196,7 @@ export function Navigation() {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute top-full right-0 mt-2 w-48 bg-background/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-xl"
+                      className="absolute top-full right-0 mt-2 w-48 bg-background/95 backdrop-blur-xl border border-border rounded-xl overflow-hidden shadow-xl"
                     >
                       <div className="p-1">
                         <Link href="/auth/seller/login">
@@ -225,7 +226,7 @@ export function Navigation() {
                   }}
                   className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isBuyerOpen
                     ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
-                    : "text-white border-white/40 hover:bg-white/10 hover:border-white/60"
+                    : "text-foreground border-border hover:bg-muted hover:border-border"
                     }`}
                 >
                   <span className="text-sm font-medium">Buyer Account</span>
@@ -237,16 +238,16 @@ export function Navigation() {
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute top-full right-0 mt-2 w-48 bg-background/95 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-xl"
+                      className="absolute top-full right-0 mt-2 w-48 bg-background/95 backdrop-blur-xl border border-border rounded-xl overflow-hidden shadow-xl"
                     >
                       <div className="p-1">
                         <Link href="/auth/buyer/login">
-                          <Button variant="ghost" className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10">
+                          <Button variant="ghost" className="w-full justify-start text-foreground/80 hover:text-foreground hover:bg-muted">
                             Login
                           </Button>
                         </Link>
                         <Link href="/auth/buyer/register">
-                          <Button variant="ghost" className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10">
+                          <Button variant="ghost" className="w-full justify-start text-foreground/80 hover:text-foreground hover:bg-muted">
                             Create Account
                           </Button>
                         </Link>
@@ -265,7 +266,7 @@ export function Navigation() {
                 }}
                 className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isSearchOpen
                   ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
-                  : "text-white border-white/40 hover:bg-white/10 hover:border-white/60"
+                  : "text-foreground border-border hover:bg-muted hover:border-border"
                   }`}
               >
                 <Search className="h-4 w-4" />
@@ -276,7 +277,7 @@ export function Navigation() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="relative text-white/80 hover:text-white hover:bg-white/10"
+                  className="relative text-foreground/80 hover:text-foreground hover:bg-muted/50"
                 >
                   <ShoppingCart className="h-5 w-5" />
                   {cartItems.length > 0 && (
@@ -287,8 +288,10 @@ export function Navigation() {
                 </Button>
               </Link>
 
+              <ThemeToggle />
+
               <Link href="/dashboard">
-                <Button variant="ghost" size="icon" className="text-white/80 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="icon" className="text-foreground/80 hover:text-foreground hover:bg-muted/50">
                   <User className="h-5 w-5" />
                 </Button>
               </Link>
@@ -297,7 +300,7 @@ export function Navigation() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden text-white/80 hover:text-white hover:bg-white/10"
+                className="lg:hidden text-foreground/80 hover:text-foreground hover:bg-muted/50"
                 onClick={() => setMobileOpen(true)}
               >
                 <Menu className="h-5 w-5" />
@@ -314,7 +317,7 @@ export function Navigation() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="absolute top-full left-0 right-0 bg-background/98 backdrop-blur-xl border-b border-white/10"
+              className="absolute top-full left-0 right-0 bg-background/98 backdrop-blur-xl border-b border-border"
             >
               <div className="max-w-[1400px] mx-auto px-6 py-10">
                 {navItems
@@ -326,7 +329,7 @@ export function Navigation() {
                         <div className="flex-1 grid grid-cols-3 gap-10">
                           {item.megaMenu.categories.map((category) => (
                             <div key={category.title}>
-                              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted mb-4">
+                              <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                                 {category.title}
                               </h4>
                               <ul className="space-y-3">
@@ -334,7 +337,7 @@ export function Navigation() {
                                   <li key={subItem.name}>
                                     <Link
                                       href={subItem.href}
-                                      className="text-white/80 hover:text-white transition-colors font-light flex items-center group"
+                                      className="text-foreground/80 hover:text-foreground transition-colors font-light flex items-center group"
                                       onClick={() => setActiveMenu(null)}
                                     >
                                       {subItem.name}
@@ -363,10 +366,10 @@ export function Navigation() {
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                             </div>
-                            <p className="text-xs text-muted uppercase tracking-wider mb-1">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
                               {item.megaMenu.featured.title}
                             </p>
-                            <h4 className="text-white font-medium mb-1 group-hover:text-accent transition-colors">
+                            <h4 className="text-foreground font-medium mb-1 group-hover:text-accent transition-colors">
                               {item.megaMenu.featured.name}
                             </h4>
                             <p className="text-accent font-semibold">{item.megaMenu.featured.price}</p>
@@ -388,13 +391,13 @@ export function Navigation() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute top-full left-0 right-0 bg-background/98 backdrop-blur-2xl border-b border-white/10 overflow-hidden"
+              className="absolute top-full left-0 right-0 bg-background/98 backdrop-blur-2xl border-b border-border overflow-hidden"
             >
               <div className="max-w-[1000px] mx-auto px-6 py-12">
                 <div className="space-y-8">
                   <div className="text-center space-y-2">
-                    <h3 className="text-2xl font-light text-white">Find Your <span className="font-semibold text-accent">Parts</span></h3>
-                    <p className="text-sm text-muted font-light">Search over 3 million premium automotive components</p>
+                    <h3 className="text-2xl font-light text-foreground">Find Your <span className="font-semibold text-accent">Parts</span></h3>
+                    <p className="text-sm text-muted-foreground font-light">Search over 3 million premium automotive components</p>
                   </div>
 
                   <div className="flex flex-col gap-0 max-w-4xl mx-auto">
@@ -403,13 +406,13 @@ export function Navigation() {
 
                   <div className="relative group max-w-2xl mx-auto">
                     <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                      <Search className="h-5 w-5 text-white/40 group-focus-within:text-accent transition-colors" />
+                      <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
                     </div>
                     <input
                       type="text"
                       autoFocus
                       placeholder="Search by part name, number, or VIN..."
-                      className="w-full h-16 bg-white/5 border border-white/10 rounded-xl pl-12 pr-32 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all text-lg"
+                      className="w-full h-16 bg-muted/50 border border-border rounded-xl pl-12 pr-32 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all text-lg"
                     />
                     <Button className="absolute right-2 top-2 bottom-2 px-8 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg">
                       Search
@@ -437,29 +440,29 @@ export function Navigation() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] bg-background"
           >
-            <div className="flex items-center justify-between px-6 h-16 border-b border-white/10">
-              <Link href="/" className="text-xl font-semibold tracking-tight text-white">
+            <div className="flex items-center justify-between px-6 h-16 border-b border-border">
+              <Link href="/" className="text-xl font-semibold tracking-tight text-foreground">
                 SIMBI<span className="text-accent">.</span>
               </Link>
-              <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)} className="text-white">
+              <Button variant="ghost" size="icon" onClick={() => setMobileOpen(false)} className="text-foreground">
                 <X className="h-5 w-5" />
               </Button>
             </div>
             <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-4rem)]">
               {navItems.map((item) => (
                 item.megaMenu ? (
-                  <div key={item.label} className="border-b border-white/10 pb-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">{item.label}</h3>
+                  <div key={item.label} className="border-b border-border pb-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">{item.label}</h3>
                     <div className="grid grid-cols-2 gap-4">
                       {item.megaMenu.categories.map((category) => (
                         <div key={category.title}>
-                          <p className="text-xs text-muted uppercase tracking-wider mb-2">{category.title}</p>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">{category.title}</p>
                           <ul className="space-y-2">
                             {category.items.slice(0, 3).map((subItem) => (
                               <li key={subItem.name}>
                                 <Link
                                   href={subItem.href}
-                                  className="text-sm text-white/70 hover:text-white"
+                                  className="text-sm text-foreground/70 hover:text-foreground"
                                   onClick={() => setMobileOpen(false)}
                                 >
                                   {subItem.name}
@@ -472,10 +475,10 @@ export function Navigation() {
                     </div>
                   </div>
                 ) : (
-                  <div key={item.label} className="border-b border-white/10 pb-6">
+                  <div key={item.label} className="border-b border-border pb-6">
                     <Link
                       href={item.href}
-                      className="text-lg font-semibold text-white hover:text-accent"
+                      className="text-lg font-semibold text-foreground hover:text-accent"
                       onClick={() => setMobileOpen(false)}
                     >
                       {item.label}
@@ -485,15 +488,15 @@ export function Navigation() {
               ))}
               <div className="pt-6 space-y-3">
                 {/* Mobile Account Links */}
-                <div className="flex flex-col gap-2 mb-4 p-4 rounded-lg bg-white/5">
-                  <h4 className="text-white font-semibold mb-2">Seller Account</h4>
-                  <Link href="/auth/seller/login" className="text-sm text-white/70 hover:text-white" onClick={() => setMobileOpen(false)}>Login</Link>
-                  <Link href="/auth/seller/register" className="text-sm text-white/70 hover:text-white" onClick={() => setMobileOpen(false)}>Create Account</Link>
+                <div className="flex flex-col gap-2 mb-4 p-4 rounded-lg bg-muted/50">
+                  <h4 className="text-foreground font-semibold mb-2">Seller Account</h4>
+                  <Link href="/auth/seller/login" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Login</Link>
+                  <Link href="/auth/seller/register" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Create Account</Link>
                 </div>
                 <div className="flex flex-col gap-2 mb-4 p-4 rounded-lg bg-white/5">
-                  <h4 className="text-white font-semibold mb-2">Buyer Account</h4>
-                  <Link href="/auth/buyer/login" className="text-sm text-white/70 hover:text-white" onClick={() => setMobileOpen(false)}>Login</Link>
-                  <Link href="/auth/buyer/register" className="text-sm text-white/70 hover:text-white" onClick={() => setMobileOpen(false)}>Create Account</Link>
+                  <h4 className="text-foreground font-semibold mb-2">Buyer Account</h4>
+                  <Link href="/auth/buyer/login" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Login</Link>
+                  <Link href="/auth/buyer/register" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Create Account</Link>
                 </div>
 
                 <Link href="/catalog" onClick={() => setMobileOpen(false)}>
@@ -502,7 +505,7 @@ export function Navigation() {
                 <Link href="/contact" onClick={() => setMobileOpen(false)}>
                   <Button
                     variant="outline"
-                    className="w-full border-white/20 text-white hover:bg-white/10 bg-transparent"
+                    className="w-full border-border text-foreground hover:bg-muted bg-transparent"
                   >
                     Contact Us
                   </Button>
