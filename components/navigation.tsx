@@ -199,12 +199,12 @@ export function Navigation() {
                       className="absolute top-full right-0 mt-2 w-48 bg-background/95 backdrop-blur-xl border border-border rounded-xl overflow-hidden shadow-xl"
                     >
                       <div className="p-1">
-                        <Link href="/auth/seller/login">
+                        <Link href="http://31.220.82.129:5000/login">
                           <Button variant="ghost" className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10">
                             Login
                           </Button>
                         </Link>
-                        <Link href="/auth/seller/register">
+                        <Link href="http://31.220.82.129:5000/register">
                           <Button variant="ghost" className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10">
                             Create Account
                           </Button>
@@ -490,8 +490,8 @@ export function Navigation() {
                 {/* Mobile Account Links */}
                 <div className="flex flex-col gap-2 mb-4 p-4 rounded-lg bg-muted/50">
                   <h4 className="text-foreground font-semibold mb-2">Seller Account</h4>
-                  <Link href="/auth/seller/login" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Login</Link>
-                  <Link href="/auth/seller/register" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Create Account</Link>
+                  <Link href="http://31.220.82.129:5000/login" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Login</Link>
+                  <Link href="http://31.220.82.129:5000/register" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Create Account</Link>
                 </div>
                 <div className="flex flex-col gap-2 mb-4 p-4 rounded-lg bg-white/5">
                   <h4 className="text-foreground font-semibold mb-2">Buyer Account</h4>
