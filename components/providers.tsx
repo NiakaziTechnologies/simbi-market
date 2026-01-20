@@ -5,6 +5,9 @@ import type React from "react"
 import { Provider } from "react-redux"
 import { store } from "@/lib/store"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/lib/auth/auth-context"
+import { CartLoader } from "@/components/cart-loader"
+import { Toaster } from "@/components/ui/toaster"
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -15,7 +18,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         enableSystem={false}
         disableTransitionOnChange
       >
-        {children}
+        <AuthProvider>
+          <CartLoader />
+          {children}
+          <Toaster />
+        </AuthProvider>
       </ThemeProvider>
     </Provider>
   )

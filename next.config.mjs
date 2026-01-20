@@ -6,6 +6,16 @@ const nextConfig = {
   images: {
     unoptimized: true,
     domains: ['images.unsplash.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**.cloudfront.net',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
   },
   // Empty turbopack config to silence the warning
   turbopack: {},

@@ -5,58 +5,161 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useSelector, useDispatch } from "react-redux"
 import type { RootState } from "@/lib/store"
 import { filterByCategory, searchParts, clearFilters, setFilters } from "@/lib/features/parts-slice"
-import { addToCart } from "@/lib/features/cart-slice"
-import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX } from "lucide-react"
+import { useCart } from "@/lib/hooks/use-cart"
+import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import Link from "next/link"
 import { SearchFilters } from "@/components/search-filters"
+import { fetchProducts, type ProductFilters } from "@/lib/api/products"
+import type { Part } from "@/lib/features/parts-slice"
 
 const categories = ["All", "Brakes", "Engine", "Suspension", "Exhaust", "Wheels"]
 
 export function CatalogContent() {
    const dispatch = useDispatch()
-   const { items, filteredItems, selectedCategory, hasCategoryFilter, filters } = useSelector((state: RootState) => state.parts)
+   const { addToCart } = useCart()
+   const { selectedCategory, hasCategoryFilter, filters } = useSelector((state: RootState) => state.parts)
    const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
    const [searchQuery, setSearchQuery] = useState("")
    const [addedItems, setAddedItems] = useState<Set<string>>(new Set())
+   const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set())
+   const [products, setProducts] = useState<Part[]>([])
+   const [isLoading, setIsLoading] = useState(true)
+   const [error, setError] = useState<string | null>(null)
 
-   const hasActiveFilters = !!(filters.year || filters.make || filters.model || filters.category || hasCategoryFilter || searchQuery)
-   const displayItems = hasActiveFilters ? filteredItems : items
-   const hasNoResults = hasActiveFilters && displayItems.length === 0
-
-  // Initialize with in-stock items on mount
+  // Fetch products from API when filters/search change
   useEffect(() => {
-    dispatch(filterByCategory(null))
-  }, [dispatch])
-
-  useEffect(() => {
-    if (searchQuery) {
-      dispatch(searchParts(searchQuery))
-    } else if (selectedCategory) {
-      dispatch(filterByCategory(selectedCategory))
-    } else {
-      // Show only in-stock items by default when no filters are active
-      dispatch(filterByCategory(null))
+    const loadProducts = async () => {
+      setIsLoading(true)
+      setError(null)
+      
+      try {
+        const apiFilters: ProductFilters = {
+          q: searchQuery || undefined,
+          category: selectedCategory || filters.category || undefined,
+          make: filters.make || undefined,
+          inStock: true, // Only show in-stock items
+          page: 1,
+          limit: 100, // Adjust as needed
+        }
+        
+        const response = await fetchProducts(apiFilters)
+        const fetchedProducts = response.products || []
+        setProducts(fetchedProducts)
+        
+        // Store products in sessionStorage so detail page can access them
+        if (typeof window !== 'undefined') {
+          try {
+            sessionStorage.setItem('catalogProducts', JSON.stringify(fetchedProducts))
+          } catch (err) {
+            console.warn('Failed to store products in sessionStorage:', err)
+          }
+        }
+      } catch (err) {
+        console.error('Error loading products:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load products')
+        setProducts([])
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [searchQuery, selectedCategory, dispatch])
+
+    loadProducts()
+  }, [searchQuery, selectedCategory, filters.category, filters.make])
+
+  // Keep Redux in sync for category selection (if needed elsewhere)
+  useEffect(() => {
+    if (selectedCategory) {
+      dispatch(filterByCategory(selectedCategory))
+    }
+  }, [selectedCategory, dispatch])
+
+  const hasActiveFilters = !!(filters.year || filters.make || filters.model || filters.category || hasCategoryFilter || searchQuery)
+  const displayItems = products
+  const hasNoResults = !isLoading && !error && displayItems.length === 0
 
   const handleCategoryClick = (category: string) => {
     setSearchQuery("")
     dispatch(filterByCategory(category === "All" ? null : category))
   }
 
-  const handleAddToCart = (item: (typeof items)[0]) => {
-    dispatch(addToCart(item))
-    setAddedItems((prev) => new Set(prev).add(item.id))
-    setTimeout(() => {
-      setAddedItems((prev) => {
+  // Show loading state
+  if (isLoading) {
+    return (
+      <section className="pt-32 pb-16 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground mb-4">
+              Explore Parts <span className="font-semibold">Catalogue</span>
+            </h1>
+            <p className="text-muted font-light leading-relaxed max-w-2xl mx-auto">
+              Premium automotive components engineered for excellence
+            </p>
+          </div>
+          <div className="flex items-center justify-center py-24">
+            <Loader2 className="h-8 w-8 animate-spin text-accent" />
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <section className="pt-32 pb-16 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground mb-4">
+              Explore Parts <span className="font-semibold">Catalogue</span>
+            </h1>
+            <p className="text-muted font-light leading-relaxed max-w-2xl mx-auto">
+              Premium automotive components engineered for excellence
+            </p>
+          </div>
+          <div className="glass-card rounded-xl p-12 max-w-md mx-auto border border-destructive/50 text-center">
+            <PackageX className="w-16 h-16 text-destructive mx-auto mb-6" />
+            <h3 className="text-2xl font-light text-foreground mb-4">Error Loading Products</h3>
+            <p className="text-muted font-light mb-8 leading-relaxed">{error}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-accent hover:bg-accent/90 text-white"
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  const handleAddToCart = async (item: Part) => {
+    if (addingToCart.has(item.id)) return
+    
+    setAddingToCart((prev) => new Set(prev).add(item.id))
+    try {
+      const success = await addToCart(item, 1)
+      if (success) {
+        setAddedItems((prev) => new Set(prev).add(item.id))
+        setTimeout(() => {
+          setAddedItems((prev) => {
+            const next = new Set(prev)
+            next.delete(item.id)
+            return next
+          })
+        }, 2000)
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+    } finally {
+      setAddingToCart((prev) => {
         const next = new Set(prev)
         next.delete(item.id)
         return next
       })
-    }, 2000)
+    }
   }
 
   const handleClearAllFilters = () => {
@@ -216,19 +319,25 @@ export function CatalogContent() {
                         <h3 className="text-xl font-light text-foreground mt-2 mb-2 group-hover:text-accent transition-colors">
                           {item.name}
                         </h3>
-                        <p className="text-muted font-light text-sm leading-relaxed mb-4">{item.description}</p>
+                        <p className="text-muted font-light text-sm leading-relaxed mb-4">{item.description || 'No description available'}</p>
                       </Link>
 
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-2xl font-light text-foreground">${item.price.toLocaleString()}</span>
+                        <span className="text-2xl font-light text-foreground">${(item.price || 0).toLocaleString()}</span>
                         <div className="flex gap-2">
                           <Link href={`/parts/${item.id}`}>
                             <Button variant="outline" size="sm" className="border-border hover:bg-muted">
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
-                          <Button onClick={() => handleAddToCart(item)} disabled={!item.inStock} size="sm">
-                            {addedItems.has(item.id) ? (
+                          <Button 
+                            onClick={() => handleAddToCart(item)} 
+                            disabled={!item.inStock || addingToCart.has(item.id)} 
+                            size="sm"
+                          >
+                            {addingToCart.has(item.id) ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : addedItems.has(item.id) ? (
                               <Check className="h-4 w-4" />
                             ) : (
                               <Plus className="h-4 w-4" />
@@ -289,14 +398,16 @@ export function CatalogContent() {
                               {item.name}
                             </h3>
                           </Link>
-                          <p className="text-muted font-light leading-relaxed mb-4">{item.description}</p>
-                          <p className="text-sm text-muted font-light">
-                            Compatible with: {item.compatibility.join(", ")}
-                          </p>
+                          <p className="text-muted font-light leading-relaxed mb-4">{item.description || 'No description available'}</p>
+                          {item.compatibility && item.compatibility.length > 0 && (
+                            <p className="text-sm text-muted font-light">
+                              Compatible with: {item.compatibility.join(", ")}
+                            </p>
+                          )}
                         </div>
 
                         <div className="flex items-center justify-between mt-6 gap-4">
-                          <span className="text-3xl font-light text-foreground">${item.price.toLocaleString()}</span>
+                          <span className="text-3xl font-light text-foreground">${(item.price || 0).toLocaleString()}</span>
                           <div className="flex gap-2">
                             <Link href={`/parts/${item.id}`}>
                               <Button variant="outline" className="border-border hover:bg-muted">
@@ -304,8 +415,17 @@ export function CatalogContent() {
                                 View Details
                               </Button>
                             </Link>
-                            <Button onClick={() => handleAddToCart(item)} disabled={!item.inStock} size="lg">
-                              {addedItems.has(item.id) ? (
+                            <Button 
+                              onClick={() => handleAddToCart(item)} 
+                              disabled={!item.inStock || addingToCart.has(item.id)} 
+                              size="lg"
+                            >
+                              {addingToCart.has(item.id) ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Adding...
+                                </>
+                              ) : addedItems.has(item.id) ? (
                                 <>
                                   <Check className="h-4 w-4 mr-2" />
                                   Added

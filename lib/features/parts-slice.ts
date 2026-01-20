@@ -27,6 +27,13 @@ export interface Part {
   vehicleModels?: string[]
   vehicleYears?: number[]
   partCategory?: string
+  // API fields
+  inventoryId?: string // Seller inventory ID (required for adding to cart)
+  sellerId?: string
+  sellerName?: string
+  oemPartNumber?: string
+  averageRating?: number
+  reviewCount?: number
 }
 
 interface PartsState {

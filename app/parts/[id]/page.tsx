@@ -1,15 +1,14 @@
 "use client"
 
-import { use, useState } from "react"
+import { use, useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
-import { useSelector, useDispatch } from "react-redux"
-import type { RootState } from "@/lib/store"
-import { addToCart } from "@/lib/features/cart-slice"
+import { useCart } from "@/lib/hooks/use-cart"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
+import type { Part } from "@/lib/features/parts-slice"
 import {
   ShoppingCart,
   Heart,
@@ -29,13 +28,38 @@ import {
   Minus,
   Plus,
   HelpCircle,
+  Loader2,
 } from "lucide-react"
 
 export default function PartDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const dispatch = useDispatch()
-  const parts = useSelector((state: RootState) => state.parts.items)
-  const part = parts.find((p) => p.id === id)
+  const { addToCart } = useCart()
+  const [part, setPart] = useState<Part | null>(null)
+  const [parts, setParts] = useState<Part[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Load products from sessionStorage (set by catalog page)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const storedProducts = sessionStorage.getItem('catalogProducts')
+        if (storedProducts) {
+          const parsedProducts: Part[] = JSON.parse(storedProducts)
+          setParts(parsedProducts)
+          const foundPart = parsedProducts.find((p) => p.id === id)
+          setPart(foundPart || null)
+        } else {
+          // No products in sessionStorage - user might have navigated directly
+          setPart(null)
+        }
+      } catch (err) {
+        console.error('Failed to load products from sessionStorage:', err)
+        setPart(null)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+  }, [id])
 
   const [selectedImage, setSelectedImage] = useState(0)
   const [quantity, setQuantity] = useState(1)
@@ -43,6 +67,21 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
   const [videoModalOpen, setVideoModalOpen] = useState(false)
   const [selectedVideo, setSelectedVideo] = useState<{ title: string; url: string } | null>(null)
   const [addedToCart, setAddedToCart] = useState(false)
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
+
+  // Show loading state while checking sessionStorage
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-background">
+        <Navigation />
+        <div className="pt-32 pb-16 px-6 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+          <p className="text-muted">Loading product details...</p>
+        </div>
+        <Footer />
+      </main>
+    )
+  }
 
   if (!part) {
     return (
@@ -50,7 +89,9 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
         <Navigation />
         <div className="pt-32 pb-16 px-6 text-center">
           <h1 className="text-4xl font-light text-white mb-4">Part Not Found</h1>
-          <p className="text-muted mb-8">The part you're looking for doesn't exist or has been removed.</p>
+          <p className="text-muted mb-8">
+            The part you're looking for doesn't exist or has been removed. Please navigate to this page from the catalog.
+          </p>
           <Link href="/catalog">
             <Button className="bg-accent hover:bg-accent/90">Back to Catalog</Button>
           </Link>
@@ -67,18 +108,21 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
       ? part.reviews.reduce((acc, r) => acc + r.rating, 0) / part.reviews.length
       : 0
 
-  const handleAddToCart = () => {
-    dispatch(
-      addToCart({
-        id: part.id,
-        name: part.name,
-        price: part.price,
-        image: part.image,
-        quantity: quantity,
-      }),
-    )
-    setAddedToCart(true)
-    setTimeout(() => setAddedToCart(false), 2000)
+  const handleAddToCart = async () => {
+    if (!part || isAddingToCart) return
+    
+    setIsAddingToCart(true)
+    try {
+      const success = await addToCart(part, quantity)
+      if (success) {
+        setAddedToCart(true)
+        setTimeout(() => setAddedToCart(false), 2000)
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error)
+    } finally {
+      setIsAddingToCart(false)
+    }
   }
 
   const openVideoModal = (video: { title: string; url: string }) => {
@@ -294,9 +338,14 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
                   <Button
                     className="flex-1 bg-accent hover:bg-accent/90 text-white py-6 text-lg relative"
                     onClick={handleAddToCart}
-                    disabled={!part.inStock}
+                    disabled={!part.inStock || isAddingToCart}
                   >
-                    {addedToCart ? (
+                    {isAddingToCart ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Adding...
+                      </>
+                    ) : addedToCart ? (
                       <>
                         <Check className="mr-2 h-5 w-5" />
                         Added to Cart
@@ -724,9 +773,14 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
           <Button
             className="flex-1 bg-accent hover:bg-accent/90 text-white py-6 text-base"
             onClick={handleAddToCart}
-            disabled={!part.inStock}
+            disabled={!part.inStock || isAddingToCart}
           >
-            {addedToCart ? (
+            {isAddingToCart ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Adding...
+              </>
+            ) : addedToCart ? (
               <>
                 <Check className="mr-2 h-4 w-4" />
                 Added

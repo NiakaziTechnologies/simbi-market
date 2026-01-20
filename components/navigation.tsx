@@ -290,7 +290,7 @@ export function Navigation() {
 
               <ThemeToggle />
 
-              <Link href="/dashboard">
+              <Link href="/dashboard/buyer">
                 <Button variant="ghost" size="icon" className="text-foreground/80 hover:text-foreground hover:bg-muted/50">
                   <User className="h-5 w-5" />
                 </Button>
