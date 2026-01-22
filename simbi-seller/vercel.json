@@ -1,0 +1,23 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "env": {
+    "NODE_ENV": "production",
+    "NEXT_PUBLIC_SELLER_API_BASE_URL": "https://simbi-three.vercel.app",
+    "JWT_SECRET": "7d3cefb645b1105bef4e8bdd72f28f35e84350a644b4210b637f5b93674e25d9",
+    "JWT_REFRESH_SECRET": "527cc57c3613f343961899c64a57179465259e1ae37441eefdb82e925d2cdb3e"
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+      ]
+    }
+  ]
+}

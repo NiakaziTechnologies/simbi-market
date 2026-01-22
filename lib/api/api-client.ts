@@ -207,9 +207,23 @@ class ApiClient {
    */
   async delete<T = any>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseURL}${endpoint}`
-    
+
     const response = await fetch(url, {
       method: 'DELETE',
+      headers: this.getHeaders(options?.headers),
+      ...options,
+    })
+
+    return this.handleResponse<T>(response)
+  }
+
+  /**
+   * Generic request method
+   */
+  async request<T = any>(endpoint: string, options: RequestInit & { method: string }): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`
+
+    const response = await fetch(url, {
       headers: this.getHeaders(options?.headers),
       ...options,
     })

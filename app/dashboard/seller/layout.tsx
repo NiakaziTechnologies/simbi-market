@@ -1,15 +1,11 @@
 "use client"
 
-import { Navigation } from "@/components/navigation"
-import { ProtectedRoute } from "@/components/auth/protected-route"
+import { SellerDashboardLayout } from "@/components/dashboard/seller-dashboard-layout"
 
-export default function SellerDashboardLayout({ children }: { children: React.ReactNode }) {
+export default function SellerDashboardLayoutWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <ProtectedRoute requiredRole="seller">
-      <main className="min-h-screen bg-background">
-        <Navigation />
-        {children}
-      </main>
-    </ProtectedRoute>
+    <SellerDashboardLayout>
+      {children}
+    </SellerDashboardLayout>
   )
 }
