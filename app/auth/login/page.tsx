@@ -11,8 +11,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { login } from '@/lib/api/auth'
 import { useAuth } from '@/lib/auth/auth-context'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle, Lock, Mail, Clock } from 'lucide-react'
 import Link from 'next/link'
+import type { ApiError } from '@/lib/api/api-client'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -21,12 +22,22 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
+interface ErrorInfo {
+  message: string
+  type: 'error' | 'warning' | 'info'
+  icon?: React.ReactNode
+  action?: {
+    label: string
+    href: string
+  }
+}
+
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login: setAuthUser, isAuthenticated, role } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null)
   
   const returnUrl = searchParams?.get('returnUrl') || null
 
@@ -55,9 +66,87 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, role, router, returnUrl])
 
+  /**
+   * Extract remaining minutes from error message
+   */
+  const extractRemainingMinutes = (message: string): number | null => {
+    const match = message.match(/(\d+)\s+minute/)
+    return match ? parseInt(match[1], 10) : null
+  }
+
+  /**
+   * Parse error message and determine error type and styling
+   */
+  const parseError = (error: ApiError | Error): ErrorInfo => {
+    const message = error.message || 'An unexpected error occurred'
+    const lowerMessage = message.toLowerCase()
+
+    // Account locked
+    if (lowerMessage.includes('locked') || lowerMessage.includes('lockout')) {
+      const minutes = extractRemainingMinutes(message)
+      return {
+        message: minutes 
+          ? `Account locked. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`
+          : message,
+        type: 'warning',
+        icon: <Lock className="h-5 w-5" />,
+      }
+    }
+
+    // IP rate limit
+    if (lowerMessage.includes('device') || lowerMessage.includes('too many login attempts')) {
+      const minutes = extractRemainingMinutes(message)
+      return {
+        message: minutes
+          ? `Too many login attempts from this device. Please try again in ${minutes} minute${minutes !== 1 ? 's' : ''}.`
+          : message,
+        type: 'warning',
+        icon: <Clock className="h-5 w-5" />,
+      }
+    }
+
+    // Email verification required
+    if (lowerMessage.includes('verify') || lowerMessage.includes('verification')) {
+      return {
+        message: message,
+        type: 'info',
+        icon: <Mail className="h-5 w-5" />,
+        action: {
+          label: 'Resend verification email',
+          href: '/auth/verify-email',
+        },
+      }
+    }
+
+    // Account status issues (inactive, suspended, banned)
+    if (lowerMessage.includes('inactive') || lowerMessage.includes('suspended') || lowerMessage.includes('banned') || lowerMessage.includes('pending')) {
+      return {
+        message: message,
+        type: 'warning',
+        icon: <AlertCircle className="h-5 w-5" />,
+      }
+    }
+
+    // Invalid credentials (wrong password attempts)
+    if (lowerMessage.includes('invalid credentials') || lowerMessage.includes('attempts remaining')) {
+      return {
+        message: message,
+        type: 'error',
+        icon: <AlertCircle className="h-5 w-5" />,
+      }
+    }
+
+    // Generic error
+    return {
+      message: message,
+      type: 'error',
+      icon: <AlertCircle className="h-5 w-5" />,
+    }
+  }
+
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
-    setError(null)
+    setErrorInfo(null)
 
     try {
       const response = await login({
@@ -82,7 +171,9 @@ export default function LoginPage() {
 
       router.push(redirectPath)
     } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.')
+      // Parse the error to get appropriate styling and icon
+      const parsedError = parseError(err)
+      setErrorInfo(parsedError)
     } finally {
       setIsLoading(false)
     }
@@ -107,14 +198,50 @@ export default function LoginPage() {
           </div>
 
           {/* Error Message */}
-          {error && (
+          {errorInfo && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg flex items-center gap-3"
+              className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${
+                errorInfo.type === 'error'
+                  ? 'bg-destructive/10 border border-destructive/20'
+                  : errorInfo.type === 'warning'
+                  ? 'bg-yellow-500/10 border border-yellow-500/20'
+                  : 'bg-blue-500/10 border border-blue-500/20'
+              }`}
             >
-              <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
-              <p className="text-sm text-destructive">{error}</p>
+              <div
+                className={`flex-shrink-0 ${
+                  errorInfo.type === 'error'
+                    ? 'text-destructive'
+                    : errorInfo.type === 'warning'
+                    ? 'text-yellow-500'
+                    : 'text-blue-500'
+                }`}
+              >
+                {errorInfo.icon}
+              </div>
+              <div className="flex-1">
+                <p
+                  className={`text-sm ${
+                    errorInfo.type === 'error'
+                      ? 'text-destructive'
+                      : errorInfo.type === 'warning'
+                      ? 'text-yellow-500'
+                      : 'text-blue-500'
+                  }`}
+                >
+                  {errorInfo.message}
+                </p>
+                {errorInfo.action && (
+                  <Link
+                    href={errorInfo.action.href}
+                    className="text-sm text-accent hover:underline mt-2 inline-block"
+                  >
+                    {errorInfo.action.label} →
+                  </Link>
+                )}
+              </div>
             </motion.div>
           )}
 
@@ -165,7 +292,12 @@ export default function LoginPage() {
           </form>
 
           {/* Footer Links */}
-          <div className="mt-6 text-center text-sm text-muted-foreground">
+          <div className="mt-6 space-y-2 text-center text-sm text-muted-foreground">
+            <p>
+              <Link href="/auth/forgot-password" className="text-accent hover:underline">
+                Forgot password?
+              </Link>
+            </p>
             <p>
               Don't have an account?{' '}
               <Link href="/auth/register" className="text-accent hover:underline">

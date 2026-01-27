@@ -9,10 +9,8 @@ import { motion } from "framer-motion"
 import {
   LayoutDashboard,
   Package,
-  CreditCard,
   Settings,
   ShoppingCart,
-  Heart,
   HelpCircle,
   LogOut,
   Menu,
@@ -27,8 +25,6 @@ const menuItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, href: "/dashboard/buyer" },
   { id: "orders", label: "Orders", icon: Package, href: "/dashboard/buyer/orders" },
   { id: "returns", label: "Returns", icon: RotateCcw, href: "/dashboard/buyer/returns" },
-  { id: "payments", label: "Payments", icon: CreditCard, href: "/dashboard/buyer/payments" },
-  { id: "wishlist", label: "Wishlist", icon: Heart, href: "/dashboard/buyer/wishlist" },
   { id: "settings", label: "Settings", icon: Settings, href: "/dashboard/buyer/settings" },
 ]
 
@@ -50,8 +46,6 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
   const getActiveTab = () => {
     if (pathname?.includes("/orders")) return "orders"
     if (pathname?.includes("/returns")) return "returns"
-    if (pathname?.includes("/payments")) return "payments"
-    if (pathname?.includes("/wishlist")) return "wishlist"
     if (pathname?.includes("/settings")) return "settings"
     return "overview"
   }

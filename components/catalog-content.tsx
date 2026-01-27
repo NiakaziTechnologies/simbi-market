@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux"
 import type { RootState } from "@/lib/store"
 import { filterByCategory, searchParts, clearFilters, setFilters } from "@/lib/features/parts-slice"
 import { useCart } from "@/lib/hooks/use-cart"
-import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX, Loader2 } from "lucide-react"
+import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX, Loader2, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -319,8 +319,37 @@ export function CatalogContent() {
                         <h3 className="text-xl font-light text-foreground mt-2 mb-2 group-hover:text-accent transition-colors">
                           {item.name}
                         </h3>
-                        <p className="text-muted font-light text-sm leading-relaxed mb-4">{item.description || 'No description available'}</p>
+                        <p className="text-muted font-light text-sm leading-relaxed mb-3">{item.description || 'No description available'}</p>
                       </Link>
+
+                      {/* Ratings */}
+                      {(item.averageRating !== undefined && item.averageRating > 0) || (item.reviewCount !== undefined && item.reviewCount > 0) ? (
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-3.5 w-3.5 ${
+                                  star <= Math.round(item.averageRating || 0)
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "fill-muted text-muted-foreground"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            {item.averageRating?.toFixed(1) || "0.0"}
+                            {item.reviewCount !== undefined && item.reviewCount > 0 && (
+                              <span className="ml-1">({item.reviewCount})</span>
+                            )}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
+                          <Star className="h-3.5 w-3.5 fill-muted text-muted-foreground" />
+                          <span>No reviews yet</span>
+                        </div>
+                      )}
 
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-2xl font-light text-foreground">${(item.price || 0).toLocaleString()}</span>
@@ -397,6 +426,34 @@ export function CatalogContent() {
                             <h3 className="text-2xl font-light text-foreground mb-2 group-hover:text-accent transition-colors">
                               {item.name}
                             </h3>
+                            {/* Ratings */}
+                            {(item.averageRating !== undefined && item.averageRating > 0) || (item.reviewCount !== undefined && item.reviewCount > 0) ? (
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="flex items-center gap-1">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                      key={star}
+                                      className={`h-4 w-4 ${
+                                        star <= Math.round(item.averageRating || 0)
+                                          ? "fill-yellow-400 text-yellow-400"
+                                          : "fill-muted text-muted-foreground"
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-sm text-muted-foreground">
+                                  {item.averageRating?.toFixed(1) || "0.0"}
+                                  {item.reviewCount !== undefined && item.reviewCount > 0 && (
+                                    <span className="ml-1">({item.reviewCount} reviews)</span>
+                                  )}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
+                                <Star className="h-4 w-4 fill-muted text-muted-foreground" />
+                                <span>No reviews yet</span>
+                              </div>
+                            )}
                           </Link>
                           <p className="text-muted font-light leading-relaxed mb-4">{item.description || 'No description available'}</p>
                           {item.compatibility && item.compatibility.length > 0 && (

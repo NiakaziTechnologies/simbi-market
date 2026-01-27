@@ -82,11 +82,17 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
 export async function logout(): Promise<void> {
   try {
     await apiClient.post('/api/auth/logout')
-  } catch (error) {
+  } catch (error: any) {
     // Even if logout fails on server, clear local auth
-    console.error('Logout error:', error)
+    // Only log non-network errors (like 404 if endpoint doesn't exist)
+    // Network errors are expected if server is down
+    if (error?.status !== undefined && error.status !== 0) {
+      // Server responded with an error status
+      console.warn('Logout API error:', error.message || 'Logout endpoint may not be available')
+    }
+    // Silently ignore network errors (server down, no connection, etc.)
   } finally {
-    // Always clear local auth
+    // Always clear local auth regardless of API call result
     const { clearAuth } = await import('../auth/auth-utils')
     clearAuth()
   }
@@ -108,8 +114,17 @@ export async function getCurrentUser(): Promise<User | null> {
     }
     
     return null
-  } catch (error) {
-    console.error('Get current user error:', error)
+  } catch (error: any) {
+    // Only log meaningful errors (server errors, not network errors)
+    // Network errors are expected if server is down or user is offline
+    if (error?.status !== undefined && error.status !== 0) {
+      // Server responded with an error status
+      // Don't log 401 errors as they're expected when not authenticated
+      if (error.status !== 401) {
+        console.warn('Get current user API error:', error.message || 'Failed to get current user')
+      }
+    }
+    // Silently return null for network errors and 401 (not authenticated)
     return null
   }
 }
@@ -133,8 +148,17 @@ export async function refreshToken(): Promise<string | null> {
     }
     
     return null
-  } catch (error) {
-    console.error('Refresh token error:', error)
+  } catch (error: any) {
+    // Only log meaningful errors (server errors, not network errors)
+    // Network errors are expected if server is down
+    if (error?.status !== undefined && error.status !== 0) {
+      // Server responded with an error status
+      // Don't log 401 errors as they're expected when token is invalid
+      if (error.status !== 401) {
+        console.warn('Refresh token API error:', error.message || 'Failed to refresh token')
+      }
+    }
+    // Silently return null for network errors and 401 (token invalid/expired)
     return null
   }
 }

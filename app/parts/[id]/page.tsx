@@ -5,10 +5,23 @@ import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import Link from "next/link"
 import { useCart } from "@/lib/hooks/use-cart"
+import { useAuth } from "@/lib/auth/auth-context"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Progress } from "@/components/ui/progress"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { useToast } from "@/hooks/use-toast"
 import type { Part } from "@/lib/features/parts-slice"
+import { getProductRating, getProductReviews, type ProductRating, type ProductReview } from "@/lib/api/product-reviews"
+import { getOrders, type OrderResponse } from "@/lib/api/orders"
+import { createReview } from "@/lib/api/buyer-reviews"
+import { format } from "date-fns"
 import {
   ShoppingCart,
   Heart,
@@ -29,6 +42,8 @@ import {
   Plus,
   HelpCircle,
   Loader2,
+  ChevronLeft,
+  Edit,
 } from "lucide-react"
 
 export default function PartDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -37,6 +52,34 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
   const [part, setPart] = useState<Part | null>(null)
   const [parts, setParts] = useState<Part[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedImage, setSelectedImage] = useState(0)
+  const [quantity, setQuantity] = useState(1)
+  const [activeTab, setActiveTab] = useState<"specs" | "features" | "reviews" | "faq">("specs")
+  const [videoModalOpen, setVideoModalOpen] = useState(false)
+  const [selectedVideo, setSelectedVideo] = useState<{ title: string; url: string } | null>(null)
+  const [addedToCart, setAddedToCart] = useState(false)
+  const [isAddingToCart, setIsAddingToCart] = useState(false)
+  const [ratingData, setRatingData] = useState<ProductRating | null>(null)
+  const [reviews, setReviews] = useState<ProductReview[]>([])
+  const [reviewsPage, setReviewsPage] = useState(1)
+  const [reviewsTotalPages, setReviewsTotalPages] = useState(1)
+  const [reviewsTotal, setReviewsTotal] = useState(0)
+  const [reviewsSortBy, setReviewsSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest')
+  const [isLoadingRating, setIsLoadingRating] = useState(false)
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false)
+  
+  // Review form state
+  const { isAuthenticated } = useAuth()
+  const { toast } = useToast()
+  const [reviewModalOpen, setReviewModalOpen] = useState(false)
+  const [purchasedOrderItem, setPurchasedOrderItem] = useState<{ orderId: string; orderItemId: string } | null>(null)
+  const [isCheckingPurchase, setIsCheckingPurchase] = useState(false)
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
+  const [reviewForm, setReviewForm] = useState({
+    rating: 5,
+    title: "",
+    comment: "",
+  })
 
   // Load products from sessionStorage (set by catalog page)
   useEffect(() => {
@@ -61,13 +104,79 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
     }
   }, [id])
 
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [quantity, setQuantity] = useState(1)
-  const [activeTab, setActiveTab] = useState<"specs" | "features" | "reviews" | "faq">("specs")
-  const [videoModalOpen, setVideoModalOpen] = useState(false)
-  const [selectedVideo, setSelectedVideo] = useState<{ title: string; url: string } | null>(null)
-  const [addedToCart, setAddedToCart] = useState(false)
-  const [isAddingToCart, setIsAddingToCart] = useState(false)
+  // Fetch rating and reviews when part is loaded and has inventoryId
+  useEffect(() => {
+    if (part?.inventoryId) {
+      const loadRating = async () => {
+        try {
+          setIsLoadingRating(true)
+          const rating = await getProductRating(part.inventoryId!)
+          setRatingData(rating)
+        } catch (err) {
+          console.error('Failed to load rating:', err)
+        } finally {
+          setIsLoadingRating(false)
+        }
+      }
+      loadRating()
+    }
+  }, [part?.inventoryId])
+
+  useEffect(() => {
+    if (part?.inventoryId) {
+      const loadReviews = async () => {
+        try {
+          setIsLoadingReviews(true)
+          const data = await getProductReviews(part.inventoryId!, reviewsPage, 10, reviewsSortBy)
+          setReviews(data.reviews)
+          setReviewsTotalPages(data.pagination.totalPages)
+          setReviewsTotal(data.pagination.total)
+        } catch (err) {
+          console.error('Failed to load reviews:', err)
+        } finally {
+          setIsLoadingReviews(false)
+        }
+      }
+      loadReviews()
+    }
+  }, [part?.inventoryId, reviewsPage, reviewsSortBy])
+
+  // Check if buyer has purchased this product
+  useEffect(() => {
+    const checkPurchase = async () => {
+      if (!isAuthenticated || !part?.inventoryId) {
+        setPurchasedOrderItem(null)
+        return
+      }
+
+      setIsCheckingPurchase(true)
+      try {
+        // Fetch all orders to check if buyer has purchased this product
+        const response = await getOrders(1, 100) // Get first 100 orders
+        const orders = response.data
+
+        // Find order item that matches this inventoryId
+        for (const order of orders) {
+          const matchingItem = order.items.find(item => item.inventoryId === part.inventoryId)
+          if (matchingItem) {
+            setPurchasedOrderItem({
+              orderId: order.id,
+              orderItemId: matchingItem.id,
+            })
+            return
+          }
+        }
+        setPurchasedOrderItem(null)
+      } catch (err) {
+        console.error('Failed to check purchase:', err)
+        setPurchasedOrderItem(null)
+      } finally {
+        setIsCheckingPurchase(false)
+      }
+    }
+
+    checkPurchase()
+  }, [isAuthenticated, part?.inventoryId])
 
   // Show loading state while checking sessionStorage
   if (isLoading) {
@@ -103,10 +212,9 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
 
   const relatedParts = parts.filter((p) => part.relatedParts?.includes(p.id))
   const images = part.images || [part.image]
-  const averageRating =
-    part.reviews && part.reviews.length > 0
-      ? part.reviews.reduce((acc, r) => acc + r.rating, 0) / part.reviews.length
-      : 0
+
+  const averageRating = ratingData?.averageRating || part.averageRating || 0
+  const reviewCount = ratingData?.reviewCount || part.reviewCount || 0
 
   const handleAddToCart = async () => {
     if (!part || isAddingToCart) return
@@ -222,20 +330,28 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
               <h1 className="text-3xl md:text-4xl font-light text-white mb-4">{part.name}</h1>
 
               {/* Rating */}
-              {part.reviews && part.reviews.length > 0 && (
+              {isLoadingRating ? (
+                <div className="flex items-center gap-3 mb-6">
+                  <Skeleton className="h-4 w-24" />
+                </div>
+              ) : (averageRating > 0 || reviewCount > 0) ? (
                 <div className="flex items-center gap-3 mb-6">
                   <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
+                    {[1, 2, 3, 4, 5].map((star) => (
                       <Star
-                        key={i}
-                        className={`h-4 w-4 ${i < Math.round(averageRating) ? "text-accent fill-accent" : "text-white/20"}`}
+                        key={star}
+                        className={`h-4 w-4 ${
+                          star <= Math.round(averageRating)
+                            ? "text-yellow-400 fill-yellow-400"
+                            : "text-white/20"
+                        }`}
                       />
                     ))}
                   </div>
                   <span className="text-white font-medium">{averageRating.toFixed(1)}</span>
-                  <span className="text-muted">({part.reviews.length} reviews)</span>
+                  <span className="text-muted">({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})</span>
                 </div>
-              )}
+              ) : null}
 
               <p className="text-muted font-light leading-relaxed mb-6">{part.description}</p>
 
@@ -476,7 +592,7 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
             {[
               { id: "specs", label: "Specifications", icon: FileText },
               { id: "features", label: "Features", icon: Package },
-              { id: "reviews", label: `Reviews (${part.reviews?.length || 0})`, icon: Star },
+              { id: "reviews", label: `Reviews (${reviewCount})`, icon: Star },
               { id: "faq", label: "FAQ", icon: HelpCircle },
             ].map((tab) => (
               <button
@@ -568,39 +684,205 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
+                className="space-y-6"
               >
-                {part.reviews && part.reviews.length > 0 ? (
-                  <div className="space-y-6">
-                    {part.reviews.map((review, index) => (
-                      <div key={index} className="glass-card rounded-xl p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                              <span className="text-accent font-medium">{review.author.charAt(0)}</span>
-                            </div>
-                            <div>
-                              <p className="text-white font-medium">{review.author}</p>
-                              <p className="text-sm text-muted">{review.date}</p>
-                            </div>
-                          </div>
-                          <div className="flex gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`h-4 w-4 ${i < review.rating ? "text-accent fill-accent" : "text-white/20"}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-white/80 font-light">{review.comment}</p>
-                      </div>
-                    ))}
+                {/* Rating Summary */}
+                {isLoadingRating ? (
+                  <div className="glass-card rounded-xl p-6">
+                    <Skeleton className="h-32 w-full" />
                   </div>
+                ) : ratingData ? (
+                  <div className="glass-card rounded-xl p-6">
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {/* Average Rating */}
+                      <div className="text-center">
+                        <div className="text-5xl font-light text-white mb-2">{ratingData.averageRating.toFixed(1)}</div>
+                        <div className="flex items-center justify-center gap-1 mb-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`h-5 w-5 ${
+                                star <= Math.round(ratingData.averageRating)
+                                  ? "text-yellow-400 fill-yellow-400"
+                                  : "text-white/20"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-muted text-sm">Based on {ratingData.reviewCount} {ratingData.reviewCount === 1 ? 'review' : 'reviews'}</p>
+                      </div>
+                      
+                      {/* Rating Distribution */}
+                      <div className="space-y-2">
+                        {[5, 4, 3, 2, 1].map((rating) => {
+                          const count = ratingData.distribution[rating as keyof typeof ratingData.distribution] || 0
+                          const percentage = ratingData.reviewCount > 0 ? (count / ratingData.reviewCount) * 100 : 0
+                          return (
+                            <div key={rating} className="flex items-center gap-3">
+                              <div className="flex items-center gap-1 w-16">
+                                <span className="text-sm text-white">{rating}</span>
+                                <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                              </div>
+                              <Progress value={percentage} className="flex-1 h-2" />
+                              <span className="text-sm text-muted w-12 text-right">{count}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Write Review Button - Prominent Placement */}
+                {isAuthenticated && (
+                  <div className="glass-card rounded-xl p-6 mb-6">
+                    {isCheckingPurchase ? (
+                      <div className="flex items-center justify-center gap-2 text-muted">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm">Checking if you've purchased this product...</span>
+                      </div>
+                    ) : purchasedOrderItem ? (
+                      <div className="text-center">
+                        <p className="text-white mb-4">Share your experience with this product</p>
+                        <Button
+                          onClick={() => setReviewModalOpen(true)}
+                          className="bg-accent hover:bg-accent/90"
+                          size="lg"
+                        >
+                          <Edit className="h-5 w-5 mr-2" />
+                          Write a Review
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="text-center">
+                        <p className="text-muted mb-2">Purchase this product to write a review</p>
+                        <Link href="/catalog">
+                          <Button variant="outline" size="sm">
+                            Browse Products
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Reviews List */}
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-light text-white">Customer Reviews</h3>
+                  {reviews.length > 0 && (
+                    <Select value={reviewsSortBy} onValueChange={(value: any) => setReviewsSortBy(value)}>
+                      <SelectTrigger className="w-40 bg-muted/50 border-border">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">Newest First</SelectItem>
+                        <SelectItem value="oldest">Oldest First</SelectItem>
+                        <SelectItem value="highest">Highest Rated</SelectItem>
+                        <SelectItem value="lowest">Lowest Rated</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                {isLoadingReviews ? (
+                  <div className="space-y-4">
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-32 w-full" />
+                  </div>
+                ) : reviews.length > 0 ? (
+                  <>
+                    <div className="space-y-6">
+                      {reviews.map((review) => (
+                        <div key={review.id} className="glass-card rounded-xl p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                                <span className="text-accent font-medium">
+                                  {review.buyer.firstName.charAt(0)}{review.buyer.lastName.charAt(0)}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-white font-medium">
+                                  {review.buyer.firstName} {review.buyer.lastName}
+                                </p>
+                                <p className="text-sm text-muted">
+                                  {format(new Date(review.createdAt), "MMM dd, yyyy")}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-1">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={`h-4 w-4 ${
+                                    star <= review.rating
+                                      ? "text-yellow-400 fill-yellow-400"
+                                      : "text-white/20"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          {review.title && (
+                            <h4 className="text-white font-medium mb-2">{review.title}</h4>
+                          )}
+                          <p className="text-white/80 font-light">{review.comment}</p>
+                          {review.response && (
+                            <div className="mt-4 pt-4 border-t border-white/10">
+                              <p className="text-sm text-muted-foreground mb-1">Seller Response:</p>
+                              <p className="text-white/70 font-light text-sm">{review.response}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Pagination */}
+                    {reviewsTotalPages > 1 && (
+                      <div className="flex items-center justify-between pt-6 border-t border-white/10">
+                        <div className="text-sm text-muted">
+                          Showing page {reviewsPage} of {reviewsTotalPages} ({reviewsTotal} total reviews)
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setReviewsPage(p => Math.max(1, p - 1))}
+                            disabled={reviewsPage === 1 || isLoadingReviews}
+                            className="border-border"
+                          >
+                            <ChevronLeft className="h-4 w-4 mr-1" />
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setReviewsPage(p => Math.min(reviewsTotalPages, p + 1))}
+                            disabled={reviewsPage === reviewsTotalPages || isLoadingReviews}
+                            className="border-border"
+                          >
+                            Next
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
-                  <div className="text-center py-16">
+                  <div className="text-center py-16 glass-card rounded-xl">
                     <Star className="h-12 w-12 text-white/20 mx-auto mb-4" />
                     <p className="text-white mb-2">No reviews yet</p>
-                    <p className="text-muted">Be the first to review this product</p>
+                    <p className="text-muted mb-4">Be the first to review this product</p>
+                    {isAuthenticated && purchasedOrderItem && (
+                      <Button
+                        onClick={() => setReviewModalOpen(true)}
+                        className="bg-accent hover:bg-accent/90"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Write a Review
+                      </Button>
+                    )}
                   </div>
                 )}
               </motion.div>
@@ -794,6 +1076,189 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
           </Button>
         </div>
       </div>
+
+      {/* Review Modal */}
+      <Dialog open={reviewModalOpen} onOpenChange={setReviewModalOpen}>
+        <DialogContent className="!max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-light">Write a Review</DialogTitle>
+            <DialogDescription>
+              Share your experience with this product
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 mt-4">
+            {/* Rating */}
+            <div>
+              <Label className="text-white mb-3 block">Rating</Label>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}
+                    className="focus:outline-none"
+                  >
+                    <Star
+                      className={`h-8 w-8 transition-colors ${
+                        star <= reviewForm.rating
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-white/20 hover:text-yellow-400/50"
+                      }`}
+                    />
+                  </button>
+                ))}
+                <span className="ml-2 text-muted text-sm">{reviewForm.rating} out of 5</span>
+              </div>
+            </div>
+
+            {/* Title */}
+            <div>
+              <Label htmlFor="review-title" className="text-white mb-2 block">
+                Review Title
+              </Label>
+              <Input
+                id="review-title"
+                value={reviewForm.title}
+                onChange={(e) => setReviewForm(prev => ({ ...prev, title: e.target.value }))}
+                placeholder="Give your review a title"
+                className="bg-muted/50 border-border"
+                maxLength={100}
+              />
+            </div>
+
+            {/* Comment */}
+            <div>
+              <Label htmlFor="review-comment" className="text-white mb-2 block">
+                Your Review
+              </Label>
+              <Textarea
+                id="review-comment"
+                value={reviewForm.comment}
+                onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
+                placeholder="Share your thoughts about this product..."
+                className="bg-muted/50 border-border min-h-32"
+                maxLength={1000}
+              />
+              <p className="text-xs text-muted mt-1">
+                {reviewForm.comment.length}/1000 characters
+              </p>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setReviewModalOpen(false)
+                  setReviewForm({ rating: 5, title: "", comment: "" })
+                }}
+                disabled={isSubmittingReview}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (!part?.inventoryId || !purchasedOrderItem) return
+
+                  // Validate form
+                  if (!reviewForm.title.trim()) {
+                    toast({
+                      title: "Validation Error",
+                      description: "Please enter a review title",
+                      variant: "destructive",
+                    })
+                    return
+                  }
+
+                  if (!reviewForm.comment.trim()) {
+                    toast({
+                      title: "Validation Error",
+                      description: "Please enter your review",
+                      variant: "destructive",
+                    })
+                    return
+                  }
+
+                  if (reviewForm.comment.trim().length < 10) {
+                    toast({
+                      title: "Validation Error",
+                      description: "Review must be at least 10 characters long",
+                      variant: "destructive",
+                    })
+                    return
+                  }
+
+                  setIsSubmittingReview(true)
+                  try {
+                    await createReview({
+                      inventoryId: part.inventoryId,
+                      orderId: purchasedOrderItem.orderId,
+                      orderItemId: purchasedOrderItem.orderItemId,
+                      rating: reviewForm.rating,
+                      title: reviewForm.title.trim(),
+                      comment: reviewForm.comment.trim(),
+                    })
+
+                    toast({
+                      title: "Review Submitted",
+                      description: "Thank you for your review! It will be visible after moderation.",
+                    })
+
+                    // Reset form and close modal
+                    setReviewForm({ rating: 5, title: "", comment: "" })
+                    setReviewModalOpen(false)
+
+                    // Reload reviews
+                    if (part.inventoryId) {
+                      const data = await getProductReviews(part.inventoryId, reviewsPage, 10, reviewsSortBy)
+                      setReviews(data.reviews)
+                      setReviewsTotalPages(data.pagination.totalPages)
+                      setReviewsTotal(data.pagination.total)
+                    }
+
+                    // Reload rating
+                    if (part.inventoryId) {
+                      const rating = await getProductRating(part.inventoryId)
+                      setRatingData(rating)
+                    }
+                  } catch (error: any) {
+                    const errorMessage = error.message || "Failed to submit review"
+                    
+                    // Handle specific error for already reviewed
+                    if (errorMessage.toLowerCase().includes("already reviewed")) {
+                      toast({
+                        title: "Already Reviewed",
+                        description: "You have already reviewed this product. Each product can only be reviewed once.",
+                        variant: "destructive",
+                      })
+                    } else {
+                      toast({
+                        title: "Error",
+                        description: errorMessage,
+                        variant: "destructive",
+                      })
+                    }
+                  } finally {
+                    setIsSubmittingReview(false)
+                  }
+                }}
+                disabled={isSubmittingReview || !reviewForm.title.trim() || !reviewForm.comment.trim()}
+                className="bg-accent hover:bg-accent/90"
+              >
+                {isSubmittingReview ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Review"
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </main>

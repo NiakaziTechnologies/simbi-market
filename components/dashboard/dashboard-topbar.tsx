@@ -4,7 +4,6 @@ import { useState } from "react"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
 import {
-  Search,
   Menu,
   ChevronDown,
   User,
@@ -13,7 +12,6 @@ import {
   ShoppingCart,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +31,6 @@ interface DashboardTopbarProps {
 }
 
 export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
-  const [searchOpen, setSearchOpen] = useState(false)
   const cartItems = useSelector((state: RootState) => state.cart.items)
   const { user, logout } = useAuth()
 
@@ -49,20 +46,6 @@ export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
         >
           <Menu className="h-5 w-5" />
         </Button>
-
-        {/* Search Bar */}
-        <div className="flex-1 max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search orders, parts..."
-              className="pl-9 h-10 bg-muted/50 border-border"
-              onFocus={() => setSearchOpen(true)}
-              onBlur={() => setTimeout(() => setSearchOpen(false), 200)}
-            />
-          </div>
-        </div>
 
         {/* Right Actions - Pushed to far right */}
         <div className="flex items-center gap-2 ml-auto">
