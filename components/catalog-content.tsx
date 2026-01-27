@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSelector, useDispatch } from "react-redux"
 import type { RootState } from "@/lib/store"
@@ -20,9 +21,11 @@ const categories = ["All", "Brakes", "Engine", "Suspension", "Exhaust", "Wheels"
 export function CatalogContent() {
    const dispatch = useDispatch()
    const { addToCart } = useCart()
+   const router = useRouter()
+   const searchParams = useSearchParams()
    const { selectedCategory, hasCategoryFilter, filters } = useSelector((state: RootState) => state.parts)
    const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
-   const [searchQuery, setSearchQuery] = useState("")
+   const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") || "")
    const [addedItems, setAddedItems] = useState<Set<string>>(new Set())
    const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set())
    const [products, setProducts] = useState<Part[]>([])
@@ -36,10 +39,18 @@ export function CatalogContent() {
       setError(null)
       
       try {
+        // Get filters from URL params or Redux state
+        const urlYear = searchParams?.get("year")
+        const urlMake = searchParams?.get("make")
+        const urlModel = searchParams?.get("model")
+        const urlCategory = searchParams?.get("category")
+        
         const apiFilters: ProductFilters = {
           q: searchQuery || undefined,
-          category: selectedCategory || filters.category || undefined,
-          make: filters.make || undefined,
+          category: urlCategory || selectedCategory || filters.category || undefined,
+          make: urlMake || filters.make || undefined,
+          year: urlYear || filters.year || undefined,
+          model: urlModel || filters.model || undefined,
           inStock: true, // Only show in-stock items
           page: 1,
           limit: 100, // Adjust as needed
@@ -67,7 +78,55 @@ export function CatalogContent() {
     }
 
     loadProducts()
-  }, [searchQuery, selectedCategory, filters.category, filters.make])
+  }, [searchQuery, selectedCategory, filters.category, filters.make, filters.year, filters.model, searchParams])
+
+  // Initialize search query and filters from URL params
+  useEffect(() => {
+    const urlQuery = searchParams?.get("q") || ""
+    const urlYear = searchParams?.get("year") || ""
+    const urlMake = searchParams?.get("make") || ""
+    const urlModel = searchParams?.get("model") || ""
+    const urlCategory = searchParams?.get("category") || ""
+    const urlVin = searchParams?.get("vin") || ""
+    
+    // Update search query
+    if (urlQuery !== searchQuery) {
+      setSearchQuery(urlQuery)
+    }
+    
+    // Update filters from URL if they exist
+    if (urlYear || urlMake || urlModel || urlCategory) {
+      const newFilters: any = {}
+      if (urlYear) newFilters.year = urlYear
+      if (urlMake) newFilters.make = urlMake
+      if (urlModel) newFilters.model = urlModel
+      if (urlCategory) newFilters.category = urlCategory
+      dispatch(setFilters(newFilters))
+    }
+    
+    // Handle VIN search
+    if (urlVin && !urlQuery) {
+      setSearchQuery(urlVin)
+    }
+  }, [searchParams, dispatch])
+
+  // Update URL when search query changes (debounced)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const currentQuery = searchParams?.get("q") || ""
+      if (searchQuery !== currentQuery) {
+        const params = new URLSearchParams(searchParams?.toString() || "")
+        if (searchQuery.trim()) {
+          params.set("q", searchQuery.trim())
+        } else {
+          params.delete("q")
+        }
+        router.replace(`/catalog?${params.toString()}`, { scroll: false })
+      }
+    }, 300) // Debounce for 300ms
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery, router, searchParams])
 
   // Keep Redux in sync for category selection (if needed elsewhere)
   useEffect(() => {

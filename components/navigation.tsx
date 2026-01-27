@@ -107,6 +107,7 @@ export function Navigation() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -328,15 +329,31 @@ export function Navigation() {
                     <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                       <Search className="h-5 w-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
                     </div>
-                    <input
-                      type="text"
-                      autoFocus
-                      placeholder="Search by part name, number, or VIN..."
-                      className="w-full h-16 bg-muted/50 border border-border rounded-xl pl-12 pr-32 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all text-lg"
-                    />
-                    <Button className="absolute right-2 top-2 bottom-2 px-8 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg">
-                      Search
-                    </Button>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        if (searchQuery.trim()) {
+                          setIsSearchOpen(false)
+                          // Redirect to catalog with search query
+                          router.push(`/catalog?q=${encodeURIComponent(searchQuery.trim())}`)
+                        }
+                      }}
+                    >
+                      <input
+                        type="text"
+                        autoFocus
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search by part name, number, or VIN..."
+                        className="w-full h-16 bg-muted/50 border border-border rounded-xl pl-12 pr-32 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all text-lg"
+                      />
+                      <Button 
+                        type="submit"
+                        className="absolute right-2 top-2 bottom-2 px-8 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg"
+                      >
+                        Search
+                      </Button>
+                    </form>
                   </div>
 
                   <div className="flex justify-center gap-8 text-xs text-white/40 font-light">

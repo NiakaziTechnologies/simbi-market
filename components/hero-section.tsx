@@ -2,14 +2,20 @@
 
 import { motion } from "framer-motion"
 import { useState, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { useSelector } from "react-redux"
+import type { RootState } from "@/lib/store"
 import { Play, Pause, Search, Scan } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SearchFilters } from "@/components/search-filters"
 
 export function HeroSection() {
+  const router = useRouter()
+  const { filters } = useSelector((state: RootState) => state.parts)
   const [isPlaying, setIsPlaying] = useState(true)
   const [searchType, setSearchType] = useState<"part" | "vin">("part")
+  const [searchQuery, setSearchQuery] = useState("")
   const videoRef = useRef<HTMLVideoElement>(null)
 
   const togglePlay = () => {
@@ -115,20 +121,51 @@ export function HeroSection() {
               )}
 
               {/* Search Input */}
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-white/40 group-focus-within:text-accent transition-colors" />
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  // Build catalog URL with search parameters
+                  const params = new URLSearchParams()
+                  
+                  if (searchType === "part") {
+                    // Part search - include filters and query
+                    if (searchQuery.trim()) {
+                      params.set("q", searchQuery.trim())
+                    }
+                    if (filters.year) params.set("year", filters.year)
+                    if (filters.make) params.set("make", filters.make)
+                    if (filters.model) params.set("model", filters.model)
+                    if (filters.category) params.set("category", filters.category)
+                  } else {
+                    // VIN search - just the VIN query
+                    if (searchQuery.trim()) {
+                      params.set("vin", searchQuery.trim())
+                    }
+                  }
+                  
+                  router.push(`/catalog?${params.toString()}`)
+                }}
+              >
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <Search className="h-5 w-5 text-white/40 group-focus-within:text-accent transition-colors" />
+                  </div>
+                  <Input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={searchType === "vin" ? "Enter your 17-digit VIN" : "Enter part name or number"}
+                    className={`h-16 pl-12 pr-36 bg-white/5 border-white/10 text-white placeholder:text-white/30 text-lg transition-all focus:ring-accent focus:border-accent rounded-xl ${searchType === "vin" ? "font-mono tracking-widest uppercase" : ""
+                      }`}
+                  />
+                  <Button 
+                    type="submit"
+                    className="absolute right-2 top-2 bottom-2 px-8 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg shadow-lg hover:shadow-accent/20 transition-all"
+                  >
+                    Search
+                  </Button>
                 </div>
-                <Input
-                  type="text"
-                  placeholder={searchType === "vin" ? "Enter your 17-digit VIN" : "Enter part name or number"}
-                  className={`h-16 pl-12 pr-36 bg-white/5 border-white/10 text-white placeholder:text-white/30 text-lg transition-all focus:ring-accent focus:border-accent rounded-xl ${searchType === "vin" ? "font-mono tracking-widest uppercase" : ""
-                    }`}
-                />
-                <Button className="absolute right-2 top-2 bottom-2 px-8 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg shadow-lg hover:shadow-accent/20 transition-all">
-                  Search
-                </Button>
-              </div>
+              </form>
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-8 mt-10 opacity-60">
