@@ -15,7 +15,7 @@ function getBaseURL(): string {
     return process.env.NEXT_PUBLIC_API_URL
   }
   const DEV_BASE_URL = 'http://localhost:3006'
-  const PROD_BASE_URL = 'https://api.production.com'
+  const PROD_BASE_URL = 'https://simbi-three.vercel.app'
   return isDevelopment ? DEV_BASE_URL : PROD_BASE_URL
 }
 
@@ -23,9 +23,9 @@ export const API_CONFIG = {
   // Development backend URL
   DEV_BASE_URL: 'http://localhost:3006',
   
-  // Production backend URL (update when production URL is known)
+  // Production backend URL
   // Use NEXT_PUBLIC_ prefix so it's available on the client side
-  PROD_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://api.production.com',
+  PROD_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'https://simbi-three.vercel.app',
   
   // Get the appropriate base URL based on environment
   get baseURL(): string {

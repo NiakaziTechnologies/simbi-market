@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -34,10 +34,12 @@ interface ErrorInfo {
 
 export default function LoginPage() {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { login: setAuthUser, isAuthenticated, role } = useAuth()
+  const { login: setAuthUser, isAuthenticated, role, isLoading: authLoading } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null)
+  const hasRedirectedRef = useRef(false)
   
   const returnUrl = searchParams?.get('returnUrl') || null
 
@@ -49,22 +51,37 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   })
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (but not during initial load or if already redirected)
   useEffect(() => {
+    // Don't redirect if auth is still loading, if we've already redirected, or if we're not on login page
+    if (authLoading || hasRedirectedRef.current || pathname !== '/auth/login') return
+    
     if (isAuthenticated && role) {
-      if (returnUrl) {
-        router.push(decodeURIComponent(returnUrl))
-      } else if (role === 'buyer') {
-        router.push('/dashboard/buyer')
-      } else if (role === 'seller') {
-        router.push('/dashboard/seller')
-      } else if (role === 'admin') {
-        router.push('/dashboard/admin')
-      } else {
-        router.push('/dashboard')
+      // Check for seller/staff userType from localStorage
+      const sellerUserType = localStorage.getItem('sellerUserType')
+      
+      // Only redirect if user is actually a seller/staff, or if they're buyer/admin
+      // Don't redirect if they're authenticated but not seller/staff (might be buyer/admin)
+      if (sellerUserType === 'staff' || sellerUserType === 'seller' || role === 'buyer' || role === 'admin') {
+        hasRedirectedRef.current = true
+        
+        const redirectPath = returnUrl 
+          ? decodeURIComponent(returnUrl)
+          : sellerUserType === 'staff' || sellerUserType === 'seller'
+          ? '/dashboard/seller'
+          : role === 'buyer'
+          ? '/dashboard/buyer'
+          : role === 'admin'
+          ? '/dashboard/admin'
+          : '/dashboard'
+        
+        // Only redirect if we're not already going there
+        if (redirectPath !== pathname) {
+          router.push(redirectPath)
+        }
       }
     }
-  }, [isAuthenticated, role, router, returnUrl])
+  }, [isAuthenticated, role, router, returnUrl, authLoading, pathname])
 
   /**
    * Extract remaining minutes from error message
@@ -147,6 +164,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     setErrorInfo(null)
+    hasRedirectedRef.current = false // Reset redirect flag
 
     try {
       const response = await login({
@@ -157,23 +175,27 @@ export default function LoginPage() {
       // Set user in auth context
       setAuthUser(response.user)
 
-      // Redirect based on userType/role from response
-      const userType = response.user.role // This is mapped from userType in the API
+      // Get userType from localStorage (set by login function)
+      const userType = localStorage.getItem('sellerUserType') || response.user.role
+      
+      // Redirect based on userType
       const redirectPath = returnUrl 
         ? decodeURIComponent(returnUrl)
-        : userType === 'buyer'
-        ? '/dashboard/buyer'
-        : userType === 'seller'
+        : userType === 'staff' || userType === 'seller'
         ? '/dashboard/seller'
-        : userType === 'admin'
+        : response.user.role === 'buyer'
+        ? '/dashboard/buyer'
+        : response.user.role === 'admin'
         ? '/dashboard/admin'
         : '/dashboard'
 
+      hasRedirectedRef.current = true // Mark as redirected before pushing
       router.push(redirectPath)
     } catch (err: any) {
       // Parse the error to get appropriate styling and icon
       const parsedError = parseError(err)
       setErrorInfo(parsedError)
+      hasRedirectedRef.current = false // Reset on error
     } finally {
       setIsLoading(false)
     }

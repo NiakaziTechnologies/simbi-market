@@ -23,19 +23,88 @@ import {
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth/auth-context"
+import { useSellerAuth } from "@/lib/auth/seller-auth-context"
+import { useMemo } from "react"
 
-const menuItems = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/seller" },
-  { id: "inventory", label: "Inventory", icon: Package, href: "/dashboard/seller/inventory" },
-  { id: "orders", label: "Orders", icon: ShoppingCart, href: "/dashboard/seller/orders" },
-  { id: "payments", label: "Payments", icon: CreditCard, href: "/dashboard/seller/payments" },
-  { id: "coupons", label: "Coupons", icon: Ticket, href: "/dashboard/seller/coupons" },
-  { id: "returns", label: "Returns", icon: RotateCcw, href: "/dashboard/seller/returns" },
-  { id: "finance", label: "Finance", icon: DollarSign, href: "/dashboard/seller/finance" },
-  { id: "staff", label: "Staff", icon: Users, href: "/dashboard/seller/staff" },
-  { id: "reports", label: "Reports", icon: BarChart3, href: "/dashboard/seller/reports" },
-  { id: "notifications", label: "Notifications", icon: Bell, href: "/dashboard/seller/notifications" },
-  { id: "profile", label: "Profile", icon: User, href: "/dashboard/seller/profile" },
+// Define menu items with role-based access
+const allMenuItems = [
+  { 
+    id: "dashboard", 
+    label: "Dashboard", 
+    icon: LayoutDashboard, 
+    href: "/dashboard/seller",
+    roles: ['seller', 'STOCK_MANAGER', 'DISPATCHER', 'FINANCE_VIEW', 'FULL_ACCESS']
+  },
+  { 
+    id: "inventory", 
+    label: "Inventory", 
+    icon: Package, 
+    href: "/dashboard/seller/inventory",
+    roles: ['seller', 'STOCK_MANAGER', 'FULL_ACCESS']
+  },
+  { 
+    id: "orders", 
+    label: "Orders", 
+    icon: ShoppingCart, 
+    href: "/dashboard/seller/orders",
+    roles: ['seller', 'DISPATCHER', 'FULL_ACCESS']
+  },
+  { 
+    id: "payments", 
+    label: "Payments", 
+    icon: CreditCard, 
+    href: "/dashboard/seller/payments",
+    roles: ['seller', 'FINANCE_VIEW', 'FULL_ACCESS']
+  },
+  { 
+    id: "coupons", 
+    label: "Coupons", 
+    icon: Ticket, 
+    href: "/dashboard/seller/coupons",
+    roles: ['seller', 'FULL_ACCESS']
+  },
+  { 
+    id: "returns", 
+    label: "Returns", 
+    icon: RotateCcw, 
+    href: "/dashboard/seller/returns",
+    roles: ['seller', 'DISPATCHER', 'FULL_ACCESS']
+  },
+  { 
+    id: "finance", 
+    label: "Finance", 
+    icon: DollarSign, 
+    href: "/dashboard/seller/finance",
+    roles: ['seller', 'FINANCE_VIEW', 'FULL_ACCESS']
+  },
+  { 
+    id: "staff", 
+    label: "Staff", 
+    icon: Users, 
+    href: "/dashboard/seller/staff",
+    roles: ['seller', 'FULL_ACCESS'] // Only sellers and full access staff
+  },
+  { 
+    id: "reports", 
+    label: "Reports", 
+    icon: BarChart3, 
+    href: "/dashboard/seller/reports",
+    roles: ['seller', 'FINANCE_VIEW', 'FULL_ACCESS']
+  },
+  { 
+    id: "notifications", 
+    label: "Notifications", 
+    icon: Bell, 
+    href: "/dashboard/seller/notifications",
+    roles: ['seller', 'STOCK_MANAGER', 'DISPATCHER', 'FINANCE_VIEW', 'FULL_ACCESS']
+  },
+  { 
+    id: "profile", 
+    label: "Profile", 
+    icon: User, 
+    href: "/dashboard/seller/profile",
+    roles: ['seller'] // Only sellers can access profile, not staff
+  },
 ]
 
 interface SellerSidebarProps {
@@ -47,6 +116,23 @@ export function SellerSidebar({ isMobileOpen = false, onMobileClose }: SellerSid
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
   const { logout } = useAuth()
+  const { userType, role } = useSellerAuth()
+
+  // Filter menu items based on user type and role
+  const menuItems = useMemo(() => {
+    // If user is seller, show all items with 'seller' in roles
+    if (userType === 'seller') {
+      return allMenuItems.filter(item => item.roles.includes('seller'))
+    }
+    
+    // If user is staff, filter by their specific role
+    if (userType === 'staff' && role) {
+      return allMenuItems.filter(item => item.roles.includes(role))
+    }
+    
+    // Default: show all (for loading state)
+    return allMenuItems
+  }, [userType, role])
 
   const getActiveTab = () => {
     if (pathname?.includes("/notifications")) return "notifications"

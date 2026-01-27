@@ -1,7 +1,9 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
+import { useSellerAuth } from "@/lib/auth/seller-auth-context"
 import {
   Users,
   Calculator,
@@ -70,8 +72,17 @@ function formatCurrency(value: number, currency: string = "USD"): string {
 }
 
 export default function StaffPage() {
+  const router = useRouter()
+  const { userType, role } = useSellerAuth()
   const [activeTab, setActiveTab] = useState("staff")
   const { toast } = useToast()
+
+  // Role-based access control: Only sellers and FULL_ACCESS staff can access this page
+  useEffect(() => {
+    if (userType === 'staff' && role !== 'FULL_ACCESS') {
+      router.push('/dashboard/seller')
+    }
+  }, [userType, role, router])
 
   // Staff Tab State
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([])

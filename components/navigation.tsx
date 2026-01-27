@@ -107,8 +107,6 @@ export function Navigation() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const [isSellerOpen, setIsSellerOpen] = useState(false)
-  const [isBuyerOpen, setIsBuyerOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -126,8 +124,6 @@ export function Navigation() {
           }`}
         onMouseLeave={() => {
           setActiveMenu(null)
-          setIsSellerOpen(false)
-          setIsBuyerOpen(false)
         }}
       >
         <div className="max-w-[1400px] mx-auto px-6">
@@ -173,96 +169,20 @@ export function Navigation() {
 
             {/* Right Actions */}
             <div className="flex items-center gap-2">
-              {/* Seller Account Button & Dropdown */}
-              <div className="relative">
+              {/* Login Button */}
+              <Link href="/auth/login">
                 <Button
                   variant="ghost"
-                  onClick={() => {
-                    setIsSellerOpen(!isSellerOpen)
-                    setIsBuyerOpen(false)
-                    setIsSearchOpen(false)
-                  }}
-                  className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isSellerOpen
-                    ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
-                    : "text-foreground border-border hover:bg-muted hover:border-border"
-                    }`}
+                  className="hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 text-foreground border-border hover:bg-muted hover:border-border"
                 >
-                  <span className="text-sm font-medium">Seller Account</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isSellerOpen ? "rotate-180" : ""}`} />
+                  <span className="text-sm font-medium">Login</span>
                 </Button>
-                <AnimatePresence>
-                  {isSellerOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute top-full right-0 mt-2 w-48 bg-background/95 backdrop-blur-xl border border-border rounded-xl overflow-hidden shadow-xl"
-                    >
-                      <div className="p-1">
-                        <Link href="http://31.220.82.129:5000/login">
-                          <Button variant="ghost" className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10">
-                            Login
-                          </Button>
-                        </Link>
-                        <Link href="http://31.220.82.129:5000/register">
-                          <Button variant="ghost" className="w-full justify-start text-white/80 hover:text-white hover:bg-white/10">
-                            Create Account
-                          </Button>
-                        </Link>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Buyer Account Button & Dropdown */}
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setIsBuyerOpen(!isBuyerOpen)
-                    setIsSellerOpen(false)
-                    setIsSearchOpen(false)
-                  }}
-                  className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isBuyerOpen
-                    ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
-                    : "text-foreground border-border hover:bg-muted hover:border-border"
-                    }`}
-                >
-                  <span className="text-sm font-medium">Buyer Account</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBuyerOpen ? "rotate-180" : ""}`} />
-                </Button>
-                <AnimatePresence>
-                  {isBuyerOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute top-full right-0 mt-2 w-48 bg-background/95 backdrop-blur-xl border border-border rounded-xl overflow-hidden shadow-xl"
-                    >
-                      <div className="p-1">
-                        <Link href="/auth/buyer/login">
-                          <Button variant="ghost" className="w-full justify-start text-foreground/80 hover:text-foreground hover:bg-muted">
-                            Login
-                          </Button>
-                        </Link>
-                        <Link href="/auth/buyer/register">
-                          <Button variant="ghost" className="w-full justify-start text-foreground/80 hover:text-foreground hover:bg-muted">
-                            Create Account
-                          </Button>
-                        </Link>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+              </Link>
 
               <Button
                 variant="ghost"
                 onClick={() => {
                   setIsSearchOpen(!isSearchOpen)
-                  setIsSellerOpen(false)
-                  setIsBuyerOpen(false)
                 }}
                 className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isSearchOpen
                   ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
@@ -487,17 +407,10 @@ export function Navigation() {
                 )
               ))}
               <div className="pt-6 space-y-3">
-                {/* Mobile Account Links */}
-                <div className="flex flex-col gap-2 mb-4 p-4 rounded-lg bg-muted/50">
-                  <h4 className="text-foreground font-semibold mb-2">Seller Account</h4>
-                  <Link href="http://31.220.82.129:5000/login" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Login</Link>
-                  <Link href="http://31.220.82.129:5000/register" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Create Account</Link>
-                </div>
-                <div className="flex flex-col gap-2 mb-4 p-4 rounded-lg bg-white/5">
-                  <h4 className="text-foreground font-semibold mb-2">Buyer Account</h4>
-                  <Link href="/auth/buyer/login" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Login</Link>
-                  <Link href="/auth/buyer/register" className="text-sm text-foreground/70 hover:text-foreground" onClick={() => setMobileOpen(false)}>Create Account</Link>
-                </div>
+                {/* Mobile Login Link */}
+                <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
+                  <Button className="w-full bg-accent hover:bg-accent/90 text-white">Login</Button>
+                </Link>
 
                 <Link href="/catalog" onClick={() => setMobileOpen(false)}>
                   <Button className="w-full bg-accent hover:bg-accent/90 text-white">Shop All Parts</Button>

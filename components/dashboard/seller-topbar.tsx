@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useAuth } from "@/lib/auth/auth-context"
+import { useSellerAuth } from "@/lib/auth/seller-auth-context"
 import { SellerNotificationsDropdown } from "./seller-notifications-dropdown"
 
 interface SellerTopbarProps {
@@ -26,7 +26,19 @@ interface SellerTopbarProps {
 }
 
 export function SellerTopbar({ onMenuClick }: SellerTopbarProps) {
-  const { user, logout } = useAuth()
+  const { seller, staff, userType, logout } = useSellerAuth()
+  
+  // Get display name based on user type
+  const displayName = userType === 'seller' 
+    ? seller?.businessName || 'Seller'
+    : staff 
+      ? `${staff.firstName} ${staff.lastName}`.trim() || 'Staff'
+      : 'User'
+  
+  // Get initial for avatar
+  const initial = userType === 'seller'
+    ? seller?.businessName?.charAt(0).toUpperCase() || 'S'
+    : staff?.firstName?.charAt(0).toUpperCase() || 'S'
 
   return (
     <header className="sticky top-0 z-30 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -43,8 +55,8 @@ export function SellerTopbar({ onMenuClick }: SellerTopbarProps) {
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 ml-auto">
-          {/* Notifications */}
-          <SellerNotificationsDropdown />
+          {/* Notifications - Only show for sellers, not staff */}
+          {userType === 'seller' && <SellerNotificationsDropdown />}
 
           {/* User Menu */}
           <DropdownMenu>
@@ -52,23 +64,28 @@ export function SellerTopbar({ onMenuClick }: SellerTopbarProps) {
               <Button variant="ghost" className="flex items-center gap-2 px-3">
                 <div className="h-8 w-8 rounded-full bg-gradient-to-br from-accent to-accent/50 flex items-center justify-center">
                   <span className="text-sm font-medium text-white">
-                    {user?.name?.charAt(0).toUpperCase() || 'S'}
+                    {initial}
                   </span>
                 </div>
-                <span className="hidden md:block font-medium">{user?.name || 'Seller'}</span>
+                <span className="hidden md:block font-medium">{displayName}</span>
                 <ChevronDown className="h-4 w-4 hidden md:block" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/seller/profile" className="flex items-center gap-2 cursor-pointer">
-                  <User className="h-4 w-4" />
-                  <span>Profile</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              {/* Profile - Only show for sellers, not staff */}
+              {userType === 'seller' && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard/seller/profile" className="flex items-center gap-2 cursor-pointer">
+                      <User className="h-4 w-4" />
+                      <span>Profile</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               <DropdownMenuItem
                 onClick={logout}
                 className="text-destructive focus:text-destructive cursor-pointer"

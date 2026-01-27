@@ -37,6 +37,7 @@ import {
 import { formatDistanceToNow } from "date-fns"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
+import { useSellerAuth } from "@/lib/auth/seller-auth-context"
 
 const notificationIcons: Record<string, typeof Package> = {
   NEW_ORDER: Package,
@@ -55,6 +56,7 @@ const notificationColors: Record<string, string> = {
 }
 
 export function SellerNotificationsDropdown() {
+  const { userType } = useSellerAuth()
   const [notifications, setNotifications] = useState<SellerNotification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
@@ -63,7 +65,13 @@ export function SellerNotificationsDropdown() {
   const [deleting, setDeleting] = useState<Set<string>>(new Set())
   const { toast } = useToast()
 
+  // Only load notifications for sellers, not staff
+  const isSeller = userType === 'seller'
+
   const loadNotifications = useCallback(async () => {
+    // Don't load if user is staff
+    if (!isSeller) return
+    
     try {
       setIsLoading(true)
       const data = await getSellerNotifications(1, 20)
@@ -79,35 +87,46 @@ export function SellerNotificationsDropdown() {
     } finally {
       setIsLoading(false)
     }
-  }, [toast])
+  }, [toast, isSeller])
 
   const loadUnreadCount = useCallback(async () => {
+    // Don't load if user is staff
+    if (!isSeller) return
+    
     try {
       const count = await getSellerUnreadCount()
       setUnreadCount(count)
     } catch (error: any) {
       console.error('Error loading unread count:', error)
     }
-  }, [])
+  }, [isSeller])
 
   useEffect(() => {
-    loadNotifications()
-    loadUnreadCount()
-
-    // Poll for unread count every 30 seconds
-    const interval = setInterval(() => {
+    // Only load notifications if user is seller
+    if (isSeller) {
+      loadNotifications()
       loadUnreadCount()
-    }, 30000)
 
-    return () => clearInterval(interval)
-  }, [loadNotifications, loadUnreadCount])
+      // Poll for unread count every 30 seconds
+      const interval = setInterval(() => {
+        loadUnreadCount()
+      }, 30000)
+
+      return () => clearInterval(interval)
+    } else {
+      // Reset state for staff users
+      setNotifications([])
+      setUnreadCount(0)
+      setIsLoading(false)
+    }
+  }, [loadNotifications, loadUnreadCount, isSeller])
 
   // Reload notifications when dropdown opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && isSeller) {
       loadNotifications()
     }
-  }, [isOpen, loadNotifications])
+  }, [isOpen, loadNotifications, isSeller])
 
   const handleMarkAsRead = async (notificationId: string, e?: React.MouseEvent) => {
     e?.stopPropagation()

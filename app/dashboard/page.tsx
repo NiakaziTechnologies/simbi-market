@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useRef } from "react"
+import { useRouter, usePathname } from "next/navigation"
+import { useAuth } from "@/lib/auth/auth-context"
 import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
@@ -10,20 +11,56 @@ import Link from "next/link"
 
 export default function DashboardPage() {
   const router = useRouter()
+  const pathname = usePathname()
+  const { isAuthenticated, role, isLoading } = useAuth()
+  const hasRedirectedRef = useRef(false)
 
-  // For now, redirect to buyer dashboard by default
-  // In production, this would check user role and redirect accordingly
+  // Redirect based on user role
   useEffect(() => {
-    // Uncomment below when you have authentication/role checking
-    // const userRole = getUserRole() // Implement this based on your auth system
-    // if (userRole === 'buyer') router.push('/dashboard/buyer')
-    // else if (userRole === 'seller') router.push('/dashboard/seller')
-    // else if (userRole === 'admin') router.push('/dashboard/admin')
-    // else router.push('/dashboard/buyer') // Default to buyer
+    // Don't redirect if still loading or already redirected
+    if (isLoading || hasRedirectedRef.current) return
     
-    // Temporary: redirect to buyer dashboard
-    router.push('/dashboard/buyer')
-  }, [router])
+    // Only redirect if we're actually on /dashboard
+    if (pathname !== '/dashboard') return
+    
+    // If not authenticated, redirect to login
+    if (!isAuthenticated) {
+      hasRedirectedRef.current = true
+      router.push('/auth/login')
+      return
+    }
+
+    // Redirect based on role (only once)
+    if (role && !hasRedirectedRef.current) {
+      hasRedirectedRef.current = true
+      
+      // Check for seller/staff userType
+      const sellerUserType = localStorage.getItem('sellerUserType')
+      
+      if (sellerUserType === 'staff' || sellerUserType === 'seller') {
+        router.replace('/dashboard/seller')
+      } else if (role === 'buyer') {
+        router.replace('/dashboard/buyer')
+      } else if (role === 'admin') {
+        router.replace('/dashboard/admin')
+      } else {
+        // Default to buyer dashboard
+        router.replace('/dashboard/buyer')
+      }
+    }
+  }, [isAuthenticated, role, isLoading, router, pathname])
+  
+  // Show loading while redirecting
+  if (isLoading || (isAuthenticated && role && pathname === '/dashboard')) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Redirecting...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <main className="min-h-screen bg-background">

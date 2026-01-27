@@ -27,7 +27,16 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
       userType: 'buyer' | 'seller' | 'admin' | 'staff'
       accessToken: string
       refreshToken?: string
-      expiresIn?: number
+      expiresIn?: number | string // Can be number (seconds) or string like "7d"
+      user?: {
+        id: string
+        email: string
+        firstName?: string
+        lastName?: string
+        businessName?: string
+        role?: string // Staff role: STOCK_MANAGER, DISPATCHER, FINANCE_VIEW, FULL_ACCESS
+        [key: string]: any
+      }
       // Additional user fields may be included in response
       id?: string
       email?: string
@@ -38,37 +47,95 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
   }>('/api/auth/login', credentials)
 
   if (response.success && response.data) {
+    const { userType, accessToken, refreshToken, expiresIn, user: userData } = response.data
+    
+    // Handle expiresIn if it's a string like "7d"
+    let expiresInSeconds: number | undefined
+    if (typeof expiresIn === 'string') {
+      // Parse "7d" format to seconds
+      const match = expiresIn.match(/(\d+)([dhms])/)
+      if (match) {
+        const value = parseInt(match[1], 10)
+        const unit = match[2]
+        const multipliers: Record<string, number> = {
+          's': 1,
+          'm': 60,
+          'h': 3600,
+          'd': 86400,
+        }
+        expiresInSeconds = value * (multipliers[unit] || 1)
+      }
+    } else {
+      expiresInSeconds = expiresIn
+    }
+    
     // Map userType from API to role for internal use
     const userTypeToRole: Record<string, 'buyer' | 'seller' | 'admin'> = {
       'buyer': 'buyer',
       'seller': 'seller',
       'admin': 'admin',
-      'staff': 'admin', // Map staff to admin for access control
+      'staff': 'seller', // Map staff to seller role for seller dashboard access
     }
     
-    const role = userTypeToRole[response.data.userType] || 'buyer'
+    const role = userTypeToRole[userType] || 'buyer'
+    
+    // Extract user information
+    const userId = userData?.id || response.data.id || ''
+    const userEmail = userData?.email || response.data.email || credentials.email
+    const userName = userData?.businessName 
+      || (userData?.firstName && userData?.lastName ? `${userData.firstName} ${userData.lastName}` : null)
+      || response.data.name 
+      || userEmail.split('@')[0]
     
     // Create user object from response data
-    // The API may include user fields directly in data, or they may need to be extracted
     const user: User = {
-      id: response.data.id || '',
-      email: response.data.email || credentials.email,
-      name: response.data.name || credentials.email.split('@')[0],
+      id: userId,
+      email: userEmail,
+      name: userName,
       role: role,
     }
     
     // Store token
-    setAuthToken(response.data.accessToken, response.data.expiresIn)
+    setAuthToken(accessToken, expiresInSeconds)
     
     // Store user data
     setUser(user)
     
+    // Store userType and role for seller/staff dashboard
+    if (userType === 'seller' || userType === 'staff') {
+      localStorage.setItem('sellerUserType', userType)
+      
+      if (userType === 'staff' && userData) {
+        // Store full staff profile with role
+        const staffRole = userData.role || ''
+        localStorage.setItem('sellerUserRole', staffRole)
+        localStorage.setItem('staffProfile', JSON.stringify({
+          ...userData,
+          userType: 'staff', // Ensure userType is set
+        }))
+        localStorage.removeItem('sellerProfile')
+      } else if (userType === 'seller') {
+        // Store seller profile if available
+        if (userData) {
+          localStorage.setItem('sellerProfile', JSON.stringify(userData))
+        }
+        localStorage.removeItem('staffProfile')
+        localStorage.removeItem('sellerUserRole')
+      }
+    } else {
+      // Clear seller/staff data for other user types
+      localStorage.removeItem('sellerUserType')
+      localStorage.removeItem('sellerUserRole')
+      localStorage.removeItem('sellerProfile')
+      localStorage.removeItem('staffProfile')
+    }
+    
     return {
       user: user,
       tokens: {
-        accessToken: response.data.accessToken,
-        refreshToken: response.data.refreshToken,
-        expiresIn: response.data.expiresIn,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        expiresIn: expiresInSeconds,
       },
     }
   }
