@@ -352,9 +352,18 @@ export function CatalogContent() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <div className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300">
+                  <div 
+                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300 cursor-pointer"
+                    onClick={(e) => {
+                      // Only navigate if clicking on the card itself, not on buttons
+                      const target = e.target as HTMLElement
+                      if (!target.closest('button') && !target.closest('a')) {
+                        router.push(`/parts/${item.id}`)
+                      }
+                    }}
+                  >
                     {/* Image */}
-                    <Link href={`/parts/${item.id}`} className="block">
+                    <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
                       <div className="relative h-64 overflow-hidden">
                         <Image
                           src={item.image || "/placeholder.svg"}
@@ -373,7 +382,7 @@ export function CatalogContent() {
 
                     {/* Content */}
                     <div className="p-6">
-                      <Link href={`/parts/${item.id}`}>
+                      <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
                         <span className="text-xs text-accent font-medium tracking-wider uppercase">{item.category}</span>
                         <h3 className="text-xl font-light text-foreground mt-2 mb-2 group-hover:text-accent transition-colors">
                           {item.name}
@@ -413,13 +422,24 @@ export function CatalogContent() {
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-2xl font-light text-foreground">${(item.price || 0).toLocaleString()}</span>
                         <div className="flex gap-2">
-                          <Link href={`/parts/${item.id}`}>
-                            <Button variant="outline" size="sm" className="border-border hover:bg-muted">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </Link>
                           <Button 
-                            onClick={() => handleAddToCart(item)} 
+                            variant="outline" 
+                            size="sm" 
+                            className="border-border hover:bg-muted"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              router.push(`/parts/${item.id}`)
+                            }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleAddToCart(item)
+                            }} 
                             disabled={!item.inStock || addingToCart.has(item.id)} 
                             size="sm"
                           >
@@ -454,10 +474,19 @@ export function CatalogContent() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
-                  <div className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300">
+                  <div 
+                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300 cursor-pointer"
+                    onClick={(e) => {
+                      // Only navigate if clicking on the card itself, not on buttons
+                      const target = e.target as HTMLElement
+                      if (!target.closest('button') && !target.closest('a')) {
+                        router.push(`/parts/${item.id}`)
+                      }
+                    }}
+                  >
                     <div className="flex flex-col md:flex-row">
                       {/* Image */}
-                      <Link href={`/parts/${item.id}`} className="block md:w-64 flex-shrink-0">
+                      <Link href={`/parts/${item.id}`} className="block md:w-64 flex-shrink-0" prefetch={false}>
                         <div className="relative w-full h-48 md:h-64 overflow-hidden">
                           <Image
                             src={item.image || "/placeholder.svg"}
@@ -481,7 +510,7 @@ export function CatalogContent() {
                               </span>
                             )}
                           </div>
-                          <Link href={`/parts/${item.id}`}>
+                          <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
                             <h3 className="text-2xl font-light text-foreground mb-2 group-hover:text-accent transition-colors">
                               {item.name}
                             </h3>
@@ -525,14 +554,24 @@ export function CatalogContent() {
                         <div className="flex items-center justify-between mt-6 gap-4">
                           <span className="text-3xl font-light text-foreground">${(item.price || 0).toLocaleString()}</span>
                           <div className="flex gap-2">
-                            <Link href={`/parts/${item.id}`}>
-                              <Button variant="outline" className="border-border hover:bg-muted">
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </Button>
-                            </Link>
                             <Button 
-                              onClick={() => handleAddToCart(item)} 
+                              variant="outline" 
+                              className="border-border hover:bg-muted"
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                router.push(`/parts/${item.id}`)
+                              }}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </Button>
+                            <Button 
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                handleAddToCart(item)
+                              }} 
                               disabled={!item.inStock || addingToCart.has(item.id)} 
                               size="lg"
                             >
