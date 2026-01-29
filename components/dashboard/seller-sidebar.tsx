@@ -221,7 +221,7 @@ export function SellerSidebar({ isMobileOpen = false, onMobileClose }: SellerSid
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                     "hover:bg-muted/50",
                     isActive
-                      ? "bg-accent/10 text-accent border-l-2 border-accent"
+                      ? "text-white bg-blue-600"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
