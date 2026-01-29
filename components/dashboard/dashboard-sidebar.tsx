@@ -120,7 +120,7 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
                     className={cn(
                       "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative group",
                       isActive
-                        ? "bg-accent/20 text-accent border-l-4 border-accent"
+                        ? "text-white bg-blue-600"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                     )}
                   >

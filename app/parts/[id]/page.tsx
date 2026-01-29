@@ -81,27 +81,47 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
     comment: "",
   })
 
-  // Load products from sessionStorage (set by catalog page)
+  // Load products from sessionStorage (set by catalog page) or fetch from API
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const storedProducts = sessionStorage.getItem('catalogProducts')
-        if (storedProducts) {
-          const parsedProducts: Part[] = JSON.parse(storedProducts)
-          setParts(parsedProducts)
-          const foundPart = parsedProducts.find((p) => p.id === id)
-          setPart(foundPart || null)
-        } else {
-          // No products in sessionStorage - user might have navigated directly
+    const loadProduct = async () => {
+      if (typeof window !== 'undefined') {
+        try {
+          const storedProducts = sessionStorage.getItem('catalogProducts')
+          if (storedProducts) {
+            const parsedProducts: Part[] = JSON.parse(storedProducts)
+            setParts(parsedProducts)
+            const foundPart = parsedProducts.find((p) => p.id === id)
+            if (foundPart) {
+              setPart(foundPart)
+              setIsLoading(false)
+              return
+            }
+          }
+
+          // If not found in sessionStorage, try to fetch from API
+          try {
+            const { fetchProductById } = await import('@/lib/api/products')
+            const product = await fetchProductById(id)
+            if (product) {
+              setPart(product)
+              setParts([product]) // Set parts array with just this product for related parts logic
+            } else {
+              setPart(null)
+            }
+          } catch (apiErr) {
+            console.error('Failed to fetch product from API:', apiErr)
+            setPart(null)
+          }
+        } catch (err) {
+          console.error('Failed to load products:', err)
           setPart(null)
+        } finally {
+          setIsLoading(false)
         }
-      } catch (err) {
-        console.error('Failed to load products from sessionStorage:', err)
-        setPart(null)
-      } finally {
-        setIsLoading(false)
       }
     }
+
+    loadProduct()
   }, [id])
 
   // Fetch rating and reviews when part is loaded and has inventoryId

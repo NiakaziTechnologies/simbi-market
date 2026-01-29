@@ -16,7 +16,6 @@ const navItems = [
   {
     label: "Shop Online",
     href: "/catalog",
-    highlighted: true,
     megaMenu: {
       categories: [
         {
@@ -141,10 +140,8 @@ export function Navigation() {
                   {item.megaMenu ? (
                     <button
                       onClick={() => router.push(item.href)}
-                      className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${item.highlighted
-                        ? activeMenu === item.label
-                          ? "text-white bg-blue-600"
-                          : "text-white bg-blue-500 hover:bg-blue-600"
+                      className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${pathname === item.href
+                        ? "text-white bg-blue-600"
                         : activeMenu === item.label
                           ? "text-foreground bg-muted"
                           : "text-foreground/80 hover:text-foreground hover:bg-muted/50"
@@ -159,7 +156,10 @@ export function Navigation() {
                   ) : (
                     <Link
                       href={item.href}
-                      className="flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full text-foreground/80 hover:text-foreground hover:bg-muted/50"
+                      className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${pathname === item.href
+                        ? "text-white bg-blue-600"
+                        : "text-foreground/80 hover:text-foreground hover:bg-muted/50"
+                        }`}
                     >
                       {item.label}
                     </Link>

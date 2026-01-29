@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -376,9 +377,8 @@ export default function RegisterPage() {
 
                       <div className="space-y-2">
                         <Label htmlFor="password">Password *</Label>
-                        <Input
+                        <PasswordInput
                           id="password"
-                          type="password"
                           {...buyerCommercialForm.register('password')}
                           className="bg-muted/50 border-border"
                         />
@@ -519,9 +519,8 @@ export default function RegisterPage() {
 
                       <div className="space-y-2">
                         <Label htmlFor="seller-password">Password *</Label>
-                        <Input
+                        <PasswordInput
                           id="seller-password"
-                          type="password"
                           {...sellerForm.register('password')}
                           className="bg-muted/50 border-border"
                         />
