@@ -353,14 +353,7 @@ export function CatalogContent() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
                   <div 
-                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300 cursor-pointer"
-                    onClick={(e) => {
-                      // Only navigate if clicking on the card itself, not on buttons
-                      const target = e.target as HTMLElement
-                      if (!target.closest('button') && !target.closest('a')) {
-                        router.push(`/parts/${item.id}`)
-                      }
-                    }}
+                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300"
                   >
                     {/* Image */}
                     <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
@@ -475,14 +468,7 @@ export function CatalogContent() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
                   <div 
-                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300 cursor-pointer"
-                    onClick={(e) => {
-                      // Only navigate if clicking on the card itself, not on buttons
-                      const target = e.target as HTMLElement
-                      if (!target.closest('button') && !target.closest('a')) {
-                        router.push(`/parts/${item.id}`)
-                      }
-                    }}
+                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300"
                   >
                     <div className="flex flex-col md:flex-row">
                       {/* Image */}

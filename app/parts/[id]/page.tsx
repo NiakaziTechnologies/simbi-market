@@ -206,6 +206,11 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
   // }, [isAuthenticated, part?.inventoryId])
 
   // EMPTY PAGE FOR NOW - DEBUGGING SESSION STORAGE ISSUES
+  useEffect(() => {
+    console.log('PartDetailPage mounted with id:', id)
+    console.log('Current pathname:', typeof window !== 'undefined' ? window.location.pathname : 'server')
+  }, [id])
+
   return (
     <main className="min-h-screen bg-background">
       <Navigation />
@@ -216,6 +221,9 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
         </p>
         <p className="text-muted mb-8">
           Data loading temporarily disabled for debugging
+        </p>
+        <p className="text-muted mb-8 text-sm">
+          If you see this page, navigation is working correctly
         </p>
         <Link href="/catalog">
           <Button className="bg-accent hover:bg-accent/90">Back to Catalog</Button>
