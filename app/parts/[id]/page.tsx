@@ -82,182 +82,211 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
   })
 
   // Load products from sessionStorage (set by catalog page) or fetch from API
+  // COMMENTED OUT FOR NOW - DEBUGGING SESSION STORAGE ISSUES
   useEffect(() => {
-    const loadProduct = async () => {
-      if (typeof window !== 'undefined') {
-        try {
-          const storedProducts = sessionStorage.getItem('catalogProducts')
-          if (storedProducts) {
-            const parsedProducts: Part[] = JSON.parse(storedProducts)
-            setParts(parsedProducts)
-            const foundPart = parsedProducts.find((p) => p.id === id)
-            if (foundPart) {
-              setPart(foundPart)
-              setIsLoading(false)
-              return
-            }
-          }
+    // const loadProduct = async () => {
+    //   if (typeof window !== 'undefined') {
+    //     try {
+    //       const storedProducts = sessionStorage.getItem('catalogProducts')
+    //       if (storedProducts) {
+    //         const parsedProducts: Part[] = JSON.parse(storedProducts)
+    //         setParts(parsedProducts)
+    //         const foundPart = parsedProducts.find((p) => p.id === id)
+    //         if (foundPart) {
+    //           setPart(foundPart)
+    //           setIsLoading(false)
+    //           return
+    //         }
+    //       }
 
-          // If not found in sessionStorage, try to fetch from API
-          try {
-            const { fetchProductById } = await import('@/lib/api/products')
-            const product = await fetchProductById(id)
-            if (product) {
-              setPart(product)
-              setParts([product]) // Set parts array with just this product for related parts logic
-            } else {
-              setPart(null)
-            }
-          } catch (apiErr) {
-            console.error('Failed to fetch product from API:', apiErr)
-            setPart(null)
-          }
-        } catch (err) {
-          console.error('Failed to load products:', err)
-          setPart(null)
-        } finally {
-          setIsLoading(false)
-        }
-      }
-    }
+    //       // If not found in sessionStorage, try to fetch from API
+    //       try {
+    //         const { fetchProductById } = await import('@/lib/api/products')
+    //         const product = await fetchProductById(id)
+    //         if (product) {
+    //           setPart(product)
+    //           setParts([product]) // Set parts array with just this product for related parts logic
+    //         } else {
+    //           setPart(null)
+    //         }
+    //       } catch (apiErr) {
+    //         console.error('Failed to fetch product from API:', apiErr)
+    //         setPart(null)
+    //       }
+    //     } catch (err) {
+    //       console.error('Failed to load products:', err)
+    //       setPart(null)
+    //     } finally {
+    //       setIsLoading(false)
+    //     }
+    //   }
+    // }
 
-    loadProduct()
+    // loadProduct()
+    
+    // For now, just set loading to false
+    setIsLoading(false)
   }, [id])
 
   // Fetch rating and reviews when part is loaded and has inventoryId
-  useEffect(() => {
-    if (part?.inventoryId) {
-      const loadRating = async () => {
-        try {
-          setIsLoadingRating(true)
-          const rating = await getProductRating(part.inventoryId!)
-          setRatingData(rating)
-        } catch (err) {
-          console.error('Failed to load rating:', err)
-        } finally {
-          setIsLoadingRating(false)
-        }
-      }
-      loadRating()
-    }
-  }, [part?.inventoryId])
+  // COMMENTED OUT FOR NOW
+  // useEffect(() => {
+  //   if (part?.inventoryId) {
+  //     const loadRating = async () => {
+  //       try {
+  //         setIsLoadingRating(true)
+  //         const rating = await getProductRating(part.inventoryId!)
+  //         setRatingData(rating)
+  //       } catch (err) {
+  //         console.error('Failed to load rating:', err)
+  //       } finally {
+  //         setIsLoadingRating(false)
+  //       }
+  //     }
+  //     loadRating()
+  //   }
+  // }, [part?.inventoryId])
 
-  useEffect(() => {
-    if (part?.inventoryId) {
-      const loadReviews = async () => {
-        try {
-          setIsLoadingReviews(true)
-          const data = await getProductReviews(part.inventoryId!, reviewsPage, 10, reviewsSortBy)
-          setReviews(data.reviews)
-          setReviewsTotalPages(data.pagination.totalPages)
-          setReviewsTotal(data.pagination.total)
-        } catch (err) {
-          console.error('Failed to load reviews:', err)
-        } finally {
-          setIsLoadingReviews(false)
-        }
-      }
-      loadReviews()
-    }
-  }, [part?.inventoryId, reviewsPage, reviewsSortBy])
+  // COMMENTED OUT FOR NOW
+  // useEffect(() => {
+  //   if (part?.inventoryId) {
+  //     const loadReviews = async () => {
+  //       try {
+  //         setIsLoadingReviews(true)
+  //         const data = await getProductReviews(part.inventoryId!, reviewsPage, 10, reviewsSortBy)
+  //         setReviews(data.reviews)
+  //         setReviewsTotalPages(data.pagination.totalPages)
+  //         setReviewsTotal(data.pagination.total)
+  //       } catch (err) {
+  //         console.error('Failed to load reviews:', err)
+  //       } finally {
+  //         setIsLoadingReviews(false)
+  //       }
+  //     }
+  //     loadReviews()
+  //   }
+  // }, [part?.inventoryId, reviewsPage, reviewsSortBy])
 
   // Check if buyer has purchased this product
-  useEffect(() => {
-    const checkPurchase = async () => {
-      if (!isAuthenticated || !part?.inventoryId) {
-        setPurchasedOrderItem(null)
-        return
-      }
+  // COMMENTED OUT FOR NOW
+  // useEffect(() => {
+  //   const checkPurchase = async () => {
+  //     if (!isAuthenticated || !part?.inventoryId) {
+  //       setPurchasedOrderItem(null)
+  //       return
+  //     }
 
-      setIsCheckingPurchase(true)
-      try {
-        // Fetch all orders to check if buyer has purchased this product
-        const response = await getOrders(1, 100) // Get first 100 orders
-        const orders = response.data
+  //     setIsCheckingPurchase(true)
+  //     try {
+  //       // Fetch all orders to check if buyer has purchased this product
+  //       const response = await getOrders(1, 100) // Get first 100 orders
+  //       const orders = response.data
 
-        // Find order item that matches this inventoryId
-        for (const order of orders) {
-          const matchingItem = order.items.find(item => item.inventoryId === part.inventoryId)
-          if (matchingItem) {
-            setPurchasedOrderItem({
-              orderId: order.id,
-              orderItemId: matchingItem.id,
-            })
-            return
-          }
-        }
-        setPurchasedOrderItem(null)
-      } catch (err) {
-        console.error('Failed to check purchase:', err)
-        setPurchasedOrderItem(null)
-      } finally {
-        setIsCheckingPurchase(false)
-      }
-    }
+  //       // Find order item that matches this inventoryId
+  //       for (const order of orders) {
+  //         const matchingItem = order.items.find(item => item.inventoryId === part.inventoryId)
+  //         if (matchingItem) {
+  //           setPurchasedOrderItem({
+  //             orderId: order.id,
+  //             orderItemId: matchingItem.id,
+  //           })
+  //           return
+  //         }
+  //       }
+  //       setPurchasedOrderItem(null)
+  //     } catch (err) {
+  //       console.error('Failed to check purchase:', err)
+  //       setPurchasedOrderItem(null)
+  //     } finally {
+  //       setIsCheckingPurchase(false)
+  //     }
+  //   }
 
-    checkPurchase()
-  }, [isAuthenticated, part?.inventoryId])
+  //   checkPurchase()
+  // }, [isAuthenticated, part?.inventoryId])
 
   // Show loading state while checking sessionStorage
-  if (isLoading) {
-    return (
-      <main className="min-h-screen bg-background">
-        <Navigation />
-        <div className="pt-32 pb-16 px-6 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
-          <p className="text-muted">Loading product details...</p>
-        </div>
-        <Footer />
-      </main>
-    )
-  }
+  // COMMENTED OUT - SHOWING EMPTY PAGE FOR NOW
+  // if (isLoading) {
+  //   return (
+  //     <main className="min-h-screen bg-background">
+  //       <Navigation />
+  //       <div className="pt-32 pb-16 px-6 text-center">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mx-auto mb-4"></div>
+  //         <p className="text-muted">Loading product details...</p>
+  //       </div>
+  //       <Footer />
+  //     </main>
+  //   )
+  // }
 
-  if (!part) {
-    return (
-      <main className="min-h-screen bg-background">
-        <Navigation />
-        <div className="pt-32 pb-16 px-6 text-center">
-          <h1 className="text-4xl font-light text-white mb-4">Part Not Found</h1>
-          <p className="text-muted mb-8">
-            The part you're looking for doesn't exist or has been removed. Please navigate to this page from the catalog.
-          </p>
-          <Link href="/catalog">
-            <Button className="bg-accent hover:bg-accent/90">Back to Catalog</Button>
-          </Link>
-        </div>
-        <Footer />
-      </main>
-    )
-  }
+  // if (!part) {
+  //   return (
+  //     <main className="min-h-screen bg-background">
+  //       <Navigation />
+  //       <div className="pt-32 pb-16 px-6 text-center">
+  //         <h1 className="text-4xl font-light text-white mb-4">Part Not Found</h1>
+  //         <p className="text-muted mb-8">
+  //           The part you're looking for doesn't exist or has been removed. Please navigate to this page from the catalog.
+  //         </p>
+  //         <Link href="/catalog">
+  //           <Button className="bg-accent hover:bg-accent/90">Back to Catalog</Button>
+  //         </Link>
+  //       </div>
+  //       <Footer />
+  //     </main>
+  //   )
+  // }
 
-  const relatedParts = parts.filter((p) => part.relatedParts?.includes(p.id))
-  const images = part.images || [part.image]
+  // const relatedParts = parts.filter((p) => part.relatedParts?.includes(p.id))
+  // const images = part.images || [part.image]
 
-  const averageRating = ratingData?.averageRating || part.averageRating || 0
-  const reviewCount = ratingData?.reviewCount || part.reviewCount || 0
+  // const averageRating = ratingData?.averageRating || part.averageRating || 0
+  // const reviewCount = ratingData?.reviewCount || part.reviewCount || 0
 
-  const handleAddToCart = async () => {
-    if (!part || isAddingToCart) return
+  // const handleAddToCart = async () => {
+  //   if (!part || isAddingToCart) return
     
-    setIsAddingToCart(true)
-    try {
-      const success = await addToCart(part, quantity)
-      if (success) {
-        setAddedToCart(true)
-        setTimeout(() => setAddedToCart(false), 2000)
-      }
-    } catch (error) {
-      console.error('Error adding to cart:', error)
-    } finally {
-      setIsAddingToCart(false)
-    }
-  }
+  //   setIsAddingToCart(true)
+  //   try {
+  //     const success = await addToCart(part, quantity)
+  //     if (success) {
+  //       setAddedToCart(true)
+  //       setTimeout(() => setAddedToCart(false), 2000)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error adding to cart:', error)
+  //   } finally {
+  //     setIsAddingToCart(false)
+  //   }
+  // }
 
-  const openVideoModal = (video: { title: string; url: string }) => {
-    setSelectedVideo(video)
-    setVideoModalOpen(true)
-  }
+  // const openVideoModal = (video: { title: string; url: string }) => {
+  //   setSelectedVideo(video)
+  //   setVideoModalOpen(true)
+  // }
 
+  // EMPTY PAGE FOR NOW - DEBUGGING SESSION STORAGE ISSUES
+  return (
+    <main className="min-h-screen bg-background">
+      <Navigation />
+      <div className="pt-32 pb-16 px-6 text-center">
+        <h1 className="text-4xl font-light text-white mb-4">Product Detail Page</h1>
+        <p className="text-muted mb-8">
+          Product ID: {id}
+        </p>
+        <p className="text-muted mb-8">
+          Data loading temporarily disabled for debugging
+        </p>
+        <Link href="/catalog">
+          <Button className="bg-accent hover:bg-accent/90">Back to Catalog</Button>
+        </Link>
+      </div>
+      <Footer />
+    </main>
+  )
+
+  /* COMMENTED OUT - ORIGINAL RENDER WITH DATA
   return (
     <main className="min-h-screen bg-background">
       <Navigation />
@@ -1283,4 +1312,5 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
       <Footer />
     </main>
   )
+  */
 }
