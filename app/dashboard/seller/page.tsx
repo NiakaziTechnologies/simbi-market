@@ -126,11 +126,11 @@ export default function SellerDashboardPage() {
   const chartConfig = {
     sales: {
       label: "Sales",
-      color: "hsl(var(--chart-1))",
+      color: "#3b82f6",
     },
     unfulfilledOrders: {
       label: "Unfulfilled Orders",
-      color: "hsl(var(--chart-2))",
+      color: "#ef4444",
     },
   }
 
@@ -301,16 +301,16 @@ export default function SellerDashboardPage() {
               <Area
                 type="monotone"
                 dataKey="sales"
-                stroke="hsl(var(--chart-1))"
-                fill="hsl(var(--chart-1))"
+                stroke="#3b82f6"
+                fill="#3b82f6"
                 fillOpacity={0.2}
                 strokeWidth={2}
               />
               <Area
                 type="monotone"
                 dataKey="unfulfilledOrders"
-                stroke="hsl(var(--chart-2))"
-                fill="hsl(var(--chart-2))"
+                stroke="#ef4444"
+                fill="#ef4444"
                 fillOpacity={0.2}
                 strokeWidth={2}
               />
