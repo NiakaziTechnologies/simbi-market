@@ -1,6 +1,4 @@
-# TODO: Change Default Landing Page and Navigation Order
+# TODO: Make config.ts work on local
 
-## Tasks
-- [x] Modify app/page.tsx to redirect to /catalog instead of rendering home page content
-- [x] Reorder navItems in components/navigation.tsx to: Shop Online, Home, About Us
-- [x] Test the redirect and navigation order
+- [x] Fix syntax error in lib/config.ts by removing invalid `<environment_details>` from the export line
+- [x] Verify the config loads without errors (Note: Dev server has dependency issues unrelated to config.ts)

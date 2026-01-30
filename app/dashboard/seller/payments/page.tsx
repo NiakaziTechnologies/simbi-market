@@ -138,23 +138,23 @@ export default function PaymentsPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full mb-6 grid grid-cols-3 bg-muted/50">
-          <TabsTrigger 
-            value="pending" 
-            className="flex items-center gap-2 text-foreground data-[state=active]:text-foreground data-[state=active]:bg-background"
+          <TabsTrigger
+            value="pending"
+            className="bg-transparent flex items-center gap-2 text-foreground data-[state=active]:!bg-blue-600 data-[state=active]:!text-white hover:!bg-blue-600 hover:!text-white"
           >
             <Clock className="h-4 w-4" />
             Pending Payouts
           </TabsTrigger>
-          <TabsTrigger 
-            value="history" 
-            className="flex items-center gap-2 text-foreground data-[state=active]:text-foreground data-[state=active]:bg-background"
+          <TabsTrigger
+            value="history"
+            className="bg-transparent flex items-center gap-2 text-foreground data-[state=active]:!bg-blue-600 data-[state=active]:!text-white hover:!bg-blue-600 hover:!text-white"
           >
             <History className="h-4 w-4" />
             Payment History
           </TabsTrigger>
-          <TabsTrigger 
-            value="summary" 
-            className="flex items-center gap-2 text-foreground data-[state=active]:text-foreground data-[state=active]:bg-background"
+          <TabsTrigger
+            value="summary"
+            className="bg-transparent flex items-center gap-2 text-foreground data-[state=active]:!bg-blue-600 data-[state=active]:!text-white hover:!bg-blue-600 hover:!text-white"
           >
             <BarChart3 className="h-4 w-4" />
             Summary

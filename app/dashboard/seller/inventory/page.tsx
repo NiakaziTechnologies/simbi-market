@@ -65,11 +65,14 @@ function normalizeImageUrl(url: string): string {
 }
 
 const COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
+  "#3b82f6", // Blue
+  "#8b5cf6", // Purple
+  "#ec4899", // Pink
+  "#f59e0b", // Amber
+  "#10b981", // Emerald
+  "#ef4444", // Red
+  "#06b6d4", // Cyan
+  "#84cc16", // Lime
 ]
 
 export default function InventoryPage() {
