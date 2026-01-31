@@ -118,6 +118,12 @@ export function useCart() {
       return false
     }
 
+    // Prevent adding out-of-stock items
+    if (!part.inStock) {
+      alert('This item is out of stock and cannot be added to cart.')
+      return false
+    }
+
     // If authenticated AND has a valid user, use API cart
     // Otherwise, use guest cart (localStorage)
     if (isAuthenticated && user) {

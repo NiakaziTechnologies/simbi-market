@@ -28,11 +28,21 @@ export function CatalogContent() {
    const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") || "")
    const [addedItems, setAddedItems] = useState<Set<string>>(new Set())
    const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set())
-   const [products, setProducts] = useState<Part[]>([])
-   const [isLoading, setIsLoading] = useState(true)
-   const [error, setError] = useState<string | null>(null)
+  const [products, setProducts] = useState<Part[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchParams?.get("q") || "")
 
-  // Fetch products from API when filters/search change
+  // Debounce search query - wait for user to finish typing
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery)
+    }, 500) // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timeoutId)
+  }, [searchQuery])
+
+  // Fetch products from API when filters/search change (using debounced query)
   useEffect(() => {
     const loadProducts = async () => {
       setIsLoading(true)
@@ -46,14 +56,14 @@ export function CatalogContent() {
         const urlCategory = searchParams?.get("category")
         
         const apiFilters: ProductFilters = {
-          q: searchQuery || undefined,
+          q: debouncedSearchQuery || undefined,
           category: urlCategory || selectedCategory || filters.category || undefined,
           make: urlMake || filters.make || undefined,
           year: urlYear || filters.year || undefined,
           model: urlModel || filters.model || undefined,
           inStock: true, // Only show in-stock items
           page: 1,
-          limit: 100, // Adjust as needed
+          limit: 30, // 30 products per page
         }
         
         const response = await fetchProducts(apiFilters)
@@ -78,7 +88,7 @@ export function CatalogContent() {
     }
 
     loadProducts()
-  }, [searchQuery, selectedCategory, filters.category, filters.make, filters.year, filters.model, searchParams])
+  }, [debouncedSearchQuery, selectedCategory, filters.category, filters.make, filters.year, filters.model, searchParams])
 
   // Initialize search query and filters from URL params
   useEffect(() => {
@@ -195,6 +205,12 @@ export function CatalogContent() {
   }
 
   const handleAddToCart = async (item: Part) => {
+    // Prevent adding out-of-stock items
+    if (!item.inStock) {
+      alert('This item is out of stock and cannot be added to cart.')
+      return
+    }
+    
     if (addingToCart.has(item.id)) return
     
     setAddingToCart((prev) => new Set(prev).add(item.id))
@@ -365,7 +381,11 @@ export function CatalogContent() {
                           className="object-cover transition-transform duration-500 group-hover:scale-110"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        {!item.inStock && (
+                        {item.inStock ? (
+                          <div className="absolute top-4 right-4 px-3 py-1 bg-green-500/90 text-white text-xs font-medium rounded">
+                            In Stock
+                          </div>
+                        ) : (
                           <div className="absolute top-4 right-4 px-3 py-1 bg-destructive/90 text-white text-xs font-medium rounded">
                             Out of Stock
                           </div>
@@ -490,7 +510,11 @@ export function CatalogContent() {
                             <span className="text-xs text-accent font-medium tracking-wider uppercase">
                               {item.category}
                             </span>
-                            {!item.inStock && (
+                            {item.inStock ? (
+                              <span className="px-3 py-1 bg-green-500/90 text-white text-xs font-medium rounded">
+                                In Stock
+                              </span>
+                            ) : (
                               <span className="px-3 py-1 bg-destructive/90 text-white text-xs font-medium rounded">
                                 Out of Stock
                               </span>

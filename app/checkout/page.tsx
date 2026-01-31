@@ -236,6 +236,13 @@ export default function CheckoutPage() {
           return
         }
 
+        // Validate phone number length
+        if (guestInfo.phoneNumber.length < 7) {
+          alert('Phone number must be at least 7 characters long.')
+          setIsPlacingOrder(false)
+          return
+        }
+
         // Validate shipping address
         if (!shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province) {
           alert('Please fill in all required shipping address fields.')
@@ -594,8 +601,12 @@ export default function CheckoutPage() {
                               value={guestInfo.phoneNumber}
                               onChange={(e) => setGuestInfo({ ...guestInfo, phoneNumber: e.target.value })}
                               required
+                              minLength={7}
                               className="bg-muted/50 border-border"
                             />
+                            {guestInfo.phoneNumber && guestInfo.phoneNumber.length > 0 && guestInfo.phoneNumber.length < 7 && (
+                              <p className="text-sm text-destructive mt-1">Phone number must be at least 7 characters</p>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -936,7 +947,7 @@ export default function CheckoutPage() {
                         disabled={
                           (isAuthenticated && !selectedAddressId && !showNewAddressForm) ||
                           (isAuthenticated && showNewAddressForm && (!shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province)) ||
-                          (!isAuthenticated && (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email || !guestInfo.phoneNumber || !shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province))
+                          (!isAuthenticated && (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email || !guestInfo.phoneNumber || guestInfo.phoneNumber.length < 7 || !shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province))
                         }
                       >
                         Continue to Review
@@ -1071,7 +1082,7 @@ export default function CheckoutPage() {
                           isPlacingOrder || 
                           (isAuthenticated && (!selectedAddressId && !showNewAddressForm)) ||
                           (isAuthenticated && showNewAddressForm && (!shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province)) ||
-                          (!isAuthenticated && (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email || !guestInfo.phoneNumber || !shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province))
+                          (!isAuthenticated && (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email || !guestInfo.phoneNumber || guestInfo.phoneNumber.length < 7 || !shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province))
                         }
                       >
                         {isPlacingOrder ? (

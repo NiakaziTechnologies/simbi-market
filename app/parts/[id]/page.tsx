@@ -201,6 +201,17 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
   // Handle add to cart
   const handleAddToCart = async () => {
     if (!part) return
+    
+    // Prevent adding out-of-stock items
+    if (!part.inStock) {
+      toast({
+        title: "Out of Stock",
+        description: "This item is out of stock and cannot be added to cart.",
+        variant: "destructive",
+      })
+      return
+    }
+    
     setIsAddingToCart(true)
     try {
       await addToCart({
