@@ -117,11 +117,13 @@ export function OrdersTab() {
     const query = searchQuery.toLowerCase()
     return (
       order.orderNumber?.toLowerCase().includes(query) ||
-      order.buyer.email?.toLowerCase().includes(query) ||
-      order.buyer.firstName?.toLowerCase().includes(query) ||
-      order.buyer.lastName?.toLowerCase().includes(query) ||
+      (order.buyer && (
+        order.buyer.email?.toLowerCase().includes(query) ||
+        order.buyer.firstName?.toLowerCase().includes(query) ||
+        order.buyer.lastName?.toLowerCase().includes(query)
+      )) ||
       order.poNumber?.toLowerCase().includes(query) ||
-      order.shippingAddress.fullName?.toLowerCase().includes(query)
+      (order.shippingAddress && order.shippingAddress.fullName?.toLowerCase().includes(query))
     )
   })
 
@@ -137,12 +139,16 @@ export function OrdersTab() {
   const loadOrderDetail = useCallback(async (orderId: string) => {
     try {
       setIsLoadingDetail(true)
-      const [detail, payment] = await Promise.all([
+      const [detail, payment] = await Promise.allSettled([
         getAdminOrderDetail(orderId),
-        getAdminOrderPayment(orderId)
+        getAdminOrderPayment(orderId).catch(() => null) // Handle payment API errors gracefully
       ])
-      setOrderDetail(detail)
-      setPaymentInfo(payment)
+      if (detail.status === 'fulfilled') {
+        setOrderDetail(detail.value)
+      }
+      if (payment.status === 'fulfilled' && payment.value) {
+        setPaymentInfo(payment.value)
+      }
     } catch (err: any) {
       console.error('Failed to load order detail:', err)
       // Fallback to list data if detail fetch fails
@@ -402,21 +408,36 @@ export function OrdersTab() {
                         className="border-b border-border hover:bg-muted/30 transition-colors"
                       >
                         <TableCell>
-                          <div className="font-medium text-foreground">{order.orderNumber}</div>
+                          <div className="font-medium text-foreground">
+                            {order.orderNumber}
+                            {order.isGuestOrder && (
+                              <Badge variant="outline" className="ml-2 bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                                Guest
+                              </Badge>
+                            )}
+                          </div>
                           {order.poNumber && (
                             <div className="text-xs text-muted-foreground">PO: {order.poNumber}</div>
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="text-sm">
-                            <div className="font-medium text-foreground">
-                              {order.buyer.firstName} {order.buyer.lastName}
+                          {order.isGuestOrder ? (
+                            <div className="text-muted-foreground italic text-sm">
+                              Guest Order
                             </div>
-                            <div className="text-muted-foreground">{order.buyer.email}</div>
-                            {order.buyer.companyName && (
-                              <div className="text-xs text-muted-foreground">{order.buyer.companyName}</div>
-                            )}
-                          </div>
+                          ) : order.buyer ? (
+                            <div className="text-sm">
+                              <div className="font-medium text-foreground">
+                                {order.buyer.firstName} {order.buyer.lastName}
+                              </div>
+                              <div className="text-muted-foreground">{order.buyer.email}</div>
+                              {order.buyer.companyName && (
+                                <div className="text-xs text-muted-foreground">{order.buyer.companyName}</div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-muted-foreground text-sm">-</div>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="text-sm text-muted-foreground">
@@ -633,62 +654,219 @@ export function OrdersTab() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card className="border-border">
                     <CardHeader>
-                      <CardTitle className="text-lg">Buyer Information</CardTitle>
+                      <CardTitle className="text-lg">
+                        {displayOrder.isGuestOrder ? "Guest Information" : "Buyer Information"}
+                      </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div>
-                        <div className="text-sm text-muted-foreground">Name</div>
-                        <div className="font-medium">{displayOrder.buyer.firstName} {displayOrder.buyer.lastName}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">Email</div>
-                        <div className="font-medium">{displayOrder.buyer.email}</div>
-                      </div>
-                      {displayOrder.buyer.companyName && (
-                        <div>
-                          <div className="text-sm text-muted-foreground">Company</div>
-                          <div className="font-medium">{displayOrder.buyer.companyName}</div>
-                        </div>
-                      )}
-                      {orderDetail?.buyer.phoneNumber && (
-                        <div>
-                          <div className="text-sm text-muted-foreground">Phone</div>
-                          <div className="font-medium">{orderDetail.buyer.phoneNumber}</div>
-                        </div>
+                      {displayOrder.isGuestOrder ? (
+                        <>
+                          <div>
+                            <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30 mb-3">
+                              Guest Order
+                            </Badge>
+                          </div>
+                          <div>
+                            <div className="text-sm text-muted-foreground">Name</div>
+                            <div className="font-medium">
+                              {displayOrder.guestFirstName || ''} {displayOrder.guestLastName || ''}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-muted-foreground">Email</div>
+                            <div className="font-medium">{displayOrder.guestEmail || 'N/A'}</div>
+                          </div>
+                          {displayOrder.guestPhoneNumber && (
+                            <div>
+                              <div className="text-sm text-muted-foreground">Phone</div>
+                              <div className="font-medium">{displayOrder.guestPhoneNumber}</div>
+                            </div>
+                          )}
+                        </>
+                      ) : displayOrder.buyer ? (
+                        <>
+                          <div>
+                            <div className="text-sm text-muted-foreground">Name</div>
+                            <div className="font-medium">{displayOrder.buyer.firstName} {displayOrder.buyer.lastName}</div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-muted-foreground">Email</div>
+                            <div className="font-medium">{displayOrder.buyer.email}</div>
+                          </div>
+                          {displayOrder.buyer.companyName && (
+                            <div>
+                              <div className="text-sm text-muted-foreground">Company</div>
+                              <div className="font-medium">{displayOrder.buyer.companyName}</div>
+                            </div>
+                          )}
+                          {orderDetail?.buyer?.phoneNumber && (
+                            <div>
+                              <div className="text-sm text-muted-foreground">Phone</div>
+                              <div className="font-medium">{orderDetail.buyer.phoneNumber}</div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-muted-foreground">No buyer information available</div>
                       )}
                     </CardContent>
                   </Card>
 
-                  <Card className="border-border">
-                    <CardHeader>
-                      <CardTitle className="text-lg">Shipping Address</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div>
-                        <div className="text-sm text-muted-foreground">Recipient</div>
-                        <div className="font-medium">{displayOrder.shippingAddress.fullName}</div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">Address</div>
-                        <div className="font-medium">
-                          {displayOrder.shippingAddress.addressLine1}
-                          {displayOrder.shippingAddress.addressLine2 && `, ${displayOrder.shippingAddress.addressLine2}`}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-muted-foreground">City, Province</div>
-                        <div className="font-medium">
-                          {displayOrder.shippingAddress.city}, {displayOrder.shippingAddress.province}
-                        </div>
-                      </div>
-                      {displayOrder.shippingAddress.postalCode && (
-                        <div>
-                          <div className="text-sm text-muted-foreground">Postal Code</div>
-                          <div className="font-medium">{displayOrder.shippingAddress.postalCode}</div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                  {(displayOrder.shippingAddress || 
+                    (displayOrder.isGuestOrder && orderDetail?.shippingAddress) ||
+                    (displayOrder.isGuestOrder && (displayOrder.guestShippingAddressLine1 || orderDetail?.guestShippingAddressLine1))) && (
+                    <Card className="border-border">
+                      <CardHeader>
+                        <CardTitle className="text-lg">Shipping Address</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {(() => {
+                          // For guest orders, check guest shipping address fields
+                          if (displayOrder.isGuestOrder) {
+                            const guestOrder = orderDetail || displayOrder
+                            const guestShippingAddr = {
+                              fullName: `${guestOrder.guestFirstName || ''} ${guestOrder.guestLastName || ''}`.trim(),
+                              phoneNumber: guestOrder.guestShippingPhoneNumber || guestOrder.guestPhoneNumber,
+                              addressLine1: guestOrder.guestShippingAddressLine1,
+                              addressLine2: guestOrder.guestShippingAddressLine2,
+                              city: guestOrder.guestShippingCity,
+                              province: guestOrder.guestShippingProvince,
+                              postalCode: guestOrder.guestShippingPostalCode,
+                            }
+                            
+                            // Check if we have at least addressLine1 (required field)
+                            if (!guestShippingAddr.addressLine1) {
+                              // Fall back to regular shipping address if available
+                              const shippingAddr = displayOrder.shippingAddress || orderDetail?.shippingAddress
+                              if (shippingAddr) {
+                                return (
+                                  <>
+                                    <div>
+                                      <div className="text-sm text-muted-foreground">Recipient</div>
+                                      <div className="font-medium">{shippingAddr.fullName}</div>
+                                    </div>
+                                    {shippingAddr.phoneNumber && (
+                                      <div>
+                                        <div className="text-sm text-muted-foreground">Phone</div>
+                                        <div className="font-medium">{shippingAddr.phoneNumber}</div>
+                                      </div>
+                                    )}
+                                    <div>
+                                      <div className="text-sm text-muted-foreground">Address</div>
+                                      <div className="font-medium">
+                                        {shippingAddr.addressLine1}
+                                        {shippingAddr.addressLine2 && `, ${shippingAddr.addressLine2}`}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <div className="text-sm text-muted-foreground">City, Province</div>
+                                      <div className="font-medium">
+                                        {shippingAddr.city}, {shippingAddr.province}
+                                      </div>
+                                    </div>
+                                    {shippingAddr.postalCode && (
+                                      <div>
+                                        <div className="text-sm text-muted-foreground">Postal Code</div>
+                                        <div className="font-medium">{shippingAddr.postalCode}</div>
+                                      </div>
+                                    )}
+                                  </>
+                                )
+                              }
+                              return <div className="text-muted-foreground">Shipping address not available</div>
+                            }
+                            
+                            // Display guest shipping address
+                            return (
+                              <>
+                                <div>
+                                  <div className="text-sm text-muted-foreground">Recipient</div>
+                                  <div className="font-medium">{guestShippingAddr.fullName || 'N/A'}</div>
+                                </div>
+                                {guestShippingAddr.phoneNumber && (
+                                  <div>
+                                    <div className="text-sm text-muted-foreground">Phone</div>
+                                    <div className="font-medium">{guestShippingAddr.phoneNumber}</div>
+                                  </div>
+                                )}
+                                <div>
+                                  <div className="text-sm text-muted-foreground">Address</div>
+                                  <div className="font-medium">
+                                    {guestShippingAddr.addressLine1}
+                                    {guestShippingAddr.addressLine2 && `, ${guestShippingAddr.addressLine2}`}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div className="text-sm text-muted-foreground">City, Province</div>
+                                  <div className="font-medium">
+                                    {guestShippingAddr.city}, {guestShippingAddr.province}
+                                  </div>
+                                </div>
+                                {guestShippingAddr.postalCode && (
+                                  <div>
+                                    <div className="text-sm text-muted-foreground">Postal Code</div>
+                                    <div className="font-medium">{guestShippingAddr.postalCode}</div>
+                                  </div>
+                                )}
+                              </>
+                            )
+                          }
+                          
+                          // For regular orders, use shippingAddress
+                          const shippingAddr = displayOrder.shippingAddress || orderDetail?.shippingAddress
+                          if (!shippingAddr) return <div className="text-muted-foreground">Shipping address not available</div>
+                          
+                          return (
+                            <>
+                              <div>
+                                <div className="text-sm text-muted-foreground">Recipient</div>
+                                <div className="font-medium">{shippingAddr.fullName}</div>
+                              </div>
+                              {shippingAddr.phoneNumber && (
+                                <div>
+                                  <div className="text-sm text-muted-foreground">Phone</div>
+                                  <div className="font-medium">{shippingAddr.phoneNumber}</div>
+                                </div>
+                              )}
+                              <div>
+                                <div className="text-sm text-muted-foreground">Address</div>
+                                <div className="font-medium">
+                                  {shippingAddr.addressLine1}
+                                  {shippingAddr.addressLine2 && `, ${shippingAddr.addressLine2}`}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-sm text-muted-foreground">City, Province</div>
+                                <div className="font-medium">
+                                  {shippingAddr.city}, {shippingAddr.province}
+                                </div>
+                              </div>
+                              {shippingAddr.postalCode && (
+                                <div>
+                                  <div className="text-sm text-muted-foreground">Postal Code</div>
+                                  <div className="font-medium">{shippingAddr.postalCode}</div>
+                                </div>
+                              )}
+                            </>
+                          )
+                        })()}
+                      </CardContent>
+                    </Card>
+                  )}
+                  {displayOrder.isGuestOrder && 
+                   !displayOrder.shippingAddress && 
+                   !orderDetail?.shippingAddress && 
+                   !displayOrder.guestShippingAddressLine1 && 
+                   !orderDetail?.guestShippingAddressLine1 && (
+                    <Card className="border-border">
+                      <CardHeader>
+                        <CardTitle className="text-lg">Shipping Address</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-muted-foreground">Shipping address information not available</div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
 
                 {/* Seller Information */}
@@ -969,7 +1147,13 @@ export function OrdersTab() {
                     <div>
                       <div className="text-sm text-muted-foreground">Customer Name</div>
                       <div className="font-medium">
-                        {displayOrder.buyer.firstName} {displayOrder.buyer.lastName}
+                        {displayOrder.isGuestOrder ? (
+                          "Guest Order"
+                        ) : displayOrder.buyer ? (
+                          `${displayOrder.buyer?.firstName || ''} ${displayOrder.buyer?.lastName || ''}`.trim() || "N/A"
+                        ) : (
+                          "N/A"
+                        )}
                       </div>
                     </div>
                     <div>

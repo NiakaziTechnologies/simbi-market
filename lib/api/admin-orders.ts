@@ -89,6 +89,16 @@ export interface AdminOrder {
   guestAccessToken: string | null
   mobileNumber: string | null
   paymentToken: string | null
+  guestFirstName: string | null
+  guestLastName: string | null
+  guestEmail: string | null
+  guestPhoneNumber: string | null
+  guestShippingPhoneNumber: string | null
+  guestShippingAddressLine1: string | null
+  guestShippingAddressLine2: string | null
+  guestShippingCity: string | null
+  guestShippingProvince: string | null
+  guestShippingPostalCode: string | null
   createdAt: string
   updatedAt: string
   buyer: {
@@ -97,7 +107,7 @@ export interface AdminOrder {
     lastName: string
     companyName: string | null
     email: string
-  }
+  } | null
   shippingAddress: {
     id: string
     fullName: string
@@ -107,7 +117,7 @@ export interface AdminOrder {
     addressLine2?: string
     postalCode?: string
     country?: string
-  }
+  } | null
   items: AdminOrderItem[]
   driver: AdminDriver | null
   _count: {
@@ -143,7 +153,7 @@ export interface AdminOrderDetail extends AdminOrder {
     companyName: string | null
     email: string
     phoneNumber?: string
-  }
+  } | null
   seller: {
     id: string
     email: string
@@ -238,7 +248,7 @@ export interface AdminOrderPaymentInfo {
     lastName: string
     companyName: string | null
     email: string
-  }
+  } | null
   seller: {
     id: string
     businessName: string

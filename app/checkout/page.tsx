@@ -8,6 +8,7 @@ import { useCart } from "@/lib/hooks/use-cart"
 import { useAuth } from "@/lib/auth/auth-context"
 import { createOrderFromCart, type CreateOrderResponse } from "@/lib/api/orders"
 import { getAddresses, createAddress, type Address } from "@/lib/api/addresses"
+import { createGuestOrder, type GuestOrderResponse } from "@/lib/api/guest-orders"
 import { Navigation } from "@/components/navigation"
 import { Trash2, Minus, Plus, Lock, CreditCard, Truck, Shield, ChevronRight, ShoppingBag, Loader2, MapPin, PlusCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -33,6 +34,14 @@ export default function CheckoutPage() {
   const [showNewAddressForm, setShowNewAddressForm] = useState(false)
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false)
   
+  // Guest buyer information (for non-authenticated users)
+  const [guestInfo, setGuestInfo] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+  })
+
   // Shipping address form state (for new address)
   const [shippingForm, setShippingForm] = useState({
     fullName: "",
@@ -86,8 +95,11 @@ export default function CheckoutPage() {
             setIsLoadingAddresses(false)
           })
       } else {
-        console.log('Checkout page: User not authenticated, redirecting to login...')
-        window.location.href = '/auth/login?returnUrl=' + encodeURIComponent('/checkout')
+        // Guest user - load cart from localStorage
+        console.log('Checkout page: Guest user, loading cart from localStorage...')
+        loadCart().catch((error) => {
+          console.error('Checkout page: Error loading guest cart:', error)
+        })
       }
     }
   }, [isAuthenticated, authLoading, loadCart])
@@ -97,41 +109,45 @@ export default function CheckoutPage() {
   const grandTotal = total + shipping + tax
 
   const handleQuantityChange = async (item: typeof items[0], change: number) => {
-    if (!item.cartItemId || updatingItems.has(item.cartItemId)) {
+    // Use cartItemId if available (authenticated), otherwise use id (guest)
+    const itemId = item.cartItemId || item.id
+    if (!itemId || updatingItems.has(itemId)) {
       return
     }
 
     const newQuantity = Math.max(1, item.quantity + change)
-    setUpdatingItems((prev) => new Set(prev).add(item.cartItemId!))
+    setUpdatingItems((prev) => new Set(prev).add(itemId))
     
     try {
-      await updateQuantity(item.cartItemId, newQuantity)
+      await updateQuantity(itemId, newQuantity)
     } catch (error) {
       console.error('Error updating quantity:', error)
     } finally {
       setUpdatingItems((prev) => {
         const next = new Set(prev)
-        next.delete(item.cartItemId!)
+        next.delete(itemId)
         return next
       })
     }
   }
 
   const handleRemoveItem = async (item: typeof items[0]) => {
-    if (!item.cartItemId || removingItems.has(item.cartItemId)) {
+    // Use cartItemId if available (authenticated), otherwise use id (guest)
+    const itemId = item.cartItemId || item.id
+    if (!itemId || removingItems.has(itemId)) {
       return
     }
 
-    setRemovingItems((prev) => new Set(prev).add(item.cartItemId!))
+    setRemovingItems((prev) => new Set(prev).add(itemId))
     
     try {
-      await removeFromCart(item.cartItemId)
+      await removeFromCart(itemId)
     } catch (error) {
       console.error('Error removing item:', error)
     } finally {
       setRemovingItems((prev) => {
         const next = new Set(prev)
-        next.delete(item.cartItemId!)
+        next.delete(itemId)
         return next
       })
     }
@@ -173,43 +189,120 @@ export default function CheckoutPage() {
     
     setIsPlacingOrder(true)
     try {
-      // Prepare order request
-      const orderRequest: any = {}
-      
-      // Add shipping address ID if using saved address, otherwise add new address object
-      if (selectedAddressId && !showNewAddressForm) {
-        orderRequest.shippingAddressId = selectedAddressId
-      } else if (showNewAddressForm && shippingForm.addressLine1 && shippingForm.city && shippingForm.province) {
-        orderRequest.shippingAddress = {
-          fullName: shippingForm.fullName || undefined,
-          phoneNumber: shippingForm.phoneNumber || undefined,
-          addressLine1: shippingForm.addressLine1,
-          addressLine2: shippingForm.addressLine2 || undefined,
-          city: shippingForm.city,
-          province: shippingForm.province,
-          postalCode: shippingForm.postalCode || undefined,
-          country: shippingForm.country || undefined,
-          isDefault: shippingForm.isDefault,
+      if (isAuthenticated) {
+        // Authenticated user - use regular order API
+        const orderRequest: any = {}
+        
+        // Add shipping address ID if using saved address, otherwise add new address object
+        if (selectedAddressId && !showNewAddressForm) {
+          orderRequest.shippingAddressId = selectedAddressId
+        } else if (showNewAddressForm && shippingForm.addressLine1 && shippingForm.city && shippingForm.province) {
+          orderRequest.shippingAddress = {
+            fullName: shippingForm.fullName || undefined,
+            phoneNumber: shippingForm.phoneNumber || undefined,
+            addressLine1: shippingForm.addressLine1,
+            addressLine2: shippingForm.addressLine2 || undefined,
+            city: shippingForm.city,
+            province: shippingForm.province,
+            postalCode: shippingForm.postalCode || undefined,
+            country: shippingForm.country || undefined,
+            isDefault: shippingForm.isDefault,
+          }
+        } else {
+          alert('Please select a shipping address or add a new one.')
+          setIsPlacingOrder(false)
+          return
         }
+        
+        // Add optional fields if provided
+        if (orderDetails.poNumber) orderRequest.poNumber = orderDetails.poNumber
+        if (orderDetails.costCenter) orderRequest.costCenter = orderDetails.costCenter
+        if (orderDetails.notes) orderRequest.notes = orderDetails.notes
+        if (orderDetails.couponCode) orderRequest.couponCode = orderDetails.couponCode
+        
+        // Create order from cart
+        const response = await createOrderFromCart(orderRequest)
+        
+        // Store order data and clear cart
+        setOrderData(response)
+        await clearCart()
+        setOrderComplete(true)
       } else {
-        alert('Please select a shipping address or add a new one.')
-        setIsPlacingOrder(false)
-        return
+        // Guest user - use guest order API
+        // Validate guest information
+        if (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email || !guestInfo.phoneNumber) {
+          alert('Please fill in all required buyer information (First Name, Last Name, Email, Phone Number).')
+          setIsPlacingOrder(false)
+          return
+        }
+
+        // Validate shipping address
+        if (!shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province) {
+          alert('Please fill in all required shipping address fields.')
+          setIsPlacingOrder(false)
+          return
+        }
+
+        // Validate cart has items
+        if (items.length === 0) {
+          alert('Your cart is empty.')
+          setIsPlacingOrder(false)
+          return
+        }
+
+        // Prepare guest order request
+        // Auto-populate shipping name and phone from buyer info if not explicitly set
+        const shippingFullName = shippingForm.fullName || `${guestInfo.firstName} ${guestInfo.lastName}`.trim()
+        const shippingPhoneNumber = shippingForm.phoneNumber || guestInfo.phoneNumber
+        
+        const guestOrderRequest = {
+          firstName: guestInfo.firstName,
+          lastName: guestInfo.lastName,
+          email: guestInfo.email,
+          phoneNumber: guestInfo.phoneNumber,
+          shippingAddress: {
+            fullName: shippingFullName,
+            phoneNumber: shippingPhoneNumber,
+            addressLine1: shippingForm.addressLine1,
+            addressLine2: shippingForm.addressLine2,
+            city: shippingForm.city,
+            province: shippingForm.province,
+            postalCode: shippingForm.postalCode,
+          },
+          items: items
+            .filter(item => item.inventoryId) // Only include items with inventoryId
+            .map(item => ({
+              inventoryId: item.inventoryId!,
+              quantity: item.quantity,
+            })),
+          notes: orderDetails.notes,
+          currency: "USD" as const,
+        }
+
+        if (guestOrderRequest.items.length === 0) {
+          alert('No valid items in cart. Please add items to your cart.')
+          setIsPlacingOrder(false)
+          return
+        }
+
+        const response = await createGuestOrder(guestOrderRequest)
+        
+        // Store order data (convert to similar format as authenticated order)
+        setOrderData({
+          orders: response.orders.map(order => ({
+            id: order.id,
+            orderNumber: order.orderNumber,
+            status: order.status,
+            paymentStatus: order.paymentStatus,
+            totalAmount: order.totalAmount,
+            currency: order.currency,
+          })),
+          orderNumber: response.orderNumber,
+        } as any)
+        
+        await clearCart()
+        setOrderComplete(true)
       }
-      
-      // Add optional fields if provided
-      if (orderDetails.poNumber) orderRequest.poNumber = orderDetails.poNumber
-      if (orderDetails.costCenter) orderRequest.costCenter = orderDetails.costCenter
-      if (orderDetails.notes) orderRequest.notes = orderDetails.notes
-      if (orderDetails.couponCode) orderRequest.couponCode = orderDetails.couponCode
-      
-      // Create order from cart
-      const response = await createOrderFromCart(orderRequest)
-      
-      // Store order data and clear cart
-      setOrderData(response)
-      await clearCart()
-      setOrderComplete(true)
     } catch (error: any) {
       console.error('Error placing order:', error)
       alert(error.message || 'Failed to place order. Please try again.')
@@ -242,12 +335,18 @@ export default function CheckoutPage() {
               <h1 className="text-4xl font-light text-white mb-4">Order Confirmed</h1>
               <p className="text-muted font-light mb-2">Thank you for your purchase</p>
               <p className="text-sm text-muted font-light mb-8">
-                Order #ORD-2025-0143 • Confirmation sent to your email
+                {orderData?.orderNumber ? `Order #${orderData.orderNumber}` : 'Order placed successfully'} • Confirmation sent to your email
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/dashboard/buyer/orders">
-                  <Button className="w-full sm:w-auto">View Order</Button>
-                </Link>
+                {isAuthenticated ? (
+                  <Link href="/dashboard/buyer/orders">
+                    <Button className="w-full sm:w-auto">View Order</Button>
+                  </Link>
+                ) : (
+                  <p className="text-sm text-muted font-light">
+                    You will receive order updates via email
+                  </p>
+                )}
                 <Link href="/catalog">
                   <Button variant="outline" className="w-full sm:w-auto bg-transparent">
                     Continue Shopping
@@ -441,201 +540,337 @@ export default function CheckoutPage() {
                   >
                     <h2 className="text-2xl font-light text-white mb-6">Shipping Information</h2>
                     
-                    {/* Saved Addresses */}
-                    {!showNewAddressForm && (
-                      <div className="space-y-4 mb-6">
-                        {isLoadingAddresses ? (
-                          <div className="glass-card rounded-lg p-6 text-center">
-                            <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-accent" />
-                            <p className="text-muted text-sm">Loading addresses...</p>
+                    {/* Guest Buyer Information (only for non-authenticated users) */}
+                    {!isAuthenticated && (
+                      <div className="glass-card rounded-lg p-6 mb-6 border border-white/10">
+                        <h3 className="text-lg font-light text-white mb-4">Buyer Information</h3>
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-sm text-muted font-light mb-2 block">
+                              First Name <span className="text-destructive">*</span>
+                            </label>
+                            <Input
+                              type="text"
+                              placeholder="John"
+                              value={guestInfo.firstName}
+                              onChange={(e) => setGuestInfo({ ...guestInfo, firstName: e.target.value })}
+                              required
+                              className="bg-muted/50 border-border"
+                            />
                           </div>
-                        ) : savedAddresses.length > 0 ? (
-                          <>
-                            <h3 className="text-lg font-light text-white mb-4">Select Shipping Address</h3>
-                            <div className="space-y-3">
-                              {savedAddresses.map((address) => (
-                                <label
-                                  key={address.id}
-                                  className={`block glass-card rounded-lg p-4 cursor-pointer border-2 transition-all ${
-                                    selectedAddressId === address.id
-                                      ? 'border-accent bg-accent/10'
-                                      : 'border-white/10 hover:border-white/20'
-                                  }`}
-                                >
-                                  <div className="flex items-start gap-4">
-                                    <input
-                                      type="radio"
-                                      name="address"
-                                      checked={selectedAddressId === address.id}
-                                      onChange={() => setSelectedAddressId(address.id)}
-                                      className="mt-1 accent-accent"
-                                    />
-                                    <div className="flex-1">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <MapPin className="h-4 w-4 text-accent" />
-                                        <span className="text-white font-light">{address.fullName}</span>
-                                        {address.isDefault && (
-                                          <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded">Default</span>
-                                        )}
-                                      </div>
-                                      <p className="text-muted text-sm">{address.phoneNumber}</p>
-                                      <p className="text-muted text-sm mt-1">
-                                        {address.addressLine1}
-                                        {address.addressLine2 && `, ${address.addressLine2}`}
-                                      </p>
-                                      <p className="text-muted text-sm">
-                                        {address.city}, {address.province}
-                                        {address.postalCode && ` ${address.postalCode}`}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </label>
-                              ))}
-                            </div>
-                          </>
-                        ) : null}
-                        
-                        {/* Add New Address Button */}
-                        <Button
-                          variant="outline"
-                          onClick={() => setShowNewAddressForm(true)}
-                          className="w-full bg-transparent border-white/20 hover:bg-white/5"
-                        >
-                          <PlusCircle className="h-4 w-4 mr-2" />
-                          Add New Address
-                        </Button>
+                          <div>
+                            <label className="text-sm text-muted font-light mb-2 block">
+                              Last Name <span className="text-destructive">*</span>
+                            </label>
+                            <Input
+                              type="text"
+                              placeholder="Doe"
+                              value={guestInfo.lastName}
+                              onChange={(e) => setGuestInfo({ ...guestInfo, lastName: e.target.value })}
+                              required
+                              className="bg-muted/50 border-border"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm text-muted font-light mb-2 block">
+                              Email Address <span className="text-destructive">*</span>
+                            </label>
+                            <Input
+                              type="email"
+                              placeholder="john.doe@example.com"
+                              value={guestInfo.email}
+                              onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })}
+                              required
+                              className="bg-muted/50 border-border"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm text-muted font-light mb-2 block">
+                              Phone Number <span className="text-destructive">*</span>
+                            </label>
+                            <Input
+                              type="tel"
+                              placeholder="0771234567"
+                              value={guestInfo.phoneNumber}
+                              onChange={(e) => setGuestInfo({ ...guestInfo, phoneNumber: e.target.value })}
+                              required
+                              className="bg-muted/50 border-border"
+                            />
+                          </div>
+                        </div>
                       </div>
                     )}
                     
-                    {/* New Address Form */}
-                    {showNewAddressForm && (
-                      <div className="glass-card rounded-lg p-6 mb-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-light text-white">New Shipping Address</h3>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setShowNewAddressForm(false)
-                              setShippingForm({
-                                fullName: "",
-                                phoneNumber: "",
-                                addressLine1: "",
-                                addressLine2: "",
-                                city: "",
-                                province: "",
-                                postalCode: "",
-                                country: "Zimbabwe",
-                                isDefault: false,
-                              })
-                            }}
-                            className="text-muted hover:text-white"
-                          >
-                            Cancel
-                          </Button>
-                        </div>
+                    {/* Shipping Address Form - Different for authenticated vs guest */}
+                    {isAuthenticated ? (
+                      <>
+                        {/* Saved Addresses (only for authenticated users) */}
+                        {!showNewAddressForm && (
+                          <div className="space-y-4 mb-6">
+                            {isLoadingAddresses ? (
+                              <div className="glass-card rounded-lg p-6 text-center">
+                                <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-accent" />
+                                <p className="text-muted text-sm">Loading addresses...</p>
+                              </div>
+                            ) : savedAddresses.length > 0 ? (
+                              <>
+                                <h3 className="text-lg font-light text-white mb-4">Select Shipping Address</h3>
+                                <div className="space-y-3">
+                                  {savedAddresses.map((address) => (
+                                    <label
+                                      key={address.id}
+                                      className={`block glass-card rounded-lg p-4 cursor-pointer border-2 transition-all ${
+                                        selectedAddressId === address.id
+                                          ? 'border-accent bg-accent/10'
+                                          : 'border-white/10 hover:border-white/20'
+                                      }`}
+                                    >
+                                      <div className="flex items-start gap-4">
+                                        <input
+                                          type="radio"
+                                          name="address"
+                                          checked={selectedAddressId === address.id}
+                                          onChange={() => setSelectedAddressId(address.id)}
+                                          className="mt-1 accent-accent"
+                                        />
+                                        <div className="flex-1">
+                                          <div className="flex items-center gap-2 mb-2">
+                                            <MapPin className="h-4 w-4 text-accent" />
+                                            <span className="text-white font-light">{address.fullName}</span>
+                                            {address.isDefault && (
+                                              <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded">Default</span>
+                                            )}
+                                          </div>
+                                          <p className="text-muted text-sm">{address.phoneNumber}</p>
+                                          <p className="text-muted text-sm mt-1">
+                                            {address.addressLine1}
+                                            {address.addressLine2 && `, ${address.addressLine2}`}
+                                          </p>
+                                          <p className="text-muted text-sm">
+                                            {address.city}, {address.province}
+                                            {address.postalCode && ` ${address.postalCode}`}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </label>
+                                  ))}
+                                </div>
+                              </>
+                            ) : null}
+                            
+                            {/* Add New Address Button */}
+                            <Button
+                              variant="outline"
+                              onClick={() => setShowNewAddressForm(true)}
+                              className="w-full bg-transparent border-white/20 hover:bg-white/5"
+                            >
+                              <PlusCircle className="h-4 w-4 mr-2" />
+                              Add New Address
+                            </Button>
+                          </div>
+                        )}
+                        
+                        {/* New Address Form (authenticated users) */}
+                        {showNewAddressForm && (
+                          <div className="glass-card rounded-lg p-6 mb-6">
+                            <div className="flex items-center justify-between mb-4">
+                              <h3 className="text-lg font-light text-white">New Shipping Address</h3>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setShowNewAddressForm(false)
+                                  setShippingForm({
+                                    fullName: "",
+                                    phoneNumber: "",
+                                    addressLine1: "",
+                                    addressLine2: "",
+                                    city: "",
+                                    province: "",
+                                    postalCode: "",
+                                    country: "Zimbabwe",
+                                    isDefault: false,
+                                  })
+                                }}
+                                className="text-muted hover:text-white"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                              <div className="md:col-span-2">
+                                <label className="text-sm text-muted font-light mb-2 block">Full Name</label>
+                                <Input 
+                                  placeholder="John Doe" 
+                                  className="bg-white/5 border-white/10 text-white"
+                                  value={shippingForm.fullName}
+                                  onChange={(e) => setShippingForm({ ...shippingForm, fullName: e.target.value })}
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <label className="text-sm text-muted font-light mb-2 block">Phone Number</label>
+                                <Input 
+                                  placeholder="+263771234567" 
+                                  className="bg-white/5 border-white/10 text-white"
+                                  value={shippingForm.phoneNumber}
+                                  onChange={(e) => setShippingForm({ ...shippingForm, phoneNumber: e.target.value })}
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <label className="text-sm text-muted font-light mb-2 block">Address Line 1 <span className="text-destructive">*</span></label>
+                                <Input 
+                                  placeholder="123 Main Street" 
+                                  className="bg-white/5 border-white/10 text-white"
+                                  value={shippingForm.addressLine1}
+                                  onChange={(e) => setShippingForm({ ...shippingForm, addressLine1: e.target.value })}
+                                  required
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <label className="text-sm text-muted font-light mb-2 block">Address Line 2 (Optional)</label>
+                                <Input 
+                                  placeholder="Apartment 4B" 
+                                  className="bg-white/5 border-white/10 text-white"
+                                  value={shippingForm.addressLine2}
+                                  onChange={(e) => setShippingForm({ ...shippingForm, addressLine2: e.target.value })}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm text-muted font-light mb-2 block">City <span className="text-destructive">*</span></label>
+                                <Input 
+                                  placeholder="Harare" 
+                                  className="bg-white/5 border-white/10 text-white"
+                                  value={shippingForm.city}
+                                  onChange={(e) => setShippingForm({ ...shippingForm, city: e.target.value })}
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm text-muted font-light mb-2 block">Province/State <span className="text-destructive">*</span></label>
+                                <Input 
+                                  placeholder="Harare" 
+                                  className="bg-white/5 border-white/10 text-white"
+                                  value={shippingForm.province}
+                                  onChange={(e) => setShippingForm({ ...shippingForm, province: e.target.value })}
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm text-muted font-light mb-2 block">Postal Code</label>
+                                <Input 
+                                  placeholder="00263" 
+                                  className="bg-white/5 border-white/10 text-white"
+                                  value={shippingForm.postalCode}
+                                  onChange={(e) => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-sm text-muted font-light mb-2 block">Country</label>
+                                <Input 
+                                  placeholder="Zimbabwe" 
+                                  className="bg-white/5 border-white/10 text-white"
+                                  value={shippingForm.country}
+                                  onChange={(e) => setShippingForm({ ...shippingForm, country: e.target.value })}
+                                />
+                              </div>
+                              <div className="md:col-span-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={shippingForm.isDefault}
+                                    onChange={(e) => setShippingForm({ ...shippingForm, isDefault: e.target.checked })}
+                                    className="accent-accent"
+                                  />
+                                  <span className="text-sm text-muted font-light">Set as default address</span>
+                                </label>
+                              </div>
+                            </div>
+                            <Button
+                              onClick={handleSaveNewAddress}
+                              className="w-full mt-4 bg-accent hover:bg-accent/90"
+                              disabled={isLoadingAddresses || !shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province}
+                            >
+                              {isLoadingAddresses ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Saving...
+                                </>
+                              ) : (
+                                "Save Address"
+                              )}
+                            </Button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      /* Guest Shipping Address Form (simplified - only required fields) */
+                      <div className="glass-card rounded-lg p-6 mb-6 border border-white/10">
+                        <h3 className="text-lg font-light text-white mb-4">Shipping Address</h3>
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="md:col-span-2">
-                            <label className="text-sm text-muted font-light mb-2 block">Full Name</label>
-                            <Input 
-                              placeholder="John Doe" 
-                              className="bg-white/5 border-white/10 text-white"
-                              value={shippingForm.fullName}
-                              onChange={(e) => setShippingForm({ ...shippingForm, fullName: e.target.value })}
-                            />
-                          </div>
-                          <div className="md:col-span-2">
-                            <label className="text-sm text-muted font-light mb-2 block">Phone Number</label>
-                            <Input 
-                              placeholder="+263771234567" 
-                              className="bg-white/5 border-white/10 text-white"
-                              value={shippingForm.phoneNumber}
-                              onChange={(e) => setShippingForm({ ...shippingForm, phoneNumber: e.target.value })}
-                            />
-                          </div>
-                          <div className="md:col-span-2">
-                            <label className="text-sm text-muted font-light mb-2 block">Address Line 1 <span className="text-destructive">*</span></label>
-                            <Input 
-                              placeholder="123 Main Street" 
-                              className="bg-white/5 border-white/10 text-white"
+                            <label className="text-sm text-muted font-light mb-2 block">
+                              Address Line 1 <span className="text-destructive">*</span>
+                            </label>
+                            <Input
+                              type="text"
+                              placeholder="123 Main Street"
                               value={shippingForm.addressLine1}
                               onChange={(e) => setShippingForm({ ...shippingForm, addressLine1: e.target.value })}
                               required
+                              className="bg-muted/50 border-border"
                             />
                           </div>
                           <div className="md:col-span-2">
-                            <label className="text-sm text-muted font-light mb-2 block">Address Line 2 (Optional)</label>
-                            <Input 
-                              placeholder="Apartment 5B, Suite 100" 
-                              className="bg-white/5 border-white/10 text-white"
+                            <label className="text-sm text-muted font-light mb-2 block">
+                              Address Line 2 (Optional)
+                            </label>
+                            <Input
+                              type="text"
+                              placeholder="Apartment 4B"
                               value={shippingForm.addressLine2}
                               onChange={(e) => setShippingForm({ ...shippingForm, addressLine2: e.target.value })}
+                              className="bg-muted/50 border-border"
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted font-light mb-2 block">City <span className="text-destructive">*</span></label>
-                            <Input 
-                              placeholder="Harare" 
-                              className="bg-white/5 border-white/10 text-white"
+                            <label className="text-sm text-muted font-light mb-2 block">
+                              City <span className="text-destructive">*</span>
+                            </label>
+                            <Input
+                              type="text"
+                              placeholder="Harare"
                               value={shippingForm.city}
                               onChange={(e) => setShippingForm({ ...shippingForm, city: e.target.value })}
                               required
+                              className="bg-muted/50 border-border"
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted font-light mb-2 block">Province/State <span className="text-destructive">*</span></label>
-                            <Input 
-                              placeholder="Harare" 
-                              className="bg-white/5 border-white/10 text-white"
+                            <label className="text-sm text-muted font-light mb-2 block">
+                              Province <span className="text-destructive">*</span>
+                            </label>
+                            <Input
+                              type="text"
+                              placeholder="Harare"
                               value={shippingForm.province}
                               onChange={(e) => setShippingForm({ ...shippingForm, province: e.target.value })}
                               required
-                            />
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted font-light mb-2 block">Postal Code</label>
-                            <Input 
-                              placeholder="00263" 
-                              className="bg-white/5 border-white/10 text-white"
-                              value={shippingForm.postalCode}
-                              onChange={(e) => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
-                            />
-                          </div>
-                          <div>
-                            <label className="text-sm text-muted font-light mb-2 block">Country</label>
-                            <Input 
-                              placeholder="Zimbabwe" 
-                              className="bg-white/5 border-white/10 text-white"
-                              value={shippingForm.country}
-                              onChange={(e) => setShippingForm({ ...shippingForm, country: e.target.value })}
+                              className="bg-muted/50 border-border"
                             />
                           </div>
                           <div className="md:col-span-2">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={shippingForm.isDefault}
-                                onChange={(e) => setShippingForm({ ...shippingForm, isDefault: e.target.checked })}
-                                className="accent-accent"
-                              />
-                              <span className="text-sm text-muted font-light">Set as default address</span>
+                            <label className="text-sm text-muted font-light mb-2 block">
+                              Postal Code (Optional)
                             </label>
+                            <Input
+                              type="text"
+                              placeholder="00263"
+                              value={shippingForm.postalCode}
+                              onChange={(e) => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
+                              className="bg-muted/50 border-border"
+                            />
                           </div>
                         </div>
-                        <Button
-                          onClick={handleSaveNewAddress}
-                          className="w-full mt-4"
-                          disabled={isLoadingAddresses || !shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province}
-                        >
-                          {isLoadingAddresses ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Saving...
-                            </>
-                          ) : (
-                            'Save Address'
-                          )}
-                        </Button>
                       </div>
                     )}
                     
@@ -643,34 +878,38 @@ export default function CheckoutPage() {
                     <div className="glass-card rounded-lg p-6">
                       <h3 className="text-lg font-light text-white mb-4">Order Details (Optional)</h3>
                       <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-sm text-muted font-light mb-2 block">PO Number</label>
-                          <Input 
-                            placeholder="PO-2024-001" 
-                            className="bg-white/5 border-white/10 text-white"
-                            value={orderDetails.poNumber}
-                            onChange={(e) => setOrderDetails({ ...orderDetails, poNumber: e.target.value })}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm text-muted font-light mb-2 block">Cost Center</label>
-                          <Input 
-                            placeholder="ENGINEERING" 
-                            className="bg-white/5 border-white/10 text-white"
-                            value={orderDetails.costCenter}
-                            onChange={(e) => setOrderDetails({ ...orderDetails, costCenter: e.target.value })}
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="text-sm text-muted font-light mb-2 block">Coupon Code</label>
-                          <Input 
-                            placeholder="DISCOUNT10" 
-                            className="bg-white/5 border-white/10 text-white"
-                            value={orderDetails.couponCode}
-                            onChange={(e) => setOrderDetails({ ...orderDetails, couponCode: e.target.value })}
-                          />
-                        </div>
-                        <div className="md:col-span-2">
+                        {isAuthenticated && (
+                          <>
+                            <div>
+                              <label className="text-sm text-muted font-light mb-2 block">PO Number</label>
+                              <Input 
+                                placeholder="PO-2024-001" 
+                                className="bg-white/5 border-white/10 text-white"
+                                value={orderDetails.poNumber}
+                                onChange={(e) => setOrderDetails({ ...orderDetails, poNumber: e.target.value })}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm text-muted font-light mb-2 block">Cost Center</label>
+                              <Input 
+                                placeholder="ENGINEERING" 
+                                className="bg-white/5 border-white/10 text-white"
+                                value={orderDetails.costCenter}
+                                onChange={(e) => setOrderDetails({ ...orderDetails, costCenter: e.target.value })}
+                              />
+                            </div>
+                            <div className="md:col-span-2">
+                              <label className="text-sm text-muted font-light mb-2 block">Coupon Code</label>
+                              <Input 
+                                placeholder="DISCOUNT10" 
+                                className="bg-white/5 border-white/10 text-white"
+                                value={orderDetails.couponCode}
+                                onChange={(e) => setOrderDetails({ ...orderDetails, couponCode: e.target.value })}
+                              />
+                            </div>
+                          </>
+                        )}
+                        <div className={isAuthenticated ? "md:col-span-2" : ""}>
                           <label className="text-sm text-muted font-light mb-2 block">Order Notes</label>
                           <textarea
                             placeholder="Special delivery instructions or notes..."
@@ -682,16 +921,26 @@ export default function CheckoutPage() {
                       </div>
                     </div>
 
+                    {/* Navigation Buttons for Step 2 */}
                     <div className="flex gap-4 mt-6">
-                      <Button variant="outline" onClick={() => setStep(1)} className="flex-1 bg-transparent">
-                        Back
-                      </Button>
-                      <Button 
-                        onClick={() => setStep(3)} 
-                        className="flex-1"
-                        disabled={!selectedAddressId && !showNewAddressForm}
+                      <Button
+                        variant="outline"
+                        onClick={() => setStep(1)}
+                        className="flex-1 bg-transparent border-white/20 hover:bg-white/5"
                       >
-                        Continue to Payment
+                        Back to Cart
+                      </Button>
+                      <Button
+                        onClick={() => setStep(3)}
+                        className="flex-1 bg-accent hover:bg-accent/90"
+                        disabled={
+                          (isAuthenticated && !selectedAddressId && !showNewAddressForm) ||
+                          (isAuthenticated && showNewAddressForm && (!shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province)) ||
+                          (!isAuthenticated && (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email || !guestInfo.phoneNumber || !shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province))
+                        }
+                      >
+                        Continue to Review
+                        <ChevronRight className="h-4 w-4 ml-2" />
                       </Button>
                     </div>
                   </motion.div>
@@ -818,7 +1067,12 @@ export default function CheckoutPage() {
                       <Button 
                         onClick={handlePlaceOrder} 
                         className="flex-1 bg-accent hover:bg-accent/90"
-                        disabled={isPlacingOrder || (!selectedAddressId && !showNewAddressForm) || (showNewAddressForm && (!shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province))}
+                        disabled={
+                          isPlacingOrder || 
+                          (isAuthenticated && (!selectedAddressId && !showNewAddressForm)) ||
+                          (isAuthenticated && showNewAddressForm && (!shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province)) ||
+                          (!isAuthenticated && (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email || !guestInfo.phoneNumber || !shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province))
+                        }
                       >
                         {isPlacingOrder ? (
                           <>

@@ -1,5 +1,5 @@
 /**
- * Component to load cart from API when user is authenticated (buyers only)
+ * Component to load cart from API (authenticated buyers) or localStorage (guest users)
  */
 
 "use client"
@@ -19,10 +19,13 @@ export function CartLoader() {
     // Only load cart if authentication is complete
     if (!authLoading) {
       if (isAuthenticated && role === 'buyer') {
-        // Load cart from API only for buyers
+        // Load cart from API for authenticated buyers
+        loadCart()
+      } else if (!isAuthenticated) {
+        // Load guest cart from localStorage for non-authenticated users
         loadCart()
       } else {
-        // Clear cart if not authenticated or not a buyer
+        // Clear cart if authenticated but not a buyer (seller/admin)
         dispatch(clearCart())
       }
     }

@@ -68,10 +68,14 @@ export interface SellerOrder {
   guestAccessToken: string | null
   mobileNumber: string | null
   paymentToken: string | null
+  guestFirstName: string | null
+  guestLastName: string | null
+  guestEmail: string | null
+  guestPhoneNumber: string | null
   createdAt: string
   updatedAt: string
-  buyer: OrderBuyer
-  shippingAddress: OrderShippingAddress
+  buyer: OrderBuyer | null
+  shippingAddress: OrderShippingAddress | null
 }
 
 /**

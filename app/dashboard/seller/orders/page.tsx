@@ -111,9 +111,11 @@ export default function OrdersPage() {
     const query = searchQuery.toLowerCase()
     return (
       order.orderNumber?.toLowerCase().includes(query) ||
-      order.buyer.firstName?.toLowerCase().includes(query) ||
-      order.buyer.lastName?.toLowerCase().includes(query) ||
-      order.buyer.companyName?.toLowerCase().includes(query) ||
+      (order.buyer && (
+        order.buyer.firstName?.toLowerCase().includes(query) ||
+        order.buyer.lastName?.toLowerCase().includes(query) ||
+        order.buyer.companyName?.toLowerCase().includes(query)
+      )) ||
       order.poNumber?.toLowerCase().includes(query) ||
       order.status?.toLowerCase().includes(query)
     )
@@ -297,22 +299,35 @@ export default function OrdersPage() {
                         <TableCell>
                           <div className="font-medium text-foreground">
                             {order.orderNumber}
+                            {order.isGuestOrder && (
+                              <Badge variant="outline" className="ml-2 bg-purple-500/20 text-purple-400 border-purple-500/30 text-xs">
+                                Guest
+                              </Badge>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div>
-                            <div className="font-medium text-foreground">
-                              {order.buyer.firstName} {order.buyer.lastName}
+                          {order.isGuestOrder ? (
+                            <div className="text-muted-foreground italic">
+                              Guest Order
                             </div>
-                            {order.buyer.companyName && (
-                              <div className="text-sm text-muted-foreground">
-                                {order.buyer.companyName}
+                          ) : order.buyer ? (
+                            <div>
+                              <div className="font-medium text-foreground">
+                                {order.buyer.firstName} {order.buyer.lastName}
                               </div>
-                            )}
-                            <div className="text-xs text-muted-foreground">
-                              {order.buyer.email}
+                              {order.buyer.companyName && (
+                                <div className="text-sm text-muted-foreground">
+                                  {order.buyer.companyName}
+                                </div>
+                              )}
+                              <div className="text-xs text-muted-foreground">
+                                {order.buyer.email}
+                              </div>
                             </div>
-                          </div>
+                          ) : (
+                            <div className="text-muted-foreground">-</div>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="text-foreground">
@@ -466,42 +481,61 @@ export default function OrdersPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-light text-foreground mb-4">Buyer Information</h3>
+                  <h3 className="text-lg font-light text-foreground mb-4">
+                    {selectedOrder.isGuestOrder ? "Order Type" : "Buyer Information"}
+                  </h3>
                   <div className="space-y-3">
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Name</p>
-                      <p className="text-foreground font-medium">
-                        {selectedOrder.buyer.firstName} {selectedOrder.buyer.lastName}
-                      </p>
-                    </div>
-                    {selectedOrder.buyer.companyName && (
+                    {selectedOrder.isGuestOrder ? (
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">Company</p>
-                        <p className="text-foreground font-medium">{selectedOrder.buyer.companyName}</p>
+                        <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                          Guest Order
+                        </Badge>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          This order was placed by an individual buyer without an account.
+                        </p>
                       </div>
+                    ) : selectedOrder.buyer ? (
+                      <>
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Name</p>
+                          <p className="text-foreground font-medium">
+                            {selectedOrder.buyer.firstName} {selectedOrder.buyer.lastName}
+                          </p>
+                        </div>
+                        {selectedOrder.buyer.companyName && (
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-1">Company</p>
+                            <p className="text-foreground font-medium">{selectedOrder.buyer.companyName}</p>
+                          </div>
+                        )}
+                        <div>
+                          <p className="text-sm text-muted-foreground mb-1">Email</p>
+                          <p className="text-foreground font-medium">{selectedOrder.buyer.email}</p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-muted-foreground">No buyer information available</div>
                     )}
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Email</p>
-                      <p className="text-foreground font-medium">{selectedOrder.buyer.email}</p>
-                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Shipping Address */}
-              <div>
-                <h3 className="text-lg font-light text-foreground mb-4">Shipping Address</h3>
-                <div className="space-y-1">
-                  <p className="text-foreground font-medium">{selectedOrder.shippingAddress.fullName}</p>
-                  <p className="text-muted-foreground">{selectedOrder.shippingAddress.addressLine1}</p>
-                  {selectedOrder.shippingAddress.addressLine2 && (
-                    <p className="text-muted-foreground">{selectedOrder.shippingAddress.addressLine2}</p>
-                  )}
-                  <p className="text-muted-foreground">
-                    {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.province} {selectedOrder.shippingAddress.postalCode}
-                  </p>
+              {selectedOrder.shippingAddress && (
+                <div>
+                  <h3 className="text-lg font-light text-foreground mb-4">Shipping Address</h3>
+                  <div className="space-y-1">
+                    <p className="text-foreground font-medium">{selectedOrder.shippingAddress.fullName}</p>
+                    <p className="text-muted-foreground">{selectedOrder.shippingAddress.addressLine1}</p>
+                    {selectedOrder.shippingAddress.addressLine2 && (
+                      <p className="text-muted-foreground">{selectedOrder.shippingAddress.addressLine2}</p>
+                    )}
+                    <p className="text-muted-foreground">
+                      {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.province} {selectedOrder.shippingAddress.postalCode}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Payment Information */}
               {isLoadingPayment ? (

@@ -13,6 +13,7 @@ interface CartState {
   total: number
   isLoading: boolean
   lastSyncAt: string | null // Timestamp of last API sync
+  isGuestCart: boolean // Whether this is a guest cart (localStorage) or authenticated cart (API)
 }
 
 const initialState: CartState = {
@@ -20,13 +21,14 @@ const initialState: CartState = {
   total: 0,
   isLoading: false,
   lastSyncAt: null,
+  isGuestCart: false,
 }
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    // Legacy reducer for backward compatibility (local-only cart)
+    // Legacy reducer for backward compatibility (local-only cart) - used for guest cart
     addToCart: (state, action: PayloadAction<Part>) => {
       const existingItem = state.items.find((item) => item.id === action.payload.id)
       if (existingItem) {
@@ -35,6 +37,7 @@ const cartSlice = createSlice({
         state.items.push({ ...action.payload, quantity: 1 })
       }
       state.total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      state.isGuestCart = true // Mark as guest cart when using local operations
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter((item) => item.id !== action.payload)
@@ -50,12 +53,21 @@ const cartSlice = createSlice({
     clearCart: (state) => {
       state.items = []
       state.total = 0
+      state.isGuestCart = false
     },
     // New reducers for API-managed cart
     setCartItems: (state, action: PayloadAction<{ items: CartItem[]; summary: CartSummary }>) => {
       state.items = action.payload.items
       state.total = action.payload.summary.totalAmount || 0
       state.lastSyncAt = new Date().toISOString()
+      state.isGuestCart = false // API-managed cart is not a guest cart
+    },
+    // Set guest cart items (from localStorage)
+    setGuestCartItems: (state, action: PayloadAction<CartItem[]>) => {
+      state.items = action.payload
+      state.total = action.payload.reduce((sum, item) => sum + item.price * item.quantity, 0)
+      state.isGuestCart = true
+      state.lastSyncAt = null
     },
     setCartLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload
@@ -71,5 +83,5 @@ const cartSlice = createSlice({
   },
 })
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart, setCartItems, setCartLoading, updateCartItem } = cartSlice.actions
+export const { addToCart, removeFromCart, updateQuantity, clearCart, setCartItems, setCartLoading, updateCartItem, setGuestCartItems } = cartSlice.actions
 export default cartSlice.reducer
