@@ -108,16 +108,27 @@ class ApiClient {
           throw error
         }
         
-        // If response parsing failed, be conservative - clear auth if no token exists
-        // Otherwise, just throw a generic error without clearing auth
+        // If response parsing failed, be conservative
+        // Only redirect to login if there was a token (user was authenticated)
+        // Don't redirect guest users (users without tokens) to login
         const token = getAuthToken()
-        if (!token) {
+        if (token) {
+          // User had a token but got 401 - token might be invalid
           clearAuth()
           if (typeof window !== 'undefined') {
             window.location.href = '/auth/login'
           }
+          throw new Error('Authentication required')
         }
-        throw new Error('Authentication required')
+        
+        // No token - this is a guest user, don't redirect
+        // Just throw the error so the calling code can handle it
+        const error: ApiError = {
+          message: 'Unauthorized',
+          status: 401,
+          data: {},
+        }
+        throw error
       }
     }
 

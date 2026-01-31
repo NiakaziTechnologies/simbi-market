@@ -126,7 +126,8 @@ export function useCart() {
 
     // If authenticated AND has a valid user, use API cart
     // Otherwise, use guest cart (localStorage)
-    if (isAuthenticated && user) {
+    // Double-check: only use API if we're certain user is authenticated
+    if (isAuthenticated && user && user.id) {
       try {
         dispatch(setCartLoading(true))
         const cartResponse = await addItemToCart({
@@ -147,6 +148,7 @@ export function useCart() {
         console.error('Error adding to cart:', error)
         dispatch(setCartLoading(false))
         // If API call fails with 401 (authentication error), fall back to guest cart
+        // Don't redirect - just use guest cart instead
         if (error?.status === 401 || error?.message?.includes('Authentication')) {
           console.warn('API cart failed with auth error, falling back to guest cart')
           // Fall through to guest cart logic below
