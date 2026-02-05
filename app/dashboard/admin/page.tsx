@@ -39,7 +39,7 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="lg:ml-64 space-y-8">
+    <div className="space-y-8">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -55,10 +55,34 @@ export default function AdminDashboardPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-background/50 border border-border">
-          <TabsTrigger value="overview" className="data-[state=active]:bg-accent data-[state=active]:text-white text-foreground">Overview</TabsTrigger>
-          <TabsTrigger value="analytics" className="data-[state=active]:bg-accent data-[state=active]:text-white text-foreground">Analytics</TabsTrigger>
-          <TabsTrigger value="activity" className="data-[state=active]:bg-accent data-[state=active]:text-white text-foreground">Activity</TabsTrigger>
-          <TabsTrigger value="reports" className="data-[state=active]:bg-accent data-[state=active]:text-white text-foreground">Reports</TabsTrigger>
+          <TabsTrigger
+            value="overview"
+            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "overview" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
+            Overview
+          </TabsTrigger>
+          <TabsTrigger
+            value="analytics"
+            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "analytics" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger
+            value="activity"
+            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "activity" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
+            Activity
+          </TabsTrigger>
+          <TabsTrigger
+            value="reports"
+            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "reports" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
+            Reports
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">

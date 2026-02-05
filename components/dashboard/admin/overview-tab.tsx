@@ -81,7 +81,7 @@ export function OverviewTab() {
   const revenueChartConfig = {
     revenue: {
       label: "Revenue",
-      color: "hsl(var(--chart-1))",
+      color: "#2563eb",
     },
   }
 
@@ -259,8 +259,8 @@ export function OverviewTab() {
                 <Area
                   type="monotone"
                   dataKey="revenue"
-                  stroke="hsl(var(--chart-1))"
-                  fill="hsl(var(--chart-1))"
+                  stroke="#2563eb"
+                  fill="#2563eb"
                   fillOpacity={0.2}
                 />
               </AreaChart>

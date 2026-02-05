@@ -22,11 +22,11 @@ import { getBusinessIntelligence } from "@/lib/api/admin-dashboard"
 import { format } from "date-fns"
 
 const COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
+  '#3b82f6', // Bright blue
+  '#10b981', // Bright green
+  '#f59e0b', // Bright amber
+  '#ef4444', // Bright red
+  '#8b5cf6', // Bright purple
 ]
 
 function formatCurrency(value: number): string {
@@ -415,9 +415,9 @@ export default function AdminReportsPage() {
                     <Line
                       type="monotone"
                       dataKey="revenue"
-                      stroke="hsl(var(--chart-1))"
+                      stroke="#3b82f6"
                       strokeWidth={2}
-                      dot={{ fill: 'hsl(var(--chart-1))', r: 4 }}
+                      dot={{ fill: '#3b82f6', r: 4 }}
                       activeDot={{ r: 6 }}
                     />
                   </LineChart>

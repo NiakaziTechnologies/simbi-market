@@ -1,10 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { OrdersTab } from "@/components/dashboard/admin/orders-tab"
 import { DriversTab } from "@/components/dashboard/admin/drivers-tab"
 
 export default function AdminDispatchPage() {
+  const [activeTab, setActiveTab] = useState("orders")
+
   return (
     <div className="space-y-8">
       <div>
@@ -14,12 +17,20 @@ export default function AdminDispatchPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="orders" className="space-y-6">
-        <TabsList className="bg-muted/50 border border-border">
-          <TabsTrigger value="orders" className="data-[state=active]:bg-accent data-[state=active]:text-white">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 bg-background/50 border border-border">
+          <TabsTrigger
+            value="orders"
+            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "orders" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
             Orders
           </TabsTrigger>
-          <TabsTrigger value="drivers" className="data-[state=active]:bg-accent data-[state=active]:text-white">
+          <TabsTrigger
+            value="drivers"
+            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "drivers" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
             Drivers
           </TabsTrigger>
         </TabsList>

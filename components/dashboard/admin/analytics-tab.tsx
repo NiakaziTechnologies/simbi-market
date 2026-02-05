@@ -94,7 +94,7 @@ export function AnalyticsTab() {
                     className="text-xs"
                   />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="orders" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="orders" fill="#2563eb" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ChartContainer>
             ) : (
