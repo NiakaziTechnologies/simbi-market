@@ -123,12 +123,12 @@ class ApiClient {
         
         // No token - this is a guest user, don't redirect
         // Just throw the error so the calling code can handle it
-        const error: ApiError = {
+        const apiError: ApiError = {
           message: 'Unauthorized',
           status: 401,
           data: {},
         }
-        throw error
+        throw apiError
       }
     }
 
