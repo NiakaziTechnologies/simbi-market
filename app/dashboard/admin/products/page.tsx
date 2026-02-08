@@ -27,11 +27,19 @@ export default function AdminProductsPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2 bg-background/50 border border-border">
-          <TabsTrigger value="seller-products" className="data-[state=active]:bg-accent data-[state=active]:text-white text-foreground">
+          <TabsTrigger
+            value="seller-products"
+            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "seller-products" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
             <Package className="h-4 w-4 mr-2" />
             Seller Products
           </TabsTrigger>
-          <TabsTrigger value="master-products" className="data-[state=active]:bg-accent data-[state=active]:text-white text-foreground">
+          <TabsTrigger
+            value="master-products"
+            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "master-products" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
             <Package className="h-4 w-4 mr-2" />
             Master Products
           </TabsTrigger>

@@ -63,7 +63,7 @@ const navItems = [
   },
   {
     label: "Home",
-    href: "/",
+    href: "/home",
     megaMenu: null,
   },
   {

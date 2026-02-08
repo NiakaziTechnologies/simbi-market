@@ -21,11 +21,11 @@ import { getReturnsReport } from "@/lib/api/admin-returns"
 import { format } from "date-fns"
 
 const COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
+  '#3b82f6', // Bright blue
+  '#10b981', // Bright green
+  '#f59e0b', // Bright amber
+  '#ef4444', // Bright red
+  '#8b5cf6', // Bright purple
 ]
 
 function formatCurrency(value: number): string {
@@ -241,10 +241,12 @@ export function ReturnsReportTab() {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, value }) => `${name}: ${value}`}
-                      outerRadius={100}
+                      label={({ name, value, percent }) => `${name}\n${value} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={90}
+                      innerRadius={40}
                       fill="#8884d8"
                       dataKey="value"
+                      style={{ fontSize: '12px', fontWeight: '500' }}
                     >
                       {statusData.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -254,10 +256,13 @@ export function ReturnsReportTab() {
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           return (
-                            <div className="rounded-lg border bg-background p-2 shadow-sm">
-                              <div className="font-medium">{payload[0].payload.name}</div>
+                            <div className="rounded-lg border bg-background p-3 shadow-lg">
+                              <div className="font-semibold text-foreground">{payload[0].payload.name}</div>
                               <div className="text-sm text-muted-foreground">
-                                Count: {payload[0].value}
+                                Count: <span className="font-medium">{payload[0].value}</span>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                Percentage: <span className="font-medium">{((payload[0].value / statusData.reduce((sum, item) => sum + item.value, 0)) * 100).toFixed(1)}%</span>
                               </div>
                             </div>
                           )
@@ -301,8 +306,26 @@ export function ReturnsReportTab() {
                       className="text-xs"
                       tick={{ fill: 'hsl(var(--muted-foreground))' }}
                     />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="value" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
+                    <ChartTooltip
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="rounded-lg border bg-background p-3 shadow-lg">
+                              <div className="font-semibold text-foreground">{label}</div>
+                              <div className="text-sm text-muted-foreground">
+                                Count: <span className="font-medium">{payload[0].value}</span>
+                              </div>
+                            </div>
+                          )
+                        }
+                        return null
+                      }}
+                    />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                      {faultData.map((entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ChartContainer>
               ) : (
@@ -341,7 +364,11 @@ export function ReturnsReportTab() {
                     tick={{ fill: 'hsl(var(--muted-foreground))' }}
                   />
                   <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="returns" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="returns" radius={[4, 4, 0, 0]}>
+                    {trendsData.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ChartContainer>
             </CardContent>
