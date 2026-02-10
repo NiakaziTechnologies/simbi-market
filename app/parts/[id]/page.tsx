@@ -44,6 +44,7 @@ import {
   Loader2,
   ChevronLeft,
   Edit,
+  Wrench,
 } from "lucide-react"
 
 export default function PartDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -67,6 +68,7 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
   const [reviewsSortBy, setReviewsSortBy] = useState<'newest' | 'oldest' | 'highest' | 'lowest'>('newest')
   const [isLoadingRating, setIsLoadingRating] = useState(false)
   const [isLoadingReviews, setIsLoadingReviews] = useState(false)
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
   
   // Review form state
   const { isAuthenticated } = useAuth()
@@ -282,7 +284,10 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
   // Product images
   const images = part.images && part.images.length > 0 
     ? part.images 
-    : [part.image || "/placeholder.svg"]
+    : part.image ? [part.image] : []
+  
+  const currentImage = images[selectedImage] || ''
+  const hasValidImage = currentImage && !imageErrors.has(currentImage)
 
   return (
     <main className="min-h-screen bg-background">
@@ -305,13 +310,20 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Image Gallery */}
             <div className="space-y-4">
-              <div className="relative aspect-square rounded-xl overflow-hidden bg-muted">
-                <Image
-                  src={images[selectedImage]}
-                  alt={part.name}
-                  fill
-                  className="object-cover"
-                />
+              <div className="relative aspect-square rounded-xl overflow-hidden bg-muted/30">
+                {!hasValidImage ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
+                    <Wrench className="h-32 w-32 text-muted-foreground/50" />
+                  </div>
+                ) : (
+                  <Image
+                    src={currentImage}
+                    alt={part.name}
+                    fill
+                    className="object-cover"
+                    onError={() => setImageErrors(prev => new Set(prev).add(currentImage))}
+                  />
+                )}
               </div>
               {images.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto">
@@ -319,11 +331,23 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
                     <button
                       key={idx}
                       onClick={() => setSelectedImage(idx)}
-                      className={`relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-colors ${
+                      className={`relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-colors bg-muted/30 ${
                         selectedImage === idx ? "border-accent" : "border-transparent"
                       }`}
                     >
-                      <Image src={img} alt={`${part.name} ${idx + 1}`} fill className="object-cover" />
+                      {imageErrors.has(img) ? (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
+                          <Wrench className="h-8 w-8 text-muted-foreground/50" />
+                        </div>
+                      ) : (
+                        <Image 
+                          src={img} 
+                          alt={`${part.name} ${idx + 1}`} 
+                          fill 
+                          className="object-cover"
+                          onError={() => setImageErrors(prev => new Set(prev).add(img))}
+                        />
+                      )}
                     </button>
                   ))}
                 </div>

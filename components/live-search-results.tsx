@@ -1,9 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/lib/store"
-import { Search, ChevronRight, CheckCircle2 } from "lucide-react"
+import { Search, ChevronRight, CheckCircle2, Wrench } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 
@@ -19,6 +20,7 @@ interface LiveSearchResultsProps {
 
 export function LiveSearchResults({ isVisible, filters }: LiveSearchResultsProps) {
     const { filteredItems } = useSelector((state: RootState) => state.parts)
+    const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
 
     // Use the filtered items from Redux (already filtered by the slice)
     const displayItems = filteredItems.slice(0, 4) // Show top 4 results
@@ -50,13 +52,20 @@ export function LiveSearchResults({ isVisible, filters }: LiveSearchResultsProps
                                     href={`/parts/${item.id}`}
                                     className="group flex items-center gap-4 p-4 hover:bg-white/5 transition-all duration-300"
                                 >
-                                    <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10">
-                                        <Image
-                                            src={item.image}
-                                            alt={item.name}
-                                            fill
-                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                        />
+                                    <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-muted/30">
+                                        {!item.image || imageErrors.has(item.id) ? (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
+                                                <Wrench className="h-8 w-8 text-muted-foreground/50" />
+                                            </div>
+                                        ) : (
+                                            <Image
+                                                src={item.image}
+                                                alt={item.name}
+                                                fill
+                                                className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                                onError={() => setImageErrors(prev => new Set(prev).add(item.id))}
+                                            />
+                                        )}
                                     </div>
 
                                     <div className="flex-1 min-w-0">

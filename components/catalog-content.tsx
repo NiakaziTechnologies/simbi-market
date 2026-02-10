@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from "react-redux"
 import type { RootState } from "@/lib/store"
 import { filterByCategory, searchParts, clearFilters, setFilters } from "@/lib/features/parts-slice"
 import { useCart } from "@/lib/hooks/use-cart"
-import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX, Loader2, Star } from "lucide-react"
+import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX, Loader2, Star, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -32,6 +32,7 @@ export function CatalogContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchParams?.get("q") || "")
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
 
   // Debounce search query - wait for user to finish typing
   useEffect(() => {
@@ -61,9 +62,8 @@ export function CatalogContent() {
           make: urlMake || filters.make || undefined,
           year: urlYear || filters.year || undefined,
           model: urlModel || filters.model || undefined,
-          inStock: true, // Only show in-stock items
           page: 1,
-          limit: 30, // 30 products per page
+          limit: 60, // 60 products per page
         }
         
         const response = await fetchProducts(apiFilters)
@@ -373,13 +373,20 @@ export function CatalogContent() {
                   >
                     {/* Image */}
                     <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
-                      <div className="relative h-64 overflow-hidden">
-                        <Image
-                          src={item.image || "/placeholder.svg"}
-                          alt={item.name}
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        />
+                      <div className="relative h-64 overflow-hidden bg-muted/30">
+                        {!item.image || imageErrors.has(item.id) ? (
+                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
+                            <Wrench className="h-20 w-20 text-muted-foreground/50" />
+                          </div>
+                        ) : (
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            onError={() => setImageErrors(prev => new Set(prev).add(item.id))}
+                          />
+                        )}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                         {item.inStock ? (
                           <div className="absolute top-4 right-4 px-3 py-1 bg-green-500/90 text-white text-xs font-medium rounded">
@@ -493,13 +500,20 @@ export function CatalogContent() {
                     <div className="flex flex-col md:flex-row">
                       {/* Image */}
                       <Link href={`/parts/${item.id}`} className="block md:w-64 flex-shrink-0" prefetch={false}>
-                        <div className="relative w-full h-48 md:h-64 overflow-hidden">
-                          <Image
-                            src={item.image || "/placeholder.svg"}
-                            alt={item.name}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
-                          />
+                        <div className="relative w-full h-48 md:h-64 overflow-hidden bg-muted/30">
+                          {!item.image || imageErrors.has(item.id) ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
+                              <Wrench className="h-20 w-20 text-muted-foreground/50" />
+                            </div>
+                          ) : (
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              fill
+                              className="object-cover transition-transform duration-500 group-hover:scale-110"
+                              onError={() => setImageErrors(prev => new Set(prev).add(item.id))}
+                            />
+                          )}
                         </div>
                       </Link>
 
