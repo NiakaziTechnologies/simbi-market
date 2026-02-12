@@ -138,6 +138,68 @@ export function CatalogContent() {
     return () => clearTimeout(timeoutId)
   }, [searchQuery, router, searchParams])
 
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams?.toString() || "")
+    let hasChanges = false
+
+    // Update year filter
+    if (filters.year) {
+      if (params.get("year") !== filters.year) {
+        params.set("year", filters.year)
+        hasChanges = true
+      }
+    } else {
+      if (params.has("year")) {
+        params.delete("year")
+        hasChanges = true
+      }
+    }
+
+    // Update make filter
+    if (filters.make) {
+      if (params.get("make") !== filters.make) {
+        params.set("make", filters.make)
+        hasChanges = true
+      }
+    } else {
+      if (params.has("make")) {
+        params.delete("make")
+        hasChanges = true
+      }
+    }
+
+    // Update model filter
+    if (filters.model) {
+      if (params.get("model") !== filters.model) {
+        params.set("model", filters.model)
+        hasChanges = true
+      }
+    } else {
+      if (params.has("model")) {
+        params.delete("model")
+        hasChanges = true
+      }
+    }
+
+    // Update category filter
+    if (filters.category) {
+      if (params.get("category") !== filters.category) {
+        params.set("category", filters.category)
+        hasChanges = true
+      }
+    } else {
+      if (params.has("category")) {
+        params.delete("category")
+        hasChanges = true
+      }
+    }
+
+    if (hasChanges) {
+      router.replace(`/catalog?${params.toString()}`, { scroll: false })
+    }
+  }, [filters.year, filters.make, filters.model, filters.category, router, searchParams])
+
   // Keep Redux in sync for category selection (if needed elsewhere)
   useEffect(() => {
     if (selectedCategory) {
@@ -240,6 +302,7 @@ export function CatalogContent() {
   const handleClearAllFilters = () => {
     dispatch(clearFilters())
     setSearchQuery("")
+    // URL will be updated automatically by the useEffect hooks
   }
 
   return (

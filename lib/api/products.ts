@@ -11,6 +11,8 @@ export interface ProductFilters {
   minPrice?: number
   maxPrice?: number
   make?: string
+  model?: string
+  year?: string
   inStock?: boolean
   page?: number
   limit?: number
@@ -36,6 +38,12 @@ export async function fetchProducts(filters: ProductFilters = {}): Promise<Produ
   if (filters.minPrice !== undefined) params.append('minPrice', filters.minPrice.toString())
   if (filters.maxPrice !== undefined) params.append('maxPrice', filters.maxPrice.toString())
   if (filters.make) params.append('make', filters.make)
+  if (filters.model) params.append('model', filters.model)
+  if (filters.year) {
+    // Send year as string (URLSearchParams converts to string anyway)
+    // Some APIs might expect it as a number, but query params are always strings
+    params.append('year', filters.year)
+  }
   if (filters.inStock !== undefined) params.append('inStock', filters.inStock.toString())
   if (filters.page) params.append('page', filters.page.toString())
   if (filters.limit) params.append('limit', filters.limit.toString())
