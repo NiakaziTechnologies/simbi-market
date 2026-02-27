@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSelector, useDispatch } from "react-redux"
@@ -33,44 +33,80 @@ export function CatalogContent() {
   const [error, setError] = useState<string | null>(null)
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchParams?.get("q") || "")
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
+  const [currentPage, setCurrentPage] = useState(() => {
+    const urlPage = searchParams?.get("page")
+    const parsed = urlPage ? parseInt(urlPage, 10) : 1
+    return !Number.isNaN(parsed) && parsed > 0 ? parsed : 1
+  })
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalResults, setTotalResults] = useState(0)
+  const [pageSize, setPageSize] = useState(60)
+  const isFirstRender = useRef(true)
 
-  // Debounce search query - wait for user to finish typing
+  // Debounce search query
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery)
-    }, 500) // Wait 500ms after user stops typing
-
+    }, 500)
     return () => clearTimeout(timeoutId)
   }, [searchQuery])
 
-  // Fetch products from API when filters/search change (using debounced query)
+  // Initialize Redux filters from URL params (mount only)
+  useEffect(() => {
+    const urlYear = searchParams?.get("year") || ""
+    const urlMake = searchParams?.get("make") || ""
+    const urlModel = searchParams?.get("model") || ""
+    const urlCategory = searchParams?.get("category") || ""
+    const urlVin = searchParams?.get("vin") || ""
+
+    if (urlYear || urlMake || urlModel || urlCategory) {
+      const newFilters: any = {}
+      if (urlYear) newFilters.year = urlYear
+      if (urlMake) newFilters.make = urlMake
+      if (urlModel) newFilters.model = urlModel
+      if (urlCategory) newFilters.category = urlCategory
+      dispatch(setFilters(newFilters))
+    }
+
+    if (urlVin && !searchQuery) {
+      setSearchQuery(urlVin)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch])
+
+  // Reset to page 1 when search or filters change (skip first render to preserve URL page)
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    setCurrentPage(1)
+  }, [debouncedSearchQuery, filters.year, filters.make, filters.model, filters.category, selectedCategory])
+
+  // Fetch products from API (driven entirely by React state, NOT searchParams)
   useEffect(() => {
     const loadProducts = async () => {
       setIsLoading(true)
       setError(null)
-      
+
       try {
-        // Get filters from URL params or Redux state
-        const urlYear = searchParams?.get("year")
-        const urlMake = searchParams?.get("make")
-        const urlModel = searchParams?.get("model")
-        const urlCategory = searchParams?.get("category")
-        
         const apiFilters: ProductFilters = {
           q: debouncedSearchQuery || undefined,
-          category: urlCategory || selectedCategory || filters.category || undefined,
-          make: urlMake || filters.make || undefined,
-          year: urlYear || filters.year || undefined,
-          model: urlModel || filters.model || undefined,
-          page: 1,
-          limit: 60, // 60 products per page
+          category: filters.category || selectedCategory || undefined,
+          make: filters.make || undefined,
+          year: filters.year || undefined,
+          model: filters.model || undefined,
+          page: currentPage,
+          limit: 60,
         }
-        
+
         const response = await fetchProducts(apiFilters)
         const fetchedProducts = response.products || []
         setProducts(fetchedProducts)
-        
-        // Store products in sessionStorage so detail page can access them
+        setTotalResults(response.total || fetchedProducts.length)
+        setTotalPages(response.totalPages || 1)
+        setPageSize(response.limit || 60)
+
         if (typeof window !== 'undefined') {
           try {
             sessionStorage.setItem('catalogProducts', JSON.stringify(fetchedProducts))
@@ -88,119 +124,26 @@ export function CatalogContent() {
     }
 
     loadProducts()
-  }, [debouncedSearchQuery, selectedCategory, filters.category, filters.make, filters.year, filters.model, searchParams])
+  }, [debouncedSearchQuery, filters.category, filters.make, filters.year, filters.model, selectedCategory, currentPage])
 
-  // Initialize search query and filters from URL params
-  useEffect(() => {
-    const urlQuery = searchParams?.get("q") || ""
-    const urlYear = searchParams?.get("year") || ""
-    const urlMake = searchParams?.get("make") || ""
-    const urlModel = searchParams?.get("model") || ""
-    const urlCategory = searchParams?.get("category") || ""
-    const urlVin = searchParams?.get("vin") || ""
-    
-    // Update search query
-    if (urlQuery !== searchQuery) {
-      setSearchQuery(urlQuery)
-    }
-    
-    // Update filters from URL if they exist
-    if (urlYear || urlMake || urlModel || urlCategory) {
-      const newFilters: any = {}
-      if (urlYear) newFilters.year = urlYear
-      if (urlMake) newFilters.make = urlMake
-      if (urlModel) newFilters.model = urlModel
-      if (urlCategory) newFilters.category = urlCategory
-      dispatch(setFilters(newFilters))
-    }
-    
-    // Handle VIN search
-    if (urlVin && !urlQuery) {
-      setSearchQuery(urlVin)
-    }
-  }, [searchParams, dispatch])
-
-  // Update URL when search query changes (debounced)
+  // Sync state → URL (one-way, debounced). URL is never read back after mount.
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      const currentQuery = searchParams?.get("q") || ""
-      if (searchQuery !== currentQuery) {
-        const params = new URLSearchParams(searchParams?.toString() || "")
-        if (searchQuery.trim()) {
-          params.set("q", searchQuery.trim())
-        } else {
-          params.delete("q")
-        }
-        router.replace(`/catalog?${params.toString()}`, { scroll: false })
-      }
-    }, 300) // Debounce for 300ms
+      const params = new URLSearchParams()
+      if (searchQuery.trim()) params.set("q", searchQuery.trim())
+      if (filters.year) params.set("year", filters.year)
+      if (filters.make) params.set("make", filters.make)
+      if (filters.model) params.set("model", filters.model)
+      if (filters.category) params.set("category", filters.category)
+      if (currentPage > 1) params.set("page", String(currentPage))
 
+      const queryString = params.toString()
+      router.replace(queryString ? `/catalog?${queryString}` : "/catalog", { scroll: false })
+    }, 300)
     return () => clearTimeout(timeoutId)
-  }, [searchQuery, router, searchParams])
+  }, [searchQuery, filters.year, filters.make, filters.model, filters.category, currentPage, router])
 
-  // Update URL when filters change
-  useEffect(() => {
-    const params = new URLSearchParams(searchParams?.toString() || "")
-    let hasChanges = false
-
-    // Update year filter
-    if (filters.year) {
-      if (params.get("year") !== filters.year) {
-        params.set("year", filters.year)
-        hasChanges = true
-      }
-    } else {
-      if (params.has("year")) {
-        params.delete("year")
-        hasChanges = true
-      }
-    }
-
-    // Update make filter
-    if (filters.make) {
-      if (params.get("make") !== filters.make) {
-        params.set("make", filters.make)
-        hasChanges = true
-      }
-    } else {
-      if (params.has("make")) {
-        params.delete("make")
-        hasChanges = true
-      }
-    }
-
-    // Update model filter
-    if (filters.model) {
-      if (params.get("model") !== filters.model) {
-        params.set("model", filters.model)
-        hasChanges = true
-      }
-    } else {
-      if (params.has("model")) {
-        params.delete("model")
-        hasChanges = true
-      }
-    }
-
-    // Update category filter
-    if (filters.category) {
-      if (params.get("category") !== filters.category) {
-        params.set("category", filters.category)
-        hasChanges = true
-      }
-    } else {
-      if (params.has("category")) {
-        params.delete("category")
-        hasChanges = true
-      }
-    }
-
-    if (hasChanges) {
-      router.replace(`/catalog?${params.toString()}`, { scroll: false })
-    }
-  }, [filters.year, filters.make, filters.model, filters.category, router, searchParams])
-
-  // Keep Redux in sync for category selection (if needed elsewhere)
+  // Keep Redux in sync for category selection
   useEffect(() => {
     if (selectedCategory) {
       dispatch(filterByCategory(selectedCategory))
@@ -210,6 +153,8 @@ export function CatalogContent() {
   const hasActiveFilters = !!(filters.year || filters.make || filters.model || filters.category || hasCategoryFilter || searchQuery)
   const displayItems = products
   const hasNoResults = !isLoading && !error && displayItems.length === 0
+  const startIndex = totalResults === 0 ? 0 : (currentPage - 1) * pageSize + 1
+  const endIndex = totalResults === 0 ? 0 : Math.min(startIndex + displayItems.length - 1, totalResults)
 
   const handleCategoryClick = (category: string) => {
     setSearchQuery("")
@@ -299,10 +244,14 @@ export function CatalogContent() {
     }
   }
 
+  const goToPage = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const handleClearAllFilters = () => {
     dispatch(clearFilters())
     setSearchQuery("")
-    // URL will be updated automatically by the useEffect hooks
   }
 
   return (
@@ -356,7 +305,9 @@ export function CatalogContent() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-muted font-light"
           >
-            Showing {displayItems.length} {displayItems.length === 1 ? "result" : "results"}
+            {totalResults > 0
+              ? `Showing ${startIndex}–${endIndex} of ${totalResults} ${totalResults === 1 ? "result" : "results"}`
+              : "Showing 0 results"}
           </motion.p>
 
           <motion.div
@@ -689,6 +640,79 @@ export function CatalogContent() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Pagination */}
+        {!hasNoResults && totalPages > 1 && (
+          <div className="mt-10 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-border"
+                disabled={currentPage === 1}
+                onClick={() => goToPage(Math.max(1, currentPage - 1))}
+              >
+                Previous
+              </Button>
+              <div className="flex items-center gap-1">
+                {(() => {
+                  const pages: (number | 'ellipsis-start' | 'ellipsis-end')[] = []
+                  const windowSize = 2
+
+                  const numbered = new Set<number>()
+                  numbered.add(1)
+                  numbered.add(totalPages)
+                  for (let offset = -windowSize; offset <= windowSize; offset++) {
+                    const p = currentPage + offset
+                    if (p >= 1 && p <= totalPages) numbered.add(p)
+                  }
+
+                  const sorted = Array.from(numbered).sort((a, b) => a - b)
+
+                  sorted.forEach((page, idx) => {
+                    if (idx > 0 && page - sorted[idx - 1] > 1) {
+                      pages.push(idx === 1 ? 'ellipsis-start' : 'ellipsis-end')
+                    }
+                    pages.push(page)
+                  })
+
+                  return pages.map((entry) => {
+                    if (typeof entry === 'string') {
+                      return (
+                        <span key={entry} className="px-1 text-muted-foreground select-none">
+                          ...
+                        </span>
+                      )
+                    }
+                    return (
+                      <Button
+                        key={entry}
+                        variant={entry === currentPage ? "default" : "outline"}
+                        size="sm"
+                        className={entry === currentPage ? "bg-accent text-white" : "border-border"}
+                        onClick={() => goToPage(entry)}
+                      >
+                        {entry}
+                      </Button>
+                    )
+                  })
+                })()}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-border"
+                disabled={currentPage === totalPages}
+                onClick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )
