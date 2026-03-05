@@ -29,7 +29,7 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="py-32 px-6">
+    <section className="py-32 px-6 bg-background">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Image */}
@@ -52,12 +52,12 @@ export function FeaturesSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-4xl md:text-6xl font-light tracking-tight text-white mb-6">
+              <h2 className="text-4xl md:text-6xl font-light tracking-tight text-foreground dark:text-white mb-6">
                 Engineering
                 <br />
                 <span className="font-semibold">Excellence</span>
               </h2>
-              <p className="text-muted font-light leading-relaxed mb-12">
+              <p className="text-muted-foreground dark:text-muted font-light leading-relaxed mb-12">
                 Experience the future of automotive parts sourcing with our premium platform
               </p>
 
@@ -72,13 +72,13 @@ export function FeaturesSection() {
                     className="flex gap-4"
                   >
                     <div className="flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-white border border-border shadow-sm flex items-center justify-center">
                         <feature.icon className="h-6 w-6 text-accent" />
                       </div>
                     </div>
                     <div>
-                      <h3 className="text-xl font-light text-white mb-2">{feature.title}</h3>
-                      <p className="text-muted font-light leading-relaxed">{feature.description}</p>
+                      <h3 className="text-xl font-light text-foreground dark:text-white mb-2">{feature.title}</h3>
+                      <p className="text-muted-foreground dark:text-muted font-light leading-relaxed">{feature.description}</p>
                     </div>
                   </motion.div>
                 ))}

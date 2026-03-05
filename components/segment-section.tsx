@@ -73,16 +73,15 @@ export function SegmentSection() {
           transition={{ duration: 0.8 }}
           className="text-center mb-20"
         >
-          <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Tailored Solutions</p>
-          <h2 className="text-4xl md:text-6xl font-light tracking-tight text-white mb-6">
+
+          <h2 className="text-4xl md:text-6xl font-light tracking-tight text-foreground dark:text-white mb-6">
             Your <span className="font-semibold">Access Point</span>
           </h2>
-          <p className="text-muted font-light leading-relaxed max-w-2xl mx-auto text-lg">
+          <p className="text-muted-foreground dark:text-muted font-light leading-relaxed max-w-2xl mx-auto text-lg">
             Choose the experience that fits your needs. From individual enthusiasts to enterprise solutions, we have you
             covered with specialized services and support.
           </p>
         </motion.div>
-
         <div className="space-y-8">
           {segments.map((segment, index) => (
             <motion.div

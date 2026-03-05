@@ -87,15 +87,15 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
-            className="glass-card rounded-2xl p-8 md:p-10 border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] bg-white/5 backdrop-blur-2xl"
+            className="glass-card dark:glass-card rounded-2xl p-8 md:p-10 border border-border dark:border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] bg-white backdrop-blur-2xl"
           >
             {/* Search Type Toggle */}
             <div className="flex justify-center mb-10">
-              <div className="inline-flex p-1.5 bg-white/5 rounded-xl border border-white/10">
+              <div className="inline-flex p-1.5 bg-gray-100 rounded-xl border border-gray-200">
                 <Button
                   variant={searchType === "part" ? "default" : "ghost"}
                   onClick={() => setSearchType("part")}
-                  className={`px-8 py-2 rounded-lg font-medium transition-all duration-300 ${searchType === "part" ? "bg-accent text-white shadow-lg" : "text-white/60 hover:text-white"
+                  className={`px-8 py-2 rounded-lg font-medium transition-all duration-300 ${searchType === "part" ? "bg-accent text-white shadow-lg" : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
                     }`}
                 >
                   <Search className="mr-2 h-4 w-4" />
@@ -104,7 +104,7 @@ export function HeroSection() {
                 <Button
                   variant={searchType === "vin" ? "default" : "ghost"}
                   onClick={() => setSearchType("vin")}
-                  className={`px-8 py-2 rounded-lg font-medium transition-all duration-300 ${searchType === "vin" ? "bg-accent text-white shadow-lg" : "text-white/60 hover:text-white"
+                  className={`px-8 py-2 rounded-lg font-medium transition-all duration-300 ${searchType === "vin" ? "bg-accent text-white shadow-lg" : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
                     }`}
                 >
                   <Scan className="mr-2 h-4 w-4" />
@@ -148,14 +148,14 @@ export function HeroSection() {
               >
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-white/40 group-focus-within:text-accent transition-colors" />
+                    <Search className="h-5 w-5 text-gray-400 group-focus-within:text-accent transition-colors" />
                   </div>
                   <Input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={searchType === "vin" ? "Enter your 17-digit VIN" : "Enter part name or number"}
-                    className={`h-16 pl-12 pr-36 bg-white/5 border-white/10 text-white placeholder:text-white/30 text-lg transition-all focus:ring-accent focus:border-accent rounded-xl ${searchType === "vin" ? "font-mono tracking-widest uppercase" : ""
+                    className={`h-16 pl-12 pr-36 bg-gray-100 border border-gray-200 text-gray-900 placeholder:text-gray-400 text-lg transition-all focus:ring-accent focus:border-accent rounded-xl ${searchType === "vin" ? "font-mono tracking-widest uppercase" : ""
                       }`}
                   />
                   <Button 
@@ -168,16 +168,16 @@ export function HeroSection() {
               </form>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-8 mt-10 opacity-60">
-              <p className="text-xs text-white font-light flex items-center">
+            <div className="flex flex-wrap items-center justify-center gap-8 mt-10">
+              <p className="text-xs text-gray-600 font-light flex items-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2 shrink-0" />
                 Secure Encrypted Search
               </p>
-              <p className="text-xs text-white font-light flex items-center">
+              <p className="text-xs text-gray-600 font-light flex items-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-2 shrink-0" />
                 3M+ Parts Indexed
               </p>
-              <p className="text-xs text-white font-light flex items-center">
+              <p className="text-xs text-gray-600 font-light flex items-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent mr-2 shrink-0" />
                 Instant Results
               </p>

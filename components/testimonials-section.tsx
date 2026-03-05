@@ -31,7 +31,7 @@ function getInitials(name: string) {
 
 export function TestimonialsSection() {
   return (
-    <section className="py-32 px-6">
+    <section className="py-32 px-6 bg-background">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -41,7 +41,7 @@ export function TestimonialsSection() {
           className="text-center mb-16"
         >
           <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Testimonials</p>
-          <h2 className="text-4xl md:text-6xl font-light tracking-tight text-white">
+          <h2 className="text-4xl md:text-6xl font-light tracking-tight text-foreground dark:text-white">
             What Our <span className="font-semibold">Customers Say</span>
           </h2>
         </motion.div>
@@ -54,28 +54,28 @@ export function TestimonialsSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
-              className="glass-card rounded-xl p-8 relative"
+              className="glass-card dark:glass-card rounded-xl p-8 relative"
             >
-              <Quote className="absolute top-6 right-6 h-8 w-8 text-white/10" />
+              <Quote className="absolute top-6 right-6 h-8 w-8 text-muted-foreground/20" />
 
               <div className="flex gap-1 mb-6">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`h-4 w-4 ${i < testimonial.rating ? "text-accent fill-accent" : "text-white/20"}`}
+                    className={`h-4 w-4 ${i < testimonial.rating ? "text-accent fill-accent" : "text-muted-foreground/30"}`}
                   />
                 ))}
               </div>
 
-              <p className="text-white/80 font-light leading-relaxed mb-8">"{testimonial.text}"</p>
+              <p className="text-muted-foreground font-light leading-relaxed mb-8">"{testimonial.text}"</p>
 
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
                   <span className="text-white font-semibold text-sm">{getInitials(testimonial.name)}</span>
                 </div>
                 <div>
-                  <p className="text-white font-medium">{testimonial.name}</p>
-                  <p className="text-sm text-muted">{testimonial.role}</p>
+                  <p className="text-foreground dark:text-white font-medium">{testimonial.name}</p>
+                  <p className="text-sm text-muted-foreground dark:text-muted">{testimonial.role}</p>
                 </div>
               </div>
             </motion.div>

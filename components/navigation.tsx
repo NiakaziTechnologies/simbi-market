@@ -120,7 +120,7 @@ export function Navigation() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled || activeMenu ? "bg-background/95 backdrop-blur-xl border-b border-white/10" : "bg-transparent"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled || activeMenu ? "bg-background/95 backdrop-blur-xl border-b border-border" : "bg-transparent"
           }`}
         onMouseLeave={() => {
           setActiveMenu(null)
@@ -144,7 +144,7 @@ export function Navigation() {
                         ? "text-white bg-blue-600"
                         : activeMenu === item.label
                           ? "text-foreground bg-muted"
-                          : "text-foreground/80 hover:text-foreground hover:bg-muted/50"
+                          : "text-foreground hover:text-foreground hover:bg-muted"
                         }`}
                     >
                       {item.label}
@@ -158,7 +158,7 @@ export function Navigation() {
                       href={item.href}
                       className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${pathname === item.href
                         ? "text-white bg-blue-600"
-                        : "text-foreground/80 hover:text-foreground hover:bg-muted/50"
+                        : "text-foreground hover:text-foreground hover:bg-muted"
                         }`}
                     >
                       {item.label}
@@ -356,7 +356,7 @@ export function Navigation() {
                     </form>
                   </div>
 
-                  <div className="flex justify-center gap-8 text-xs text-white/40 font-light">
+                  <div className="flex justify-center gap-8 text-xs text-muted-foreground font-light">
                     <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500" /> Free Expert Shipping</span>
                     <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Genuine OEM Parts</span>
                     <span className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-accent" /> 24/7 Support</span>

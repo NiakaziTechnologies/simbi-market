@@ -94,7 +94,7 @@ export default function BlogPage() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-6">
+      <section className="pt-32 pb-16 px-6 bg-background dark:bg-black">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -103,10 +103,10 @@ export default function BlogPage() {
             className="text-center mb-16"
           >
             <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Our Blog</p>
-            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-white mb-6">
+            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground dark:text-white mb-6">
               Automotive <span className="font-semibold">Insights</span>
             </h1>
-            <p className="text-lg text-muted font-light max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground dark:text-muted font-light max-w-2xl mx-auto">
               Expert guides, industry news, and tips to help you get the most out of your vehicle.
             </p>
           </motion.div>
@@ -122,7 +122,7 @@ export default function BlogPage() {
               <button
                 key={category}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                  index === 0 ? "bg-accent text-white" : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+                  index === 0 ? "bg-accent text-white" : "bg-secondary dark:bg-white/5 text-foreground dark:text-white/70 hover:bg-accent/10 dark:hover:bg-white/10 hover:text-foreground dark:hover:text-white"
                 }`}
               >
                 {category}
@@ -133,7 +133,7 @@ export default function BlogPage() {
       </section>
 
       {/* Featured Post */}
-      <section className="px-6 pb-16">
+      <section className="px-6 pb-16 bg-background dark:bg-black">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -182,7 +182,7 @@ export default function BlogPage() {
       </section>
 
       {/* Blog Posts Grid */}
-      <section className="px-6 pb-32">
+      <section className="px-6 pb-32 bg-background dark:bg-black">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogPosts.map((post, index) => (
@@ -208,11 +208,11 @@ export default function BlogPage() {
                         </span>
                       </div>
                     </div>
-                    <h3 className="text-xl font-medium text-white mb-2 group-hover:text-accent transition-colors line-clamp-2">
+                    <h3 className="text-xl font-medium text-foreground dark:text-white mb-2 group-hover:text-accent transition-colors line-clamp-2">
                       {post.title}
                     </h3>
-                    <p className="text-muted font-light mb-4 line-clamp-2">{post.excerpt}</p>
-                    <div className="flex items-center justify-between text-sm text-muted">
+                    <p className="text-muted-foreground dark:text-muted font-light mb-4 line-clamp-2">{post.excerpt}</p>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground dark:text-muted">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
                         {post.date}
@@ -235,7 +235,7 @@ export default function BlogPage() {
             viewport={{ once: true }}
             className="text-center mt-16"
           >
-            <button className="group inline-flex items-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-medium rounded-full transition-all">
+            <button className="group inline-flex items-center gap-2 px-8 py-4 bg-secondary dark:bg-white/5 hover:bg-accent/10 dark:hover:bg-white/10 text-foreground dark:text-white font-medium rounded-full transition-all">
               Load More Articles
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </button>

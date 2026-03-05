@@ -100,7 +100,7 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
             }
           }
 
-          // If not found in sessionStorage, try to fetch from API
+          // If not found in sessionStorage, try to fetch from API using fetchProductById
           try {
             const { fetchProductById } = await import('@/lib/api/products')
             const product = await fetchProductById(id)

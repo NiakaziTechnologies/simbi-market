@@ -29,7 +29,7 @@ const features = [
 
 export function EngineeringExcellenceSection() {
   return (
-    <section className="py-32 px-6 bg-black relative overflow-hidden">
+    <section className="py-32 px-6 bg-foreground dark:bg-black relative overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0 opacity-20">
         <Image
@@ -50,12 +50,12 @@ export function EngineeringExcellenceSection() {
           className="text-center mb-16"
         >
           <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Precision Engineering</p>
-          <h2 className="text-5xl md:text-7xl font-light tracking-tight text-white mb-6">
+          <h2 className="text-5xl md:text-7xl font-light tracking-tight text-foreground dark:text-white mb-6">
             Engineering
             <br />
             <span className="font-semibold">Excellence</span>
           </h2>
-          <p className="text-lg text-muted font-light max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground dark:text-muted font-light max-w-2xl mx-auto">
             Experience the future of automotive parts sourcing with our premium platform
           </p>
         </motion.div>
@@ -69,12 +69,12 @@ export function EngineeringExcellenceSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
             >
-              <div className="glass-card rounded-xl p-8 text-center group hover:bg-white/10 transition-all">
+              <div className="glass-card dark:glass-card rounded-xl p-8 text-center group hover:bg-white/10 dark:hover:bg-white/10 transition-all">
                 <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mx-auto mb-6 group-hover:bg-accent/20 transition-colors">
                   <feature.icon className="h-8 w-8 text-accent" />
                 </div>
-                <h3 className="text-xl font-medium text-white mb-3">{feature.title}</h3>
-                <p className="text-muted font-light">{feature.description}</p>
+                <h3 className="text-xl font-medium text-foreground dark:text-white mb-3">{feature.title}</h3>
+                <p className="text-muted-foreground dark:text-muted font-light">{feature.description}</p>
               </div>
             </motion.div>
           ))}

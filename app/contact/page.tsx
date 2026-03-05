@@ -65,7 +65,7 @@ export default function ContactPage() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-6">
+      <section className="pt-32 pb-16 px-6 bg-background dark:bg-black">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -74,10 +74,10 @@ export default function ContactPage() {
             className="text-center mb-16"
           >
             <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Contact Us</p>
-            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-white mb-6">
+            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground dark:text-white mb-6">
               Get In <span className="font-semibold">Touch</span>
             </h1>
-            <p className="text-lg text-muted font-light max-w-2xl mx-auto">
+            <p className="text-lg text-muted-foreground dark:text-muted font-light max-w-2xl mx-auto">
               Have questions about our products or services? Our team is here to help you find the perfect parts for
               your vehicle.
             </p>
@@ -86,7 +86,7 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Info Cards */}
-      <section className="px-6 pb-16">
+      <section className="px-6 pb-16 bg-background dark:bg-black">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {contactInfo.map((info, index) => (
@@ -96,14 +96,14 @@ export default function ContactPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="glass-card rounded-xl p-6 text-center"
+                className="glass-card dark:glass-card rounded-xl p-6 text-center"
               >
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 mb-4">
                   <info.icon className="h-6 w-6 text-accent" />
                 </div>
-                <h3 className="text-lg font-medium text-white mb-1">{info.title}</h3>
-                <p className="text-white font-light mb-1">{info.content}</p>
-                <p className="text-sm text-muted">{info.description}</p>
+                <h3 className="text-lg font-medium text-foreground dark:text-white mb-1">{info.title}</h3>
+                <p className="text-foreground dark:text-white font-light mb-1">{info.content}</p>
+                <p className="text-sm text-muted-foreground dark:text-muted">{info.description}</p>
               </motion.div>
             ))}
           </div>
@@ -111,7 +111,7 @@ export default function ContactPage() {
       </section>
 
       {/* Main Contact Section */}
-      <section className="px-6 py-16">
+      <section className="px-6 py-16 bg-background dark:bg-black">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-5 gap-12">
             {/* Inquiry Types */}
@@ -122,7 +122,7 @@ export default function ContactPage() {
               transition={{ duration: 0.8 }}
               className="lg:col-span-2"
             >
-              <h2 className="text-2xl font-light text-white mb-8">
+              <h2 className="text-2xl font-light text-foreground dark:text-white mb-8">
                 How can we <span className="font-semibold">help?</span>
               </h2>
               <div className="space-y-4">
@@ -137,26 +137,26 @@ export default function ContactPage() {
                     className={`w-full text-left p-6 rounded-xl border transition-all ${
                       formData.type === type.title.toLowerCase().replace(" ", "-")
                         ? "border-accent bg-accent/10"
-                        : "border-white/10 bg-white/[0.02] hover:border-white/20"
+                        : "border-border dark:border-white/10 bg-secondary dark:bg-white/[0.02] hover:border-accent dark:hover:border-white/20"
                     }`}
                   >
                     <div className="flex items-start gap-4">
                       <div
                         className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          formData.type === type.title.toLowerCase().replace(" ", "-") ? "bg-accent/20" : "bg-white/5"
+                          formData.type === type.title.toLowerCase().replace(" ", "-") ? "bg-accent/20" : "bg-accent/5 dark:bg-white/5"
                         }`}
                       >
                         <type.icon
                           className={`h-5 w-5 ${
                             formData.type === type.title.toLowerCase().replace(" ", "-")
                               ? "text-accent"
-                              : "text-white/70"
+                              : "text-muted-foreground dark:text-white/70"
                           }`}
                         />
                       </div>
                       <div>
-                        <h3 className="text-white font-medium mb-1">{type.title}</h3>
-                        <p className="text-sm text-muted">{type.description}</p>
+                        <h3 className="text-foreground dark:text-white font-medium mb-1">{type.title}</h3>
+                        <p className="text-sm text-muted-foreground dark:text-muted">{type.description}</p>
                       </div>
                     </div>
                   </motion.button>
@@ -164,11 +164,11 @@ export default function ContactPage() {
               </div>
 
               {/* Map Preview */}
-              <div className="mt-8 rounded-xl overflow-hidden h-48 bg-white/5 flex items-center justify-center border border-white/10">
+              <div className="mt-8 rounded-xl overflow-hidden h-48 bg-secondary dark:bg-white/5 flex items-center justify-center border border-border dark:border-white/10">
                 <div className="text-center">
                   <MapPin className="h-8 w-8 text-accent mx-auto mb-2" />
-                  <p className="text-white font-light">ZB Centre, Harare</p>
-                  <p className="text-sm text-muted">View on Google Maps</p>
+                  <p className="text-foreground dark:text-white font-light">ZB Centre, Harare</p>
+                  <p className="text-sm text-muted-foreground dark:text-muted">View on Google Maps</p>
                 </div>
               </div>
             </motion.div>
@@ -181,35 +181,35 @@ export default function ContactPage() {
               transition={{ duration: 0.8 }}
               className="lg:col-span-3"
             >
-              <div className="glass-card rounded-2xl p-8 md:p-10">
-                <h2 className="text-2xl font-light text-white mb-2">
+              <div className="glass-card dark:glass-card rounded-2xl p-8 md:p-10">
+                <h2 className="text-2xl font-light text-foreground dark:text-white mb-2">
                   Send us a <span className="font-semibold">message</span>
                 </h2>
-                <p className="text-muted font-light mb-8">
+                <p className="text-muted-foreground dark:text-muted font-light mb-8">
                   Fill out the form below and we'll get back to you as soon as possible.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm text-white mb-2">Full Name *</label>
+                      <label className="block text-sm text-foreground dark:text-white mb-2">Full Name *</label>
                       <Input
                         type="text"
                         placeholder="John Doe"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                        className="bg-background dark:bg-white/5 border-border dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/40"
                         required
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-white mb-2">Email Address *</label>
+                      <label className="block text-sm text-foreground dark:text-white mb-2">Email Address *</label>
                       <Input
                         type="email"
                         placeholder="john@example.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                        className="bg-background dark:bg-white/5 border-border dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/40"
                         required
                       />
                     </div>
@@ -217,35 +217,35 @@ export default function ContactPage() {
 
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm text-white mb-2">Phone Number</label>
+                      <label className="block text-sm text-foreground dark:text-white mb-2">Phone Number</label>
                       <Input
                         type="tel"
                         placeholder="+263 77 822 4653"
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                        className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                        className="bg-background dark:bg-white/5 border-border dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/40"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm text-white mb-2">Subject *</label>
+                      <label className="block text-sm text-foreground dark:text-white mb-2">Subject *</label>
                       <Input
                         type="text"
                         placeholder="How can we help?"
                         value={formData.subject}
                         onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                        className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                        className="bg-background dark:bg-white/5 border-border dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/40"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm text-white mb-2">Message *</label>
+                    <label className="block text-sm text-foreground dark:text-white mb-2">Message *</label>
                     <Textarea
                       placeholder="Tell us more about your inquiry..."
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/40 min-h-[150px]"
+                      className="bg-background dark:bg-white/5 border-border dark:border-white/10 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-white/40 min-h-[150px]"
                       required
                     />
                   </div>
@@ -262,7 +262,7 @@ export default function ContactPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="px-6 py-32 bg-black/50">
+      <section className="px-6 py-32 bg-secondary dark:bg-black/50">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -272,7 +272,7 @@ export default function ContactPage() {
             className="text-center mb-16"
           >
             <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">FAQ</p>
-            <h2 className="text-4xl md:text-5xl font-light tracking-tight text-white">
+            <h2 className="text-4xl md:text-5xl font-light tracking-tight text-foreground dark:text-white">
               Common <span className="font-semibold">Questions</span>
             </h2>
           </motion.div>
@@ -302,10 +302,10 @@ export default function ContactPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="glass-card rounded-xl p-6"
+                className="glass-card dark:glass-card rounded-xl p-6"
               >
-                <h3 className="text-lg font-medium text-white mb-2">{faq.q}</h3>
-                <p className="text-muted font-light">{faq.a}</p>
+                <h3 className="text-lg font-medium text-foreground dark:text-white mb-2">{faq.q}</h3>
+                <p className="text-muted-foreground dark:text-muted font-light">{faq.a}</p>
               </motion.div>
             ))}
           </div>

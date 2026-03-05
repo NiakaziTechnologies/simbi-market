@@ -28,20 +28,20 @@ export function CatalogContent() {
    const [searchQuery, setSearchQuery] = useState(searchParams?.get("q") || "")
    const [addedItems, setAddedItems] = useState<Set<string>>(new Set())
    const [addingToCart, setAddingToCart] = useState<Set<string>>(new Set())
-  const [products, setProducts] = useState<Part[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchParams?.get("q") || "")
-  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
-  const [currentPage, setCurrentPage] = useState(() => {
-    const urlPage = searchParams?.get("page")
-    const parsed = urlPage ? parseInt(urlPage, 10) : 1
-    return !Number.isNaN(parsed) && parsed > 0 ? parsed : 1
-  })
-  const [totalPages, setTotalPages] = useState(1)
-  const [totalResults, setTotalResults] = useState(0)
-  const [pageSize, setPageSize] = useState(60)
-  const isFirstRender = useRef(true)
+   const [products, setProducts] = useState<Part[]>([])
+   const [isLoading, setIsLoading] = useState(true)
+   const [error, setError] = useState<string | null>(null)
+   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchParams?.get("q") || "")
+   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
+   const [currentPage, setCurrentPage] = useState(() => {
+     const urlPage = searchParams?.get("page")
+     const parsed = urlPage ? parseInt(urlPage, 10) : 1
+     return !Number.isNaN(parsed) && parsed > 0 ? parsed : 1
+   })
+   const [totalPages, setTotalPages] = useState(1)
+   const [totalResults, setTotalResults] = useState(0)
+   const [pageSize, setPageSize] = useState(60)
+   const isFirstRender = useRef(true)
 
   // Debounce search query
   useEffect(() => {
@@ -276,21 +276,24 @@ export function CatalogContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="glass-card rounded-xl p-8 mb-12 border border-white/10 bg-white/5 backdrop-blur-xl"
+          className="glass-card rounded-2xl p-8 md:p-10 border-2 border-gray-400 dark:border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] bg-gray-100 dark:bg-black/60 mb-12"
         >
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div className="flex flex-col gap-0 overflow-hidden">
               <SearchFilters />
             </div>
 
+            {/* Search Input */}
             <div className="relative group max-w-3xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-accent transition-colors" />
+              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-600 dark:text-white/40 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" />
+              </div>
               <Input
                 type="text"
                 placeholder="Search by part name, category, or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-14 pl-12 bg-muted/50 border-border text-foreground placeholder:text-muted-foreground text-lg transition-all focus:ring-accent focus:border-accent rounded-xl"
+                className="h-14 pl-12 bg-white dark:bg-white/5 border-2 border-gray-400 dark:border-white/10 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/30 text-lg transition-all focus:ring-black dark:focus:ring-white focus:border-black dark:focus:border-white rounded-xl"
               />
             </div>
           </div>
@@ -383,7 +386,7 @@ export function CatalogContent() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
                   <div 
-                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300"
+                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300 border border-border dark:border-white/10"
                   >
                     {/* Image */}
                     <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
@@ -509,7 +512,7 @@ export function CatalogContent() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                 >
                   <div 
-                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300"
+                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300 border border-border dark:border-white/10"
                   >
                     <div className="flex flex-col md:flex-row">
                       {/* Image */}
@@ -717,3 +720,4 @@ export function CatalogContent() {
     </section>
   )
 }
+

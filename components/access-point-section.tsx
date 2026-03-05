@@ -57,10 +57,10 @@ export function AccessPointSection() {
           className="text-center mb-16"
         >
           <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Your Access Point</p>
-          <h2 className="text-4xl md:text-6xl font-light tracking-tight text-white mb-6">
+          <h2 className="text-4xl md:text-6xl font-light tracking-tight text-foreground dark:text-white mb-6">
             Choose <span className="font-semibold">Your Experience</span>
           </h2>
-          <p className="text-lg text-muted font-light max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground dark:text-muted font-light max-w-2xl mx-auto">
             Specialized services tailored for individual hobbyists and large-scale automotive enterprises.
           </p>
         </motion.div>
@@ -76,8 +76,7 @@ export function AccessPointSection() {
               className="relative group h-full"
             >
               <div
-                className={`glass-card rounded-3xl p-10 h-full flex flex-col relative overflow-hidden transition-all duration-500 hover:border-white/30 ${tier.featured ? "border-accent/50 bg-accent/5" : "border-white/10"
-                  }`}
+                className={`glass-card dark:glass-card rounded-3xl p-10 h-full flex flex-col relative overflow-hidden transition-all duration-500 hover:border-accent/50 dark:hover:border-white/30 ${tier.featured ? "border-accent/50 bg-accent/5" : "border-border dark:border-white/10"}`}
               >
                 {/* Background Gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${tier.gradient} opacity-50`} />
@@ -91,24 +90,24 @@ export function AccessPointSection() {
 
                 <div className="relative z-10 flex flex-col h-full">
                   {/* Icon */}
-                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-8 ${tier.featured ? "bg-accent/20" : "bg-white/5"}`}>
-                    <tier.icon className={`h-8 w-8 ${tier.featured ? "text-accent" : "text-white/70"}`} />
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-8 ${tier.featured ? "bg-accent/20" : "bg-white/5 dark:bg-white/5"}`}>
+                    <tier.icon className={`h-8 w-8 ${tier.featured ? "text-accent" : "text-foreground dark:text-white/70"}`} />
                   </div>
 
                   {/* Stats */}
                   <div className="mb-8">
-                    <div className="text-5xl font-light text-white mb-1">{tier.stat}</div>
-                    <div className="text-xs text-muted uppercase tracking-[0.2em] font-medium">{tier.statLabel}</div>
+                    <div className="text-5xl font-light text-foreground dark:text-white mb-1">{tier.stat}</div>
+                    <div className="text-xs text-muted-foreground dark:text-muted uppercase tracking-[0.2em] font-medium">{tier.statLabel}</div>
                   </div>
 
                   {/* Title */}
                   <div className="mb-6">
-                    <h3 className="text-3xl font-light text-white mb-2">{tier.title}</h3>
+                    <h3 className="text-3xl font-light text-foreground dark:text-white mb-2">{tier.title}</h3>
                     <p className="text-sm text-accent font-medium">{tier.subtitle}</p>
                   </div>
 
                   {/* Description */}
-                  <p className="text-white/60 font-light mb-8 leading-relaxed text-lg">{tier.description}</p>
+                  <p className="text-muted-foreground dark:text-white/60 font-light mb-8 leading-relaxed text-lg">{tier.description}</p>
 
                   <div className="mt-auto">
                     {/* Features */}
@@ -118,7 +117,7 @@ export function AccessPointSection() {
                           <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
                             <Check className="h-3 w-3 text-accent" />
                           </div>
-                          <span className="text-sm text-white/80 font-light">{feature}</span>
+                          <span className="text-sm text-muted-foreground dark:text-white/80 font-light">{feature}</span>
                         </div>
                       ))}
                     </div>
@@ -129,7 +128,7 @@ export function AccessPointSection() {
                         size="lg"
                         className={`w-full h-14 rounded-xl text-base font-medium transition-all duration-300 ${tier.featured
                             ? "bg-accent hover:bg-accent/90 text-white shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)]"
-                            : "bg-white/5 hover:bg-white/10 text-white border border-white/10"
+                            : "bg-muted/50 dark:bg-white/5 hover:bg-muted dark:hover:bg-white/10 text-foreground dark:text-white border border-border dark:border-white/10"
                           }`}
                       >
                         {tier.cta}
@@ -139,7 +138,6 @@ export function AccessPointSection() {
                   </div>
                 </div>
               </div>
-            </motion.div>
           ))}
         </div>
       </div>

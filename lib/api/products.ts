@@ -26,6 +26,92 @@ export interface ProductsResponse {
   totalPages: number
 }
 
+// Helper function to normalize image URLs (handle protocol-relative URLs)
+const normalizeImageUrl = (url: string | undefined): string => {
+  if (!url) return '/placeholder.svg'
+  if (url.startsWith('//')) {
+    return `https:${url}`
+  }
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+  return url
+}
+
+/**
+ * Map raw API product to Part interface
+ */
+function mapProductToPart(product: any): Part {
+  // Get the first image from imageUrls array, or use placeholder
+  const firstImage = product.imageUrls && product.imageUrls.length > 0 
+    ? product.imageUrls[0] 
+    : '/placeholder.svg'
+  
+  // Build compatibility array from make, model, year
+  const compatibility: string[] = []
+  if (product.make) compatibility.push(product.make)
+  if (product.model) compatibility.push(product.model)
+  if (product.year) compatibility.push(product.year.toString())
+  
+  // Build vehicle models array
+  const vehicleModels: string[] = []
+  if (product.make) vehicleModels.push(product.make)
+  if (product.model) vehicleModels.push(product.model)
+  
+  // Build vehicle years array
+  const vehicleYears: number[] = []
+  if (product.year) vehicleYears.push(product.year)
+  
+  // Determine if product is in stock - check multiple possible field names
+  // API might return: inStock, isInStock, stock, available, quantity, stockStatus
+  // Default to true if no stock info is available (to allow adding to cart)
+  const isInStock = 
+    product.inStock === true ||
+    product.inStock === 'true' ||
+    product.isInStock === true ||
+    product.isInStock === 'true' ||
+    product.stock > 0 ||
+    product.stock === true ||
+    product.stock === 'true' ||
+    product.available === true ||
+    product.available === 'true' ||
+    product.quantity > 0 ||
+    product.stockStatus === 'in_stock' ||
+    product.stockStatus === 'available' ||
+    product.stockStatus === 'In Stock' ||
+    // Default to true if no stock field exists (better UX - allows adding to cart)
+    (product.inStock === undefined && product.isInStock === undefined && product.stock === undefined && product.available === undefined && product.quantity === undefined && product.stockStatus === undefined)
+  
+  return {
+    id: product.id || '',
+    name: product.name || 'Unnamed Product',
+    category: product.category || '',
+    price: product.displayPrice || product.lowestPrice || 0,
+    image: normalizeImageUrl(firstImage),
+    description: product.description || '',
+    compatibility: compatibility,
+    inStock: isInStock,
+    brand: product.manufacturer || product.make,
+    sku: product.sku || product.oemPartNumber,
+    // Map additional fields
+    vehicleModels: vehicleModels.length > 0 ? vehicleModels : undefined,
+    vehicleYears: vehicleYears.length > 0 ? vehicleYears : undefined,
+    partCategory: product.subcategory || product.category,
+    // Map all available images
+    images: product.imageUrls ? product.imageUrls.map((url: string) => normalizeImageUrl(url)) : undefined,
+    // Map inventory ID (required for cart operations)
+    inventoryId: product.inventoryId,
+    // Map OEM part number if available
+    oemPartNumber: product.oemPartNumber,
+    // Map seller information if needed
+    sellerName: product.sellerName,
+    sellerId: product.sellerId,
+    // Map rating information
+    averageRating: product.averageRating,
+    reviewCount: product.reviewCount,
+  }
+}
+
 /**
  * Fetch products from the marketplace API endpoint
  */
@@ -65,72 +151,11 @@ export async function fetchProducts(filters: ProductFilters = {}): Promise<Produ
       }
     }>(endpoint)
     
-    // Helper function to normalize image URLs (handle protocol-relative URLs)
-    const normalizeImageUrl = (url: string | undefined): string => {
-      if (!url) return '/placeholder.svg'
-      if (url.startsWith('//')) {
-        return `https:${url}`
-      }
-      if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url
-      }
-      return url
-    }
-    
     // Extract products from the response data array
     const rawProducts = response.data || []
     
     // Map API response fields to Part interface based on actual API structure
-    const mappedProducts: Part[] = rawProducts.map((product: any) => {
-      // Get the first image from imageUrls array, or use placeholder
-      const firstImage = product.imageUrls && product.imageUrls.length > 0 
-        ? product.imageUrls[0] 
-        : '/placeholder.svg'
-      
-      // Build compatibility array from make, model, year
-      const compatibility: string[] = []
-      if (product.make) compatibility.push(product.make)
-      if (product.model) compatibility.push(product.model)
-      if (product.year) compatibility.push(product.year.toString())
-      
-      // Build vehicle models array
-      const vehicleModels: string[] = []
-      if (product.make) vehicleModels.push(product.make)
-      if (product.model) vehicleModels.push(product.model)
-      
-      // Build vehicle years array
-      const vehicleYears: number[] = []
-      if (product.year) vehicleYears.push(product.year)
-      
-      return {
-        id: product.id || '',
-        name: product.name || 'Unnamed Product',
-        category: product.category || '',
-        price: product.displayPrice || product.lowestPrice || 0,
-        image: normalizeImageUrl(firstImage),
-        description: product.description || '',
-        compatibility: compatibility,
-        inStock: product.inStock !== undefined ? product.inStock : true,
-        brand: product.manufacturer || product.make,
-        sku: product.sku || product.oemPartNumber,
-        // Map additional fields
-        vehicleModels: vehicleModels.length > 0 ? vehicleModels : undefined,
-        vehicleYears: vehicleYears.length > 0 ? vehicleYears : undefined,
-        partCategory: product.subcategory || product.category,
-        // Map all available images
-        images: product.imageUrls ? product.imageUrls.map((url: string) => normalizeImageUrl(url)) : undefined,
-        // Map inventory ID (required for cart operations)
-        ...(product.inventoryId && { inventoryId: product.inventoryId }),
-        // Map OEM part number if available
-        ...(product.oemPartNumber && { oemPartNumber: product.oemPartNumber }),
-        // Map seller information if needed
-        ...(product.sellerName && { sellerName: product.sellerName }),
-        ...(product.sellerId && { sellerId: product.sellerId }),
-        // Map rating information
-        ...(product.averageRating !== undefined && { averageRating: product.averageRating }),
-        ...(product.reviewCount !== undefined && { reviewCount: product.reviewCount }),
-      }
-    })
+    const mappedProducts: Part[] = rawProducts.map(mapProductToPart)
     
     // Extract pagination info
     const pagination = response.pagination || {}
@@ -144,6 +169,51 @@ export async function fetchProducts(filters: ProductFilters = {}): Promise<Produ
     }
   } catch (error) {
     console.error('Error fetching products:', error)
+    throw error
+  }
+}
+
+/**
+ * Fetch a single product by ID from the marketplace API endpoint
+ */
+export async function fetchProductById(productId: string): Promise<Part | null> {
+  try {
+    // First try searching by exact ID using the search endpoint
+    // Use a broad search to find the product
+    const response = await apiClient.get<{
+      success: boolean
+      message: string
+      data: any[]
+      pagination: {
+        page: number
+        limit: number
+        total: number
+        totalPages: number
+        hasNext: boolean
+        hasPrev: boolean
+      }
+    }>(`/api/buyer/products/marketplace?limit=50`)
+    
+    // Find the product in the response by ID
+    const rawProducts = response.data || []
+    
+    // Try exact match first, then try finding by ID in the results
+    let product = rawProducts.find((p: any) => p.id === productId)
+    
+    // If not found by exact ID match, try partial match
+    if (!product) {
+      product = rawProducts.find((p: any) => 
+        p.id && (p.id.includes(productId) || productId.includes(p.id))
+      )
+    }
+    
+    if (product) {
+      return mapProductToPart(product)
+    }
+    
+    return null
+  } catch (error) {
+    console.error('Error fetching product by ID:', error)
     throw error
   }
 }

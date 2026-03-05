@@ -322,13 +322,13 @@ export default function CheckoutPage() {
     return (
       <main className="min-h-screen bg-background">
         <Navigation />
-        <section className="pt-32 pb-16 px-6">
+        <section className="pt-32 pb-16 px-6 bg-background dark:bg-black">
           <div className="max-w-2xl mx-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6 }}
-              className="glass-card rounded-lg p-12 text-center"
+              className="glass-card dark:glass-card rounded-lg p-12 text-center"
             >
               <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
                 <motion.div
@@ -339,9 +339,9 @@ export default function CheckoutPage() {
                   <Shield className="h-10 w-10 text-green-400" />
                 </motion.div>
               </div>
-              <h1 className="text-4xl font-light text-white mb-4">Order Confirmed</h1>
-              <p className="text-muted font-light mb-2">Thank you for your purchase</p>
-              <p className="text-sm text-muted font-light mb-8">
+              <h1 className="text-4xl font-light text-foreground dark:text-white mb-4">Order Confirmed</h1>
+              <p className="text-muted-foreground dark:text-muted font-light mb-2">Thank you for your purchase</p>
+              <p className="text-sm text-muted-foreground dark:text-muted font-light mb-8">
                 {orderData?.orderNumber ? `Order #${orderData.orderNumber}` : 'Order placed successfully'} • Confirmation sent to your email
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -350,7 +350,7 @@ export default function CheckoutPage() {
                     <Button className="w-full sm:w-auto">View Order</Button>
                   </Link>
                 ) : (
-                  <p className="text-sm text-muted font-light">
+                  <p className="text-sm text-muted-foreground dark:text-muted font-light">
                     You will receive order updates via email
                   </p>
                 )}
@@ -371,19 +371,19 @@ export default function CheckoutPage() {
     return (
       <main className="min-h-screen bg-background">
         <Navigation />
-        <section className="pt-32 pb-16 px-6">
+        <section className="pt-32 pb-16 px-6 bg-background dark:bg-black">
           <div className="max-w-2xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="glass-card rounded-lg p-12 text-center"
+              className="glass-card dark:glass-card rounded-lg p-12 text-center"
             >
-              <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
-                <ShoppingBag className="h-10 w-10 text-muted" />
+              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-6">
+                <ShoppingBag className="h-10 w-10 text-muted-foreground" />
               </div>
-              <h1 className="text-3xl font-light text-white mb-4">Your cart is empty</h1>
-              <p className="text-muted font-light mb-8">Add some premium parts to get started</p>
+              <h1 className="text-3xl font-light text-foreground dark:text-white mb-4">Your cart is empty</h1>
+              <p className="text-muted-foreground dark:text-muted font-light mb-8">Add some premium parts to get started</p>
               <Link href="/catalog">
                 <Button>Browse Catalog</Button>
               </Link>
@@ -398,7 +398,7 @@ export default function CheckoutPage() {
     <main className="min-h-screen bg-background">
       <Navigation />
 
-      <section className="pt-32 pb-16 px-6">
+      <section className="pt-32 pb-16 px-6 bg-background dark:bg-black">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div
@@ -407,10 +407,10 @@ export default function CheckoutPage() {
             transition={{ duration: 0.8 }}
             className="text-center mb-12"
           >
-            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-white mb-4">
+            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground dark:text-white mb-4">
               Secure <span className="font-semibold">Checkout</span>
             </h1>
-            <p className="text-muted font-light">Complete your order with confidence</p>
+            <p className="text-muted-foreground dark:text-muted font-light">Complete your order with confidence</p>
           </motion.div>
 
           {/* Progress Steps */}
@@ -426,22 +426,22 @@ export default function CheckoutPage() {
                   onClick={() => setStep(index + 1)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
                     step === index + 1
-                      ? "bg-white text-black"
+                      ? "bg-foreground text-background dark:bg-white dark:text-black"
                       : step > index + 1
                         ? "bg-accent/20 text-accent"
-                        : "bg-white/5 text-muted"
+                        : "bg-muted text-foreground dark:bg-white/5 dark:text-muted"
                   }`}
                 >
                   <span
                     className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
-                      step === index + 1 ? "bg-black text-white" : step > index + 1 ? "bg-accent text-white" : ""
+                      step === index + 1 ? "bg-background text-foreground dark:bg-black dark:text-white" : step > index + 1 ? "bg-accent text-white" : ""
                     }`}
                   >
                     {index + 1}
                   </span>
                   <span className="font-light hidden sm:inline">{stepName}</span>
                 </button>
-                {index < 2 && <ChevronRight className="h-5 w-5 text-muted mx-2" />}
+                {index < 2 && <ChevronRight className="h-5 w-5 text-muted-foreground dark:text-muted mx-2" />}
               </div>
             ))}
           </motion.div>
@@ -460,9 +460,9 @@ export default function CheckoutPage() {
                     transition={{ duration: 0.4 }}
                     className="space-y-4"
                   >
-                    <h2 className="text-2xl font-light text-white mb-6">Review Your Items</h2>
+                    <h2 className="text-2xl font-light text-foreground dark:text-white mb-6">Review Your Items</h2>
                     {items.map((item) => (
-                      <div key={item.id} className="glass-card rounded-lg p-6">
+                      <div key={item.id} className="glass-card dark:glass-card rounded-lg p-6">
                         <div className="flex gap-6">
                           <div className="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
                             <Image
@@ -475,15 +475,15 @@ export default function CheckoutPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between gap-4">
                               <div>
-                                <h3 className="text-lg font-light text-white">{item.name}</h3>
-                                <p className="text-muted font-light text-sm">{item.category}</p>
+                                <h3 className="text-lg font-light text-foreground dark:text-white">{item.name}</h3>
+                                <p className="text-muted-foreground dark:text-muted font-light text-sm">{item.category}</p>
                               </div>
                               <button
                                 onClick={() => handleRemoveItem(item)}
-                                className="text-muted hover:text-destructive transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={!item.cartItemId || removingItems.has(item.cartItemId)}
+                                className="text-muted-foreground dark:text-muted hover:text-destructive transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={removingItems.has(item.cartItemId || item.id)}
                               >
-                                {removingItems.has(item.cartItemId) ? (
+                                {removingItems.has(item.cartItemId || item.id) ? (
                                   <Loader2 className="h-5 w-5 animate-spin" />
                                 ) : (
                                   <Trash2 className="h-5 w-5" />
@@ -494,17 +494,17 @@ export default function CheckoutPage() {
                               <div className="flex items-center gap-3">
                                 <button
                                   onClick={() => handleQuantityChange(item, -1)}
-                                  className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                  disabled={!item.cartItemId || updatingItems.has(item.cartItemId) || item.quantity <= 1}
+                                  className="w-8 h-8 rounded-full bg-muted dark:bg-white/5 flex items-center justify-center hover:bg-muted/80 dark:hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={updatingItems.has(item.cartItemId || item.id) || item.quantity <= 1}
                                 >
-                                  {updatingItems.has(item.cartItemId) ? (
+                                  {updatingItems.has(item.cartItemId || item.id) ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
                                     <Minus className="h-4 w-4" />
                                   )}
                                 </button>
-                                <span className="text-white font-light w-8 text-center">
-                                  {updatingItems.has(item.cartItemId) ? (
+                                <span className="text-foreground dark:text-white font-light w-8 text-center">
+                                  {updatingItems.has(item.cartItemId || item.id) ? (
                                     <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                                   ) : (
                                     item.quantity
@@ -512,17 +512,17 @@ export default function CheckoutPage() {
                                 </span>
                                 <button
                                   onClick={() => handleQuantityChange(item, 1)}
-                                  className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                  disabled={!item.cartItemId || updatingItems.has(item.cartItemId)}
+                                  className="w-8 h-8 rounded-full bg-muted dark:bg-white/5 flex items-center justify-center hover:bg-muted/80 dark:hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={updatingItems.has(item.cartItemId || item.id)}
                                 >
-                                  {updatingItems.has(item.cartItemId) ? (
+                                  {updatingItems.has(item.cartItemId || item.id) ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />
                                   ) : (
                                     <Plus className="h-4 w-4" />
                                   )}
                                 </button>
                               </div>
-                              <span className="text-xl font-light text-white">
+                              <span className="text-xl font-light text-foreground dark:text-white">
                                 ${(item.price * item.quantity).toLocaleString()}
                               </span>
                             </div>
@@ -545,15 +545,15 @@ export default function CheckoutPage() {
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <h2 className="text-2xl font-light text-white mb-6">Shipping Information</h2>
+                    <h2 className="text-2xl font-light text-foreground dark:text-white mb-6">Shipping Information</h2>
                     
                     {/* Guest Buyer Information (only for non-authenticated users) */}
                     {!isAuthenticated && (
-                      <div className="glass-card rounded-lg p-6 mb-6 border border-white/10">
-                        <h3 className="text-lg font-light text-white mb-4">Buyer Information</h3>
+                      <div className="glass-card dark:glass-card rounded-lg p-6 mb-6 border border-border dark:border-white/10">
+                        <h3 className="text-lg font-light text-foreground dark:text-white mb-4">Buyer Information</h3>
                         <div className="grid md:grid-cols-2 gap-4">
                           <div>
-                            <label className="text-sm text-muted font-light mb-2 block">
+                            <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">
                               First Name <span className="text-destructive">*</span>
                             </label>
                             <Input
@@ -562,11 +562,11 @@ export default function CheckoutPage() {
                               value={guestInfo.firstName}
                               onChange={(e) => setGuestInfo({ ...guestInfo, firstName: e.target.value })}
                               required
-                              className="bg-muted/50 border-border"
+                              className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted font-light mb-2 block">
+                            <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">
                               Last Name <span className="text-destructive">*</span>
                             </label>
                             <Input
@@ -575,11 +575,11 @@ export default function CheckoutPage() {
                               value={guestInfo.lastName}
                               onChange={(e) => setGuestInfo({ ...guestInfo, lastName: e.target.value })}
                               required
-                              className="bg-muted/50 border-border"
+                              className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted font-light mb-2 block">
+                            <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">
                               Email Address <span className="text-destructive">*</span>
                             </label>
                             <Input
@@ -588,11 +588,11 @@ export default function CheckoutPage() {
                               value={guestInfo.email}
                               onChange={(e) => setGuestInfo({ ...guestInfo, email: e.target.value })}
                               required
-                              className="bg-muted/50 border-border"
+                              className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted font-light mb-2 block">
+                            <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">
                               Phone Number <span className="text-destructive">*</span>
                             </label>
                             <Input
@@ -602,7 +602,7 @@ export default function CheckoutPage() {
                               onChange={(e) => setGuestInfo({ ...guestInfo, phoneNumber: e.target.value })}
                               required
                               minLength={7}
-                              className="bg-muted/50 border-border"
+                              className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                             />
                             {guestInfo.phoneNumber && guestInfo.phoneNumber.length > 0 && guestInfo.phoneNumber.length < 7 && (
                               <p className="text-sm text-destructive mt-1">Phone number must be at least 7 characters</p>
@@ -619,21 +619,21 @@ export default function CheckoutPage() {
                         {!showNewAddressForm && (
                           <div className="space-y-4 mb-6">
                             {isLoadingAddresses ? (
-                              <div className="glass-card rounded-lg p-6 text-center">
+                              <div className="glass-card dark:glass-card rounded-lg p-6 text-center">
                                 <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2 text-accent" />
-                                <p className="text-muted text-sm">Loading addresses...</p>
+                                <p className="text-muted-foreground dark:text-muted text-sm">Loading addresses...</p>
                               </div>
                             ) : savedAddresses.length > 0 ? (
                               <>
-                                <h3 className="text-lg font-light text-white mb-4">Select Shipping Address</h3>
+                                <h3 className="text-lg font-light text-foreground dark:text-white mb-4">Select Shipping Address</h3>
                                 <div className="space-y-3">
                                   {savedAddresses.map((address) => (
                                     <label
                                       key={address.id}
-                                      className={`block glass-card rounded-lg p-4 cursor-pointer border-2 transition-all ${
+                                      className={`block glass-card dark:glass-card rounded-lg p-4 cursor-pointer border-2 transition-all ${
                                         selectedAddressId === address.id
                                           ? 'border-accent bg-accent/10'
-                                          : 'border-white/10 hover:border-white/20'
+                                          : 'border-border dark:border-white/10 hover:border-accent dark:hover:border-white/20'
                                       }`}
                                     >
                                       <div className="flex items-start gap-4">
@@ -647,17 +647,17 @@ export default function CheckoutPage() {
                                         <div className="flex-1">
                                           <div className="flex items-center gap-2 mb-2">
                                             <MapPin className="h-4 w-4 text-accent" />
-                                            <span className="text-white font-light">{address.fullName}</span>
+                                            <span className="text-foreground dark:text-white font-light">{address.fullName}</span>
                                             {address.isDefault && (
                                               <span className="text-xs bg-accent/20 text-accent px-2 py-1 rounded">Default</span>
                                             )}
                                           </div>
-                                          <p className="text-muted text-sm">{address.phoneNumber}</p>
-                                          <p className="text-muted text-sm mt-1">
+                                          <p className="text-muted-foreground dark:text-muted text-sm">{address.phoneNumber}</p>
+                                          <p className="text-muted-foreground dark:text-muted text-sm mt-1">
                                             {address.addressLine1}
                                             {address.addressLine2 && `, ${address.addressLine2}`}
                                           </p>
-                                          <p className="text-muted text-sm">
+                                          <p className="text-muted-foreground dark:text-muted text-sm">
                                             {address.city}, {address.province}
                                             {address.postalCode && ` ${address.postalCode}`}
                                           </p>
@@ -673,7 +673,7 @@ export default function CheckoutPage() {
                             <Button
                               variant="outline"
                               onClick={() => setShowNewAddressForm(true)}
-                              className="w-full bg-transparent border-white/20 hover:bg-white/5"
+                              className="w-full bg-transparent border-border dark:border-white/20 hover:bg-muted dark:hover:bg-white/5"
                             >
                               <PlusCircle className="h-4 w-4 mr-2" />
                               Add New Address
@@ -683,9 +683,9 @@ export default function CheckoutPage() {
                         
                         {/* New Address Form (authenticated users) */}
                         {showNewAddressForm && (
-                          <div className="glass-card rounded-lg p-6 mb-6">
+                          <div className="glass-card dark:glass-card rounded-lg p-6 mb-6">
                             <div className="flex items-center justify-between mb-4">
-                              <h3 className="text-lg font-light text-white">New Shipping Address</h3>
+                              <h3 className="text-lg font-light text-foreground dark:text-white">New Shipping Address</h3>
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -703,83 +703,83 @@ export default function CheckoutPage() {
                                     isDefault: false,
                                   })
                                 }}
-                                className="text-muted hover:text-white"
+                                className="text-muted-foreground dark:text-muted hover:text-foreground dark:hover:text-white"
                               >
                                 Cancel
                               </Button>
                             </div>
                             <div className="grid md:grid-cols-2 gap-4">
                               <div className="md:col-span-2">
-                                <label className="text-sm text-muted font-light mb-2 block">Full Name</label>
+                                <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">Full Name</label>
                                 <Input 
                                   placeholder="John Doe" 
-                                  className="bg-white/5 border-white/10 text-white"
+                                  className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                   value={shippingForm.fullName}
                                   onChange={(e) => setShippingForm({ ...shippingForm, fullName: e.target.value })}
                                 />
                               </div>
                               <div className="md:col-span-2">
-                                <label className="text-sm text-muted font-light mb-2 block">Phone Number</label>
+                                <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">Phone Number</label>
                                 <Input 
                                   placeholder="+263771234567" 
-                                  className="bg-white/5 border-white/10 text-white"
+                                  className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                   value={shippingForm.phoneNumber}
                                   onChange={(e) => setShippingForm({ ...shippingForm, phoneNumber: e.target.value })}
                                 />
                               </div>
                               <div className="md:col-span-2">
-                                <label className="text-sm text-muted font-light mb-2 block">Address Line 1 <span className="text-destructive">*</span></label>
+                                <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">Address Line 1 <span className="text-destructive">*</span></label>
                                 <Input 
                                   placeholder="123 Main Street" 
-                                  className="bg-white/5 border-white/10 text-white"
+                                  className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                   value={shippingForm.addressLine1}
                                   onChange={(e) => setShippingForm({ ...shippingForm, addressLine1: e.target.value })}
                                   required
                                 />
                               </div>
                               <div className="md:col-span-2">
-                                <label className="text-sm text-muted font-light mb-2 block">Address Line 2 (Optional)</label>
+                                <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">Address Line 2 (Optional)</label>
                                 <Input 
                                   placeholder="Apartment 4B" 
-                                  className="bg-white/5 border-white/10 text-white"
+                                  className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                   value={shippingForm.addressLine2}
                                   onChange={(e) => setShippingForm({ ...shippingForm, addressLine2: e.target.value })}
                                 />
                               </div>
                               <div>
-                                <label className="text-sm text-muted font-light mb-2 block">City <span className="text-destructive">*</span></label>
+                                <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">City <span className="text-destructive">*</span></label>
                                 <Input 
                                   placeholder="Harare" 
-                                  className="bg-white/5 border-white/10 text-white"
+                                  className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                   value={shippingForm.city}
                                   onChange={(e) => setShippingForm({ ...shippingForm, city: e.target.value })}
                                   required
                                 />
                               </div>
                               <div>
-                                <label className="text-sm text-muted font-light mb-2 block">Province/State <span className="text-destructive">*</span></label>
+                                <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">Province/State <span className="text-destructive">*</span></label>
                                 <Input 
                                   placeholder="Harare" 
-                                  className="bg-white/5 border-white/10 text-white"
+                                  className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                   value={shippingForm.province}
                                   onChange={(e) => setShippingForm({ ...shippingForm, province: e.target.value })}
                                   required
                                 />
                               </div>
                               <div>
-                                <label className="text-sm text-muted font-light mb-2 block">Postal Code</label>
+                                <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">Postal Code</label>
                                 <Input 
                                   placeholder="00263" 
-                                  className="bg-white/5 border-white/10 text-white"
+                                  className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                   value={shippingForm.postalCode}
                                   onChange={(e) => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
                                 />
                               </div>
                               <div>
-                                <label className="text-sm text-muted font-light mb-2 block">Country</label>
+                                <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">Country</label>
                                 <Input 
                                   placeholder="Zimbabwe" 
-                                  className="bg-white/5 border-white/10 text-white"
+                                  className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                   value={shippingForm.country}
                                   onChange={(e) => setShippingForm({ ...shippingForm, country: e.target.value })}
                                 />
@@ -792,7 +792,7 @@ export default function CheckoutPage() {
                                     onChange={(e) => setShippingForm({ ...shippingForm, isDefault: e.target.checked })}
                                     className="accent-accent"
                                   />
-                                  <span className="text-sm text-muted font-light">Set as default address</span>
+                                  <span className="text-sm text-muted-foreground dark:text-muted font-light">Set as default address</span>
                                 </label>
                               </div>
                             </div>
@@ -815,11 +815,11 @@ export default function CheckoutPage() {
                       </>
                     ) : (
                       /* Guest Shipping Address Form (simplified - only required fields) */
-                      <div className="glass-card rounded-lg p-6 mb-6 border border-white/10">
-                        <h3 className="text-lg font-light text-white mb-4">Shipping Address</h3>
+                      <div className="glass-card dark:glass-card rounded-lg p-6 mb-6 border border-border dark:border-white/10">
+                        <h3 className="text-lg font-light text-foreground dark:text-white mb-4">Shipping Address</h3>
                         <div className="grid md:grid-cols-2 gap-4">
                           <div className="md:col-span-2">
-                            <label className="text-sm text-muted font-light mb-2 block">
+                            <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">
                               Address Line 1 <span className="text-destructive">*</span>
                             </label>
                             <Input
@@ -828,11 +828,11 @@ export default function CheckoutPage() {
                               value={shippingForm.addressLine1}
                               onChange={(e) => setShippingForm({ ...shippingForm, addressLine1: e.target.value })}
                               required
-                              className="bg-muted/50 border-border"
+                              className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                             />
                           </div>
                           <div className="md:col-span-2">
-                            <label className="text-sm text-muted font-light mb-2 block">
+                            <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">
                               Address Line 2 (Optional)
                             </label>
                             <Input
@@ -840,11 +840,11 @@ export default function CheckoutPage() {
                               placeholder="Apartment 4B"
                               value={shippingForm.addressLine2}
                               onChange={(e) => setShippingForm({ ...shippingForm, addressLine2: e.target.value })}
-                              className="bg-muted/50 border-border"
+                              className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted font-light mb-2 block">
+                            <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">
                               City <span className="text-destructive">*</span>
                             </label>
                             <Input
@@ -853,11 +853,11 @@ export default function CheckoutPage() {
                               value={shippingForm.city}
                               onChange={(e) => setShippingForm({ ...shippingForm, city: e.target.value })}
                               required
-                              className="bg-muted/50 border-border"
+                              className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                             />
                           </div>
                           <div>
-                            <label className="text-sm text-muted font-light mb-2 block">
+                            <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">
                               Province <span className="text-destructive">*</span>
                             </label>
                             <Input
@@ -866,11 +866,11 @@ export default function CheckoutPage() {
                               value={shippingForm.province}
                               onChange={(e) => setShippingForm({ ...shippingForm, province: e.target.value })}
                               required
-                              className="bg-muted/50 border-border"
+                              className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                             />
                           </div>
                           <div className="md:col-span-2">
-                            <label className="text-sm text-muted font-light mb-2 block">
+                            <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">
                               Postal Code (Optional)
                             </label>
                             <Input
@@ -878,7 +878,7 @@ export default function CheckoutPage() {
                               placeholder="00263"
                               value={shippingForm.postalCode}
                               onChange={(e) => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
-                              className="bg-muted/50 border-border"
+                              className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                             />
                           </div>
                         </div>
@@ -886,34 +886,34 @@ export default function CheckoutPage() {
                     )}
                     
                     {/* Order Details Section */}
-                    <div className="glass-card rounded-lg p-6">
-                      <h3 className="text-lg font-light text-white mb-4">Order Details (Optional)</h3>
+                    <div className="glass-card dark:glass-card rounded-lg p-6">
+                      <h3 className="text-lg font-light text-foreground dark:text-white mb-4">Order Details (Optional)</h3>
                       <div className="grid md:grid-cols-2 gap-4">
                         {isAuthenticated && (
                           <>
                             <div>
-                              <label className="text-sm text-muted font-light mb-2 block">PO Number</label>
+                              <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">PO Number</label>
                               <Input 
                                 placeholder="PO-2024-001" 
-                                className="bg-white/5 border-white/10 text-white"
+                                className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                 value={orderDetails.poNumber}
                                 onChange={(e) => setOrderDetails({ ...orderDetails, poNumber: e.target.value })}
                               />
                             </div>
                             <div>
-                              <label className="text-sm text-muted font-light mb-2 block">Cost Center</label>
+                              <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">Cost Center</label>
                               <Input 
                                 placeholder="ENGINEERING" 
-                                className="bg-white/5 border-white/10 text-white"
+                                className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                 value={orderDetails.costCenter}
                                 onChange={(e) => setOrderDetails({ ...orderDetails, costCenter: e.target.value })}
                               />
                             </div>
                             <div className="md:col-span-2">
-                              <label className="text-sm text-muted font-light mb-2 block">Coupon Code</label>
+                              <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">Coupon Code</label>
                               <Input 
                                 placeholder="DISCOUNT10" 
-                                className="bg-white/5 border-white/10 text-white"
+                                className="bg-background dark:bg-white/5 border-border dark:border-white/10"
                                 value={orderDetails.couponCode}
                                 onChange={(e) => setOrderDetails({ ...orderDetails, couponCode: e.target.value })}
                               />
@@ -921,10 +921,10 @@ export default function CheckoutPage() {
                           </>
                         )}
                         <div className={isAuthenticated ? "md:col-span-2" : ""}>
-                          <label className="text-sm text-muted font-light mb-2 block">Order Notes</label>
+                          <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">Order Notes</label>
                           <textarea
                             placeholder="Special delivery instructions or notes..."
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent min-h-[100px]"
+                            className="w-full bg-background dark:bg-white/5 border border-border dark:border-white/10 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-accent min-h-[100px]"
                             value={orderDetails.notes}
                             onChange={(e) => setOrderDetails({ ...orderDetails, notes: e.target.value })}
                           />
@@ -937,7 +937,7 @@ export default function CheckoutPage() {
                       <Button
                         variant="outline"
                         onClick={() => setStep(1)}
-                        className="flex-1 bg-transparent border-white/20 hover:bg-white/5"
+                        className="flex-1 bg-transparent border-border dark:border-white/20 hover:bg-muted dark:hover:bg-white/5"
                       >
                         Back to Cart
                       </Button>
@@ -966,51 +966,51 @@ export default function CheckoutPage() {
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.4 }}
                   >
-                    <h2 className="text-2xl font-light text-white mb-6">Payment Details</h2>
-                    <div className="glass-card rounded-lg p-6">
+                    <h2 className="text-2xl font-light text-foreground dark:text-white mb-6">Payment Details</h2>
+                    <div className="glass-card dark:glass-card rounded-lg p-6">
                       <div className="flex items-center gap-2 mb-6">
                         <Lock className="h-4 w-4 text-accent" />
-                        <span className="text-sm text-muted font-light">Secure 256-bit SSL encryption</span>
+                        <span className="text-sm text-muted-foreground dark:text-muted font-light">Secure 256-bit SSL encryption</span>
                       </div>
 
                       {/* Payment Method Selection */}
                       <div className="mb-6">
-                        <label className="text-sm text-muted font-light mb-3 block">Payment Method</label>
+                        <label className="text-sm text-muted-foreground dark:text-muted font-light mb-3 block">Payment Method</label>
                         <div className="grid grid-cols-3 gap-4">
                           <button
                             onClick={() => setPaymentMethod("paynow")}
                             className={`p-4 rounded-lg border transition-all ${
                               paymentMethod === "paynow"
                                 ? "border-accent bg-accent/10"
-                                : "border-white/10 bg-white/5 hover:border-white/20"
+                                : "border-border dark:border-white/10 bg-muted dark:bg-white/5 hover:border-accent dark:hover:border-white/20"
                             }`}
                           >
-                            <CreditCard className="h-6 w-6 mx-auto mb-2 text-white" />
-                            <p className="text-white font-light text-sm">Pay Now</p>
+                            <CreditCard className="h-6 w-6 mx-auto mb-2 text-foreground dark:text-white" />
+                            <p className="text-foreground dark:text-white font-light text-sm">Pay Now</p>
                           </button>
                           <button
                             onClick={() => setPaymentMethod("paypal")}
                             className={`p-4 rounded-lg border transition-all ${
                               paymentMethod === "paypal"
                                 ? "border-accent bg-accent/10"
-                                : "border-white/10 bg-white/5 hover:border-white/20"
+                                : "border-border dark:border-white/10 bg-muted dark:bg-white/5 hover:border-accent dark:hover:border-white/20"
                             }`}
                           >
                             <div className="h-6 w-6 mx-auto mb-2 flex items-center justify-center">
-                              <span className="text-white font-bold text-xs">PP</span>
+                              <span className="text-foreground dark:text-white font-bold text-xs">PP</span>
                             </div>
-                            <p className="text-white font-light text-sm">PayPal</p>
+                            <p className="text-foreground dark:text-white font-light text-sm">PayPal</p>
                           </button>
                           <button
                             onClick={() => setPaymentMethod("cash")}
                             className={`p-4 rounded-lg border transition-all ${
                               paymentMethod === "cash"
                                 ? "border-accent bg-accent/10"
-                                : "border-white/10 bg-white/5 hover:border-white/20"
+                                : "border-border dark:border-white/10 bg-muted dark:bg-white/5 hover:border-accent dark:hover:border-white/20"
                             }`}
                           >
-                            <Truck className="h-6 w-6 mx-auto mb-2 text-white" />
-                            <p className="text-white font-light text-sm">Cash on Delivery</p>
+                            <Truck className="h-6 w-6 mx-auto mb-2 text-foreground dark:text-white" />
+                            <p className="text-foreground dark:text-white font-light text-sm">Cash on Delivery</p>
                           </button>
                         </div>
                       </div>
@@ -1112,8 +1112,8 @@ export default function CheckoutPage() {
                 className="space-y-6 sticky top-32"
               >
                 {/* Order Preview */}
-                <div className="glass-card rounded-lg p-6">
-                  <h2 className="text-xl font-light text-white mb-6">Order Preview</h2>
+                <div className="glass-card dark:glass-card rounded-lg p-6">
+                  <h2 className="text-xl font-light text-foreground dark:text-white mb-6">Order Preview</h2>
                   
                   {/* Selected Address */}
                   {step >= 2 && (
@@ -1169,13 +1169,13 @@ export default function CheckoutPage() {
                   {/* Payment Method */}
                   {step >= 3 && (
                     <div className="mb-6">
-                      <h3 className="text-sm text-muted font-light mb-3">Payment Method</h3>
-                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                      <h3 className="text-sm text-muted-foreground dark:text-muted font-light mb-3">Payment Method</h3>
+                      <div className="bg-muted dark:bg-white/5 rounded-lg p-4 border border-border dark:border-white/10">
                         <div className="flex items-center gap-2">
                           {paymentMethod === "paynow" && <CreditCard className="h-4 w-4 text-accent" />}
                           {paymentMethod === "paypal" && <span className="text-accent font-bold text-xs">PP</span>}
                           {paymentMethod === "cash" && <Truck className="h-4 w-4 text-accent" />}
-                          <span className="text-white font-light text-sm capitalize">
+                          <span className="text-foreground dark:text-white font-light text-sm capitalize">
                             {paymentMethod === "paynow" ? "Pay Now" : paymentMethod === "paypal" ? "PayPal" : "Cash on Delivery"}
                           </span>
                         </div>
@@ -1185,8 +1185,8 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Order Summary */}
-                <div className="glass-card rounded-lg p-6">
-                  <h2 className="text-xl font-light text-white mb-6">Order Summary</h2>
+                <div className="glass-card dark:glass-card rounded-lg p-6">
+                  <h2 className="text-xl font-light text-foreground dark:text-white mb-6">Order Summary</h2>
 
                   <div className="space-y-4 mb-6">
                     {items.map((item) => (
@@ -1195,40 +1195,40 @@ export default function CheckoutPage() {
                           <Image src={item.image || "/placeholder.svg"} alt={item.name} fill className="object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-light text-sm truncate">{item.name}</p>
-                          <p className="text-muted text-xs">Qty: {item.quantity}</p>
+                          <p className="text-foreground dark:text-white font-light text-sm truncate">{item.name}</p>
+                          <p className="text-muted-foreground dark:text-muted text-xs">Qty: {item.quantity}</p>
                         </div>
-                        <span className="text-white font-light">${(item.price * item.quantity).toLocaleString()}</span>
+                        <span className="text-foreground dark:text-white font-light">${(item.price * item.quantity).toLocaleString()}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="border-t border-white/10 pt-4 space-y-3">
-                    <div className="flex justify-between text-muted font-light">
+                  <div className="border-border dark:border-white/10 pt-4 space-y-3">
+                    <div className="flex justify-between text-muted-foreground dark:text-muted font-light">
                       <span>Subtotal</span>
                       <span>${total.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-muted font-light">
+                    <div className="flex justify-between text-muted-foreground dark:text-muted font-light">
                       <span>Shipping</span>
                       <span>{shipping === 0 ? "Free" : `$${shipping}`}</span>
                     </div>
-                    <div className="flex justify-between text-muted font-light">
+                    <div className="flex justify-between text-muted-foreground dark:text-muted font-light">
                       <span>Tax</span>
                       <span>${tax.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-white text-lg font-light pt-3 border-t border-white/10">
+                    <div className="flex justify-between text-foreground dark:text-white text-lg font-light pt-3 border-t border-border dark:border-white/10">
                       <span>Total</span>
                       <span>${grandTotal.toFixed(2)}</span>
                     </div>
                   </div>
 
                   {/* Trust Badges */}
-                  <div className="mt-6 pt-6 border-t border-white/10">
-                    <div className="flex items-center gap-3 text-muted">
+                  <div className="mt-6 pt-6 border-t border-border dark:border-white/10">
+                    <div className="flex items-center gap-3 text-muted-foreground dark:text-muted">
                       <Shield className="h-5 w-5" />
                       <span className="text-sm font-light">Buyer Protection Guarantee</span>
                     </div>
-                    <div className="flex items-center gap-3 text-muted mt-2">
+                    <div className="flex items-center gap-3 text-muted-foreground dark:text-muted mt-2">
                       <Truck className="h-5 w-5" />
                       <span className="text-sm font-light">Free returns within 30 days</span>
                     </div>

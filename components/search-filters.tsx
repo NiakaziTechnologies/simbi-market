@@ -82,28 +82,28 @@ function SearchableSelect({ options, placeholder, value, onValueChange, classNam
                     role="combobox"
                     aria-expanded={open}
                     className={cn(
-                        "justify-between bg-white/5 border-white/10 text-white hover:bg-white/10 hover:text-white h-12 rounded-none first:rounded-l-xl last:rounded-r-xl border-r-0 last:border-r transition-all",
+                        "justify-between bg-white dark:bg-black/40 border-2 border-gray-400 dark:border-white/10 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 h-12 rounded-none first:rounded-l-xl last:rounded-r-xl border-r-0 last:border-r transition-all font-medium",
                         className
                     )}
                 >
                     {value
                         ? options.find((option) => option.value === value)?.label || value
                         : placeholder}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-70" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0 bg-[#0a0a0a] border-white/10 text-white z-[60]">
+            <PopoverContent className="w-[200px] p-0 bg-white dark:bg-zinc-900 border-2 border-gray-400 dark:border-white/10 text-black dark:text-white z-[60]">
                 <Command>
                     <CommandInput
                         placeholder={`Search ${placeholder.toLowerCase()}...`}
-                        className="h-9"
+                        className="h-9 bg-white dark:bg-zinc-900 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/50 border-b border-gray-200 dark:border-white/10"
                         onValueChange={setSearchValue}
                     />
                     <CommandList>
                         <CommandEmpty className="p-2 pt-0">
                             <Button
                                 variant="ghost"
-                                className="w-full justify-start text-xs text-accent hover:text-accent hover:bg-white/5"
+                                className="w-full justify-start text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-gray-100 dark:hover:bg-white/10"
                                 onClick={() => {
                                     onValueChange(searchValue)
                                     setOpen(false)
@@ -121,7 +121,7 @@ function SearchableSelect({ options, placeholder, value, onValueChange, classNam
                                         onValueChange(currentValue === value ? "" : currentValue)
                                         setOpen(false)
                                     }}
-                                    className="hover:bg-white/10 cursor-pointer"
+                                    className="hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer text-black dark:text-white"
                                 >
                                     <Check
                                         className={cn(
@@ -201,7 +201,7 @@ export function SearchFilters({ className }: { className?: string }) {
                         variant="outline"
                         size="sm"
                         onClick={handleClearFilters}
-                        className="h-8 px-3 text-xs bg-white/5 border-white/20 hover:bg-white/10"
+                        className="h-8 px-3 text-xs bg-white dark:bg-white/5 border-2 border-gray-400 dark:border-white/10 text-black dark:text-white hover:bg-gray-100 dark:hover:bg-white/10"
                     >
                         <X className="w-3 h-3 mr-1" />
                         Clear Filters

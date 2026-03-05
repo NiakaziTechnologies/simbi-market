@@ -34,25 +34,25 @@ export function LiveSearchResults({ isVisible, filters }: LiveSearchResultsProps
                     exit={{ opacity: 0, y: 10, scale: 0.98 }}
                     className="absolute top-full left-0 right-0 mt-4 z-50"
                 >
-                    <div className="glass-card rounded-2xl overflow-hidden border border-white/20 bg-[#0a0a0a]/90 backdrop-blur-3xl shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)]">
-                        <div className="p-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
+                    <div className="glass-card rounded-2xl overflow-hidden border border-border dark:border-white/20 bg-background dark:bg-[#0a0a0a]/90 backdrop-blur-3xl shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)]">
+                        <div className="p-4 border-b border-border dark:border-white/10 bg-muted/30 dark:bg-white/5 flex items-center justify-between">
                             <span className="text-xs font-semibold text-accent uppercase tracking-widest flex items-center gap-2">
                                 <Search className="w-3 h-3" />
                                 Matching Results
                             </span>
-                            <span className="text-[10px] text-white/40 uppercase tracking-wide">
+                            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">
                                 Showing {displayItems.length} of {displayItems.length} items
                             </span>
                         </div>
 
-                        <div className="divide-y divide-white/10">
+                        <div className="divide-y divide-border dark:divide-white/10">
                             {displayItems.map((item) => (
                                 <Link
                                     key={item.id}
                                     href={`/parts/${item.id}`}
-                                    className="group flex items-center gap-4 p-4 hover:bg-white/5 transition-all duration-300"
+                                    className="group flex items-center gap-4 p-4 hover:bg-muted/30 dark:hover:bg-white/5 transition-all duration-300"
                                 >
-                                    <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10 bg-muted/30">
+                                    <div className="relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-border dark:border-white/10 bg-muted/30">
                                         {!item.image || imageErrors.has(item.id) ? (
                                             <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
                                                 <Wrench className="h-8 w-8 text-muted-foreground/50" />
@@ -70,32 +70,32 @@ export function LiveSearchResults({ isVisible, filters }: LiveSearchResultsProps
 
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h4 className="text-white font-medium text-sm truncate group-hover:text-accent transition-colors">
+                                            <h4 className="text-foreground dark:text-white font-medium text-sm truncate group-hover:text-accent transition-colors">
                                                 {item.name}
                                             </h4>
                                             {item.inStock && (
                                                 <CheckCircle2 className="w-3 h-3 text-green-500 shrink-0" />
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-3 text-[10px] text-white/40 uppercase tracking-wider font-semibold">
+                                        <div className="flex items-center gap-3 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
                                             <span>{item.brand || "Brembo"}</span>
-                                            <span className="w-1 h-1 rounded-full bg-white/20" />
+                                            <span className="w-1 h-1 rounded-full bg-muted-foreground/20" />
                                             <span>{item.category}</span>
                                         </div>
                                     </div>
 
                                     <div className="text-right flex flex-col items-end gap-2">
-                                        <span className="text-white font-semibold text-sm">
+                                        <span className="text-foreground font-semibold text-sm">
                                             ${item.price.toLocaleString()}
                                         </span>
-                                        <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all" />
                                     </div>
                                 </Link>
                             ))}
                         </div>
 
-                        <Link href="/catalog" className="block p-4 bg-white/5 hover:bg-white/10 text-center transition-colors">
-                            <span className="text-xs font-medium text-white/60 hover:text-white transition-colors">
+                        <Link href="/catalog" className="block p-4 bg-muted/30 dark:bg-white/5 hover:bg-muted/50 dark:hover:bg-white/10 text-center transition-colors">
+                            <span className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
                                 View all results in Catalogue
                             </span>
                         </Link>

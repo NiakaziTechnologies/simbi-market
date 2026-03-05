@@ -52,7 +52,7 @@ const brands = [
 
 export function BrandsSection() {
   return (
-    <section className="py-32 px-6 bg-black">
+    <section className="py-32 px-6 bg-background dark:bg-black">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -63,13 +63,13 @@ export function BrandsSection() {
         >
           <div>
             <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Shop By Brand</p>
-            <h2 className="text-4xl md:text-6xl font-light tracking-tight text-white">
+            <h2 className="text-4xl md:text-6xl font-light tracking-tight text-foreground dark:text-white">
               Premium <span className="font-semibold">Brands</span>
             </h2>
           </div>
           <Link
             href="/catalog"
-            className="flex items-center gap-2 text-white/80 hover:text-accent transition-colors font-light group"
+            className="flex items-center gap-2 text-muted-foreground hover:text-accent transition-colors font-light group"
           >
             View All Brands
             <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />

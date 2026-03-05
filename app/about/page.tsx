@@ -78,7 +78,7 @@ export default function AboutPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 px-6 border-b border-white/10">
+      <section className="py-16 px-6 border-b border-border">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -91,7 +91,7 @@ export default function AboutPage() {
                 className="text-center"
               >
                 <p className="text-4xl md:text-5xl font-bold text-accent mb-2">{stat.value}</p>
-                <p className="text-muted font-light uppercase tracking-wider text-sm">{stat.label}</p>
+                <p className="text-muted-foreground dark:text-muted font-light uppercase tracking-wider text-sm">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -99,7 +99,7 @@ export default function AboutPage() {
       </section>
 
       {/* Mission Section */}
-      <section className="py-32 px-6">
+      <section className="py-32 px-6 bg-background dark:bg-black">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -109,17 +109,17 @@ export default function AboutPage() {
               transition={{ duration: 0.8 }}
             >
               <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Our Mission</p>
-              <h2 className="text-4xl md:text-5xl font-light tracking-tight text-white mb-6">
+              <h2 className="text-4xl md:text-5xl font-light tracking-tight text-foreground dark:text-white mb-6">
                 Empowering Vehicle Owners
                 <br />
                 <span className="font-semibold">Worldwide</span>
               </h2>
-              <p className="text-muted font-light leading-relaxed mb-8 text-lg">
+              <p className="text-muted-foreground dark:text-muted font-light leading-relaxed mb-8 text-lg">
                 To empower vehicle owners and automotive professionals with reliable, high-quality parts and exceptional
                 service. Our team of certified automotive experts carefully curates every product in our extensive
                 catalog, ensuring you receive only the finest parts for your vehicle.
               </p>
-              <p className="text-white/80 font-light leading-relaxed">
+              <p className="text-foreground dark:text-white/80 font-light leading-relaxed">
                 We understand that your vehicle is more than just transportation—it's an investment and passion. That's
                 why we're committed to providing only the highest quality automotive parts, backed by expert knowledge
                 and unmatched customer service.
@@ -137,10 +137,10 @@ export default function AboutPage() {
                 <Image src="/new/about.jpeg" alt="Our Mission" fill className="object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
               </div>
-              <div className="absolute -bottom-8 -left-8 glass-card rounded-xl p-6 max-w-xs">
+              <div className="absolute -bottom-8 -left-8 glass-card dark:glass-card rounded-xl p-6 max-w-xs">
                 <Award className="h-8 w-8 text-accent mb-3" />
-                <p className="text-white font-medium mb-1">Industry Leadership</p>
-                <p className="text-sm text-muted font-light">
+                <p className="text-foreground dark:text-white font-medium mb-1">Industry Leadership</p>
+                <p className="text-sm text-muted-foreground dark:text-muted font-light">
                   Recognized as a leading automotive parts supplier in Zimbabwe.
                 </p>
               </div>
@@ -150,7 +150,7 @@ export default function AboutPage() {
       </section>
 
       {/* Values Section */}
-      <section className="py-32 px-6 bg-black/50">
+      <section className="py-32 px-6 bg-secondary dark:bg-black/50">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -160,7 +160,7 @@ export default function AboutPage() {
             className="text-center mb-16"
           >
             <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Why Choose Us</p>
-            <h2 className="text-4xl md:text-5xl font-light tracking-tight text-white">
+            <h2 className="text-4xl md:text-5xl font-light tracking-tight text-foreground dark:text-white">
               Our Core <span className="font-semibold">Values</span>
             </h2>
           </motion.div>
@@ -173,13 +173,13 @@ export default function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="glass-card rounded-xl p-8 text-center"
+                className="glass-card dark:glass-card rounded-xl p-8 text-center"
               >
                 <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-accent/10 mb-6">
                   <value.icon className="h-7 w-7 text-accent" />
                 </div>
-                <h3 className="text-xl font-medium text-white mb-3">{value.title}</h3>
-                <p className="text-muted font-light leading-relaxed">{value.description}</p>
+                <h3 className="text-xl font-medium text-foreground dark:text-white mb-3">{value.title}</h3>
+                <p className="text-muted-foreground dark:text-muted font-light leading-relaxed">{value.description}</p>
               </motion.div>
             ))}
           </div>
@@ -187,7 +187,7 @@ export default function AboutPage() {
       </section>
 
       {/* Quality Assurance */}
-      <section className="py-32 px-6">
+      <section className="py-32 px-6 bg-background dark:bg-black">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -215,12 +215,12 @@ export default function AboutPage() {
               className="order-1 lg:order-2"
             >
               <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Quality Assurance</p>
-              <h2 className="text-4xl md:text-5xl font-light tracking-tight text-white mb-6">
+              <h2 className="text-4xl md:text-5xl font-light tracking-tight text-foreground dark:text-white mb-6">
                 Uncompromising
                 <br />
                 <span className="font-semibold">Quality</span>
               </h2>
-              <p className="text-muted font-light leading-relaxed mb-8 text-lg">
+              <p className="text-muted-foreground dark:text-muted font-light leading-relaxed mb-8 text-lg">
                 Every part that leaves our facility undergoes rigorous testing and quality control. We partner only with
                 trusted manufacturers who share our commitment to excellence.
               </p>
@@ -236,7 +236,7 @@ export default function AboutPage() {
                     className="flex items-center gap-3"
                   >
                     <CheckCircle className="h-5 w-5 text-accent flex-shrink-0" />
-                    <span className="text-white font-light">{cert}</span>
+                    <span className="text-foreground dark:text-white font-light">{cert}</span>
                   </motion.div>
                 ))}
               </div>
