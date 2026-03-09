@@ -109,6 +109,28 @@ function mapProductToPart(product: any): Part {
     // Map rating information
     averageRating: product.averageRating,
     reviewCount: product.reviewCount,
+    // Map part type (original/aftermarket/OEM/Genuine) - check multiple possible field names
+    // If seller is the same as manufacturer, it's likely OEM/Original
+    partType: product.partType || 
+              product.isOriginal === true || product.isOriginal === 'true' 
+                ? 'original' 
+                : product.isAftermarket === true || product.isAftermarket === 'true' 
+                  ? 'aftermarket' 
+                  : product.type === 'OEM' || product.type === 'Genuine'
+                    ? product.type
+                    : product.quality === 'OEM' || product.quality === 'Genuine'
+                      ? product.quality
+                      : product.condition === 'new' || product.condition === 'New'
+                        ? 'OEM'
+                        : product.sellerName === product.manufacturer || product.sellerName === product.brand
+                          ? 'OEM'
+                          : product.isVerified === true
+                            ? 'OEM'
+                            : undefined,
+    // Map VIN if available
+    vin: product.vin || product.vinNumber,
+    // Map SKU if available
+    sku: product.sku || product.sellerSku,
   }
 }
 

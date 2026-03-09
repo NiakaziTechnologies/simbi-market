@@ -34,6 +34,9 @@ export interface Part {
   oemPartNumber?: string
   averageRating?: number
   reviewCount?: number
+  // New fields for product details
+  partType?: "original" | "aftermarket" | "OEM" | "Genuine"
+  vin?: string
 }
 
 interface PartsState {

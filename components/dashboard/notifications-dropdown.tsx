@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Bell,
@@ -14,7 +14,10 @@ import {
   AlertCircle,
   Loader2,
   ExternalLink,
+  Volume2,
+  VolumeX,
 } from "lucide-react"
+import { playNotificationSound, isSoundEnabled, setSoundEnabled } from "@/lib/utils/notification-sound"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,6 +64,21 @@ export function NotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false)
   const [markingAsRead, setMarkingAsRead] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState<Set<string>>(new Set())
+  const [soundEnabled, setSoundEnabledState] = useState<boolean>(true)
+  const prevUnreadCount = useRef<number>(0)
+
+  // Initialize sound preference
+  useEffect(() => {
+    setSoundEnabledState(isSoundEnabled())
+  }, [])
+
+  // Handle sound toggle
+  const handleToggleSound = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const newValue = !soundEnabled
+    setSoundEnabledState(newValue)
+    setSoundEnabled(newValue)
+  }
 
   const loadNotifications = useCallback(async () => {
     try {
@@ -78,6 +96,11 @@ export function NotificationsDropdown() {
   const loadUnreadCount = useCallback(async () => {
     try {
       const count = await getUnreadCount()
+      // Play sound if count increased (new notification received)
+      if (count > prevUnreadCount.current && prevUnreadCount.current > 0) {
+        playNotificationSound()
+      }
+      prevUnreadCount.current = count
       setUnreadCount(count)
     } catch (error: any) {
       console.error('Error loading unread count:', error)
@@ -85,8 +108,13 @@ export function NotificationsDropdown() {
   }, [])
 
   useEffect(() => {
-    loadNotifications()
-    loadUnreadCount()
+    // Set initial previous count to current count after first load
+    const init = async () => {
+      await loadNotifications()
+      await loadUnreadCount()
+      prevUnreadCount.current = unreadCount
+    }
+    init()
 
     // Poll for unread count every 30 seconds
     const interval = setInterval(() => {
@@ -212,6 +240,20 @@ export function NotificationsDropdown() {
         <div className="flex items-center justify-between px-2 py-1.5">
           <DropdownMenuLabel className="px-0">Notifications</DropdownMenuLabel>
           <div className="flex items-center gap-1">
+            {/* Sound toggle button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleToggleSound}
+              title={soundEnabled ? "Mute notifications" : "Unmute notifications"}
+            >
+              {soundEnabled ? (
+                <Volume2 className="h-3.5 w-3.5" />
+              ) : (
+                <VolumeX className="h-3.5 w-3.5" />
+              )}
+            </Button>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"

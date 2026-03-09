@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Bell,
@@ -15,7 +15,10 @@ import {
   Truck,
   DollarSign,
   RotateCcw,
+  Volume2,
+  VolumeX,
 } from "lucide-react"
+import { playNotificationSound, isSoundEnabled, setSoundEnabled } from "@/lib/utils/notification-sound"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,7 +66,22 @@ export function SellerNotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false)
   const [markingAsRead, setMarkingAsRead] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState<Set<string>>(new Set())
+  const [soundEnabled, setSoundEnabledState] = useState<boolean>(true)
+  const prevUnreadCount = useRef<number>(0)
   const { toast } = useToast()
+
+  // Initialize sound preference
+  useEffect(() => {
+    setSoundEnabledState(isSoundEnabled())
+  }, [])
+
+  // Handle sound toggle
+  const handleToggleSound = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const newValue = !soundEnabled
+    setSoundEnabledState(newValue)
+    setSoundEnabled(newValue)
+  }
 
   // Only load notifications for sellers, not staff
   const isSeller = userType === 'seller'
@@ -95,6 +113,11 @@ export function SellerNotificationsDropdown() {
     
     try {
       const count = await getSellerUnreadCount()
+      // Play sound if count increased (new notification received)
+      if (count > prevUnreadCount.current && prevUnreadCount.current > 0) {
+        playNotificationSound()
+      }
+      prevUnreadCount.current = count
       setUnreadCount(count)
     } catch (error: any) {
       console.error('Error loading unread count:', error)
@@ -265,6 +288,20 @@ export function SellerNotificationsDropdown() {
         <div className="flex items-center justify-between px-2 py-1.5">
           <DropdownMenuLabel className="px-0">Notifications</DropdownMenuLabel>
           <div className="flex items-center gap-1">
+            {/* Sound toggle button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={handleToggleSound}
+              title={soundEnabled ? "Mute notifications" : "Unmute notifications"}
+            >
+              {soundEnabled ? (
+                <Volume2 className="h-3.5 w-3.5" />
+              ) : (
+                <VolumeX className="h-3.5 w-3.5" />
+              )}
+            </Button>
             {unreadCount > 0 && (
               <Button
                 variant="ghost"

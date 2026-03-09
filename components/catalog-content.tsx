@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from "react-redux"
 import type { RootState } from "@/lib/store"
 import { filterByCategory, searchParts, clearFilters, setFilters } from "@/lib/features/parts-slice"
 import { useCart } from "@/lib/hooks/use-cart"
-import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX, Loader2, Star, Wrench } from "lucide-react"
+import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX, Loader2, Star, Wrench, Hash, Factory, Car, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -426,6 +426,46 @@ export function CatalogContent() {
                         </h3>
                         <p className="text-muted font-light text-sm leading-relaxed mb-3">{item.description || 'No description available'}</p>
                       </Link>
+
+                      {/* Product Details - Brand, OEM, SKU, Part Type, Compatible Vehicles */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {item.brand && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                            <Factory className="h-3 w-3" />
+                            <span>{item.brand}</span>
+                          </div>
+                        )}
+                        {item.oemPartNumber && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                            <Hash className="h-3 w-3" />
+                            <span>OEM: {item.oemPartNumber}</span>
+                          </div>
+                        )}
+                        {item.sku && !item.oemPartNumber && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                            <Hash className="h-3 w-3" />
+                            <span>SKU: {item.sku}</span>
+                          </div>
+                        )}
+                        {item.partType && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                            <Tag className="h-3 w-3" />
+                            <span className="capitalize">{item.partType === 'OEM' ? 'OEM' : item.partType === 'Genuine' ? 'Genuine' : item.partType}</span>
+                          </div>
+                        )}
+                        {item.vehicleModels && item.vehicleModels.length > 0 && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                            <Car className="h-3 w-3" />
+                            <span className="truncate max-w-[100px]">{item.vehicleModels[0]}</span>
+                            {item.vehicleModels.length > 1 && <span className="text-[10px]">+{item.vehicleModels.length - 1}</span>}
+                          </div>
+                        )}
+                        {item.vehicleYears && item.vehicleYears.length > 0 && (
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
+                            <span>{Math.min(...item.vehicleYears)}-{Math.max(...item.vehicleYears)}</span>
+                          </div>
+                        )}
+                      </div>
 
                       {/* Ratings */}
                       {(item.averageRating !== undefined && item.averageRating > 0) || (item.reviewCount !== undefined && item.reviewCount > 0) ? (

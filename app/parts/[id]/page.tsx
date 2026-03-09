@@ -45,6 +45,10 @@ import {
   ChevronLeft,
   Edit,
   Wrench,
+  Car,
+  Tag,
+  Hash,
+  Factory,
 } from "lucide-react"
 
 export default function PartDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -451,6 +455,88 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
                 <div className="text-center">
                   <Clock className="h-6 w-6 mx-auto text-accent mb-2" />
                   <span className="text-sm text-muted-foreground">Fast Delivery</span>
+                </div>
+              </div>
+
+              {/* Product Details - Brand, OEM, Part Type, Compatible Vehicles */}
+              <div className="mt-6 pt-6 border-t border-border">
+                <h3 className="text-lg font-medium text-foreground mb-4">Product Details</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Brand/Manufacturer */}
+                  {part.brand && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <Factory className="h-5 w-5 text-accent flex-shrink-0" />
+                      <div>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Brand / Manufacturer</span>
+                        <p className="text-sm font-medium text-foreground">{part.brand}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* OEM Part Number */}
+                  {(part.oemPartNumber || part.sku) && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <Hash className="h-5 w-5 text-accent flex-shrink-0" />
+                      <div>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider">
+                          {part.oemPartNumber ? 'OEM Part Number' : 'SKU'}
+                        </span>
+                        <p className="text-sm font-medium text-foreground">{part.oemPartNumber || part.sku}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Part Type (Original/Aftermarket) */}
+                  {part.partType && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <Tag className="h-5 w-5 text-accent flex-shrink-0" />
+                      <div>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Part Type</span>
+                        <p className="text-sm font-medium text-foreground capitalize">
+                          {part.partType === 'OEM' ? 'OEM (Original Equipment Manufacturer)' : 
+                           part.partType === 'Genuine' ? 'Genuine' : 
+                           part.partType.charAt(0).toUpperCase() + part.partType.slice(1)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Compatible Vehicle Models */}
+                  {part.vehicleModels && part.vehicleModels.length > 0 && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <Car className="h-5 w-5 text-accent flex-shrink-0" />
+                      <div>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Suitable Car Models</span>
+                        <p className="text-sm font-medium text-foreground">{part.vehicleModels.join(', ')}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Compatible Years */}
+                  {part.vehicleYears && part.vehicleYears.length > 0 && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                      <Tag className="h-5 w-5 text-accent flex-shrink-0" />
+                      <div>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Model Years</span>
+                        <p className="text-sm font-medium text-foreground">
+                          {part.vehicleYears.sort((a, b) => a - b).length > 1 
+                            ? `${Math.min(...part.vehicleYears)} - ${Math.max(...part.vehicleYears)}`
+                            : part.vehicleYears[0].toString()}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* VIN */}
+                  {part.vin && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 sm:col-span-2">
+                      <FileText className="h-5 w-5 text-accent flex-shrink-0" />
+                      <div>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider">VIN</span>
+                        <p className="text-sm font-medium text-foreground font-mono">{part.vin}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
