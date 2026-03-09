@@ -517,7 +517,7 @@ export default function BuyerDashboardPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-medium text-foreground mb-1">Shop Parts</h3>
-                  <p className="text-sm text-muted-foreground">Browse our catalog</p>
+                  <p className="text-sm text-muted-foreground">Browse our catalogue</p>
                 </div>
               </div>
             </div>

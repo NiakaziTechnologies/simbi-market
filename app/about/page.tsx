@@ -117,7 +117,7 @@ export default function AboutPage() {
               <p className="text-muted-foreground dark:text-muted font-light leading-relaxed mb-8 text-lg">
                 To empower vehicle owners and automotive professionals with reliable, high-quality parts and exceptional
                 service. Our team of certified automotive experts carefully curates every product in our extensive
-                catalog, ensuring you receive only the finest parts for your vehicle.
+                catalogue, ensuring you receive only the finest parts for your vehicle.
               </p>
               <p className="text-foreground dark:text-white/80 font-light leading-relaxed">
                 We understand that your vehicle is more than just transportation—it's an investment and passion. That's

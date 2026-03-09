@@ -49,6 +49,13 @@ export function DashboardTopbar({ onMenuClick }: DashboardTopbarProps) {
 
         {/* Right Actions - Pushed to far right */}
         <div className="flex items-center gap-2 ml-auto">
+          {/* Shop Now */}
+          <Link href="/catalog">
+            <Button variant="ghost" size="sm">
+              Shop Now
+            </Button>
+          </Link>
+
           {/* Cart */}
           <Link href="/checkout">
             <Button variant="ghost" size="icon" className="relative">

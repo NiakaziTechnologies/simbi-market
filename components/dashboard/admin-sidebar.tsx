@@ -17,6 +17,7 @@ import {
   X,
   LogOut,
   Truck,
+  FileText,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -27,6 +28,7 @@ const menuItems = [
   { id: "notifications", label: "Notifications", icon: Bell, href: "/dashboard/admin/notifications" },
   { id: "users", label: "Users", icon: Users, href: "/dashboard/admin/users" },
   { id: "products", label: "Products", icon: Package, href: "/dashboard/admin/products" },
+  { id: "blogs", label: "Blog", icon: FileText, href: "/dashboard/admin/blogs" },
   { id: "dispatch", label: "Dispatch", icon: Truck, href: "/dashboard/admin/dispatch" },
   { id: "payouts", label: "Payouts", icon: DollarSign, href: "/dashboard/admin/payouts" },
   { id: "returns", label: "Returns", icon: RotateCcw, href: "/dashboard/admin/returns" },
@@ -48,6 +50,7 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
     if (pathname?.includes("/notifications")) return "notifications"
     if (pathname?.includes("/users")) return "users"
     if (pathname?.includes("/products")) return "products"
+    if (pathname?.includes("/blogs")) return "blogs"
     if (pathname?.includes("/dispatch")) return "dispatch"
     if (pathname?.includes("/payouts")) return "payouts"
     if (pathname?.includes("/returns")) return "returns"

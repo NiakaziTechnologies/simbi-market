@@ -273,7 +273,7 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
             The product you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
           <Link href="/catalog">
-            <Button className="bg-accent hover:bg-accent/90">Browse Catalog</Button>
+            <Button className="bg-accent hover:bg-accent/90">Browse Catalogue</Button>
           </Link>
         </div>
         <Footer />

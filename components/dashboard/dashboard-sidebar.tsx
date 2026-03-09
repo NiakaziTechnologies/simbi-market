@@ -1,7 +1,5 @@
 "use client"
 
-"use client"
-
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -10,16 +8,13 @@ import {
   LayoutDashboard,
   Package,
   Settings,
-  ShoppingCart,
   HelpCircle,
-  LogOut,
   Menu,
   X,
   RotateCcw,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { useAuth } from "@/lib/auth/auth-context"
 
 const menuItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, href: "/dashboard/buyer" },
@@ -30,7 +25,6 @@ const menuItems = [
 
 const secondaryItems = [
   { id: "help", label: "Help & Support", icon: HelpCircle, href: "/contact" },
-  { id: "shop", label: "Shop Now", icon: ShoppingCart, href: "/catalog" },
 ]
 
 interface DashboardSidebarProps {
@@ -41,7 +35,6 @@ interface DashboardSidebarProps {
 export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: DashboardSidebarProps) {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const { logout } = useAuth()
 
   const getActiveTab = () => {
     if (pathname?.includes("/orders")) return "orders"
@@ -153,19 +146,6 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
                 </motion.div>
               </Link>
             ))}
-            <div className="pt-2">
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10",
-                  isCollapsed && "justify-center"
-                )}
-                onClick={logout}
-              >
-                <LogOut className="h-5 w-5 flex-shrink-0" />
-                {!isCollapsed && <span className="font-medium text-sm ml-3">Logout</span>}
-              </Button>
-            </div>
           </div>
         </div>
       </aside>
