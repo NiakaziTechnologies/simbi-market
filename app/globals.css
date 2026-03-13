@@ -147,3 +147,44 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Catalog search card - Light theme blue background */
+.light .catalog-search-card {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+  border: 2px solid #2563eb !important;
+}
+
+/* Catalog search input - Light theme white text */
+.light .catalog-search-input {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* Pickup locations - Light mode dark text */
+.light .pickup-location-text {
+  color: #1e293b !important;
+}
+
+.light .store-pickup-title {
+  color: #1e293b !important;
+}
+
+.light .shadow-text {
+  filter: none !important;
+}
+
+.light .catalog-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.light .catalog-search-input:focus {
+  background: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4) !important;
+  border-color: white !important;
+}
+
+.light .catalog-search-card .search-filters * {
+  color: white !important;
+}

@@ -23,7 +23,8 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(1)
   const [orderComplete, setOrderComplete] = useState(false)
   const [orderData, setOrderData] = useState<CreateOrderResponse | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState<"paynow" | "paypal" | "cash">("paynow")
+  const [paymentMethod, setPaymentMethod] = useState<"paynow" | "paypal" | "cash" | "pickup">("paynow")
+  const [pickupLocation, setPickupLocation] = useState<"avana" | "office">("avana")
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
   const [removingItems, setRemovingItems] = useState<Set<string>>(new Set())
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
@@ -80,13 +81,8 @@ export default function CheckoutPage() {
         getAddresses()
           .then((addresses) => {
             setSavedAddresses(addresses)
-            // Select default address if available
-            const defaultAddress = addresses.find(addr => addr.isDefault)
-            if (defaultAddress) {
-              setSelectedAddressId(defaultAddress.id)
-            } else if (addresses.length > 0) {
-              setSelectedAddressId(addresses[0].id)
-            }
+            // NO auto-selection - user must choose
+            // setSelectedAddressId(null)
           })
           .catch((error) => {
             console.error('Checkout page: Error loading addresses:', error)
@@ -105,7 +101,7 @@ export default function CheckoutPage() {
   }, [isAuthenticated, authLoading, loadCart])
 
   const shipping = total > 500 ? 0 : 49.99
-  const tax = total * 0.0825
+  const tax = total * 0.145  // Zimbabwe VAT 14.5%
   const grandTotal = total + shipping + tax
 
   const handleQuantityChange = async (item: typeof items[0], change: number) => {
@@ -214,16 +210,17 @@ export default function CheckoutPage() {
           return
         }
         
-        // Add optional fields if provided
+// Add optional fields if provided
         if (orderDetails.poNumber) orderRequest.poNumber = orderDetails.poNumber
         if (orderDetails.costCenter) orderRequest.costCenter = orderDetails.costCenter
         if (orderDetails.notes) orderRequest.notes = orderDetails.notes
         if (orderDetails.couponCode) orderRequest.couponCode = orderDetails.couponCode
+        if (paymentMethod) orderRequest.paymentMethod = paymentMethod
         
         // Create order from cart
-        const response = await createOrderFromCart(orderRequest)
+  const response = await createOrderFromCart(orderRequest)
         
-        // Store order data and clear cart
+        // Store order data and clear cart  
         setOrderData(response)
         await clearCart()
         setOrderComplete(true)
@@ -267,6 +264,7 @@ export default function CheckoutPage() {
           lastName: guestInfo.lastName,
           email: guestInfo.email,
           phoneNumber: guestInfo.phoneNumber,
+          paymentMethod,
           shippingAddress: {
             fullName: shippingFullName,
             phoneNumber: shippingPhoneNumber,
@@ -342,7 +340,7 @@ export default function CheckoutPage() {
               <h1 className="text-4xl font-light text-foreground dark:text-white mb-4">Order Confirmed</h1>
               <p className="text-muted-foreground dark:text-muted font-light mb-2">Thank you for your purchase</p>
               <p className="text-sm text-muted-foreground dark:text-muted font-light mb-8">
-                {orderData?.orderNumber ? `Order #${orderData.orderNumber}` : 'Order placed successfully'} • Confirmation sent to your email
+                {orderData?.orders?.[0]?.orderNumber ? `Order #${orderData.orders[0].orderNumber}` : 'Order placed successfully'} • Confirmation sent to your email
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 {isAuthenticated ? (
@@ -976,7 +974,7 @@ export default function CheckoutPage() {
                       {/* Payment Method Selection */}
                       <div className="mb-6">
                         <label className="text-sm text-muted-foreground dark:text-muted font-light mb-3 block">Payment Method</label>
-                        <div className="grid grid-cols-3 gap-4">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           <button
                             onClick={() => setPaymentMethod("paynow")}
                             className={`p-4 rounded-lg border transition-all ${
@@ -1011,6 +1009,19 @@ export default function CheckoutPage() {
                           >
                             <Truck className="h-6 w-6 mx-auto mb-2 text-foreground dark:text-white" />
                             <p className="text-foreground dark:text-white font-light text-sm">Cash on Delivery</p>
+                          </button>
+                          <button
+                            onClick={() => setPaymentMethod("pickup")}
+                            className={`p-4 rounded-lg border transition-all col-span-2 md:col-span-1 ${
+                              paymentMethod === "pickup"
+                                ? "border-accent bg-accent/10"
+                                : "border-border dark:border-white/10 bg-muted dark:bg-white/5 hover:border-accent dark:hover:border-white/20"
+                            }`}
+                          >
+                            <div className="h-6 w-6 mx-auto mb-2">
+                              <MapPin className="h-6 w-6 text-foreground dark:text-white" />
+                            </div>
+                            <p className="text-foreground dark:text-white font-light text-sm">Pickup</p>
                           </button>
                         </div>
                       </div>
@@ -1048,6 +1059,55 @@ export default function CheckoutPage() {
                         </div>
                       )}
 
+{paymentMethod === "pickup" && (
+                        <div className="bg-white/5 rounded-lg p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                              <MapPin className="h-6 w-6 text-accent" />
+                            </div>
+                            <div>
+
+                              <h3 className="store-pickup-title text-foreground dark:text-white font-light mb-2">Store Pickup</h3>
+                              <p className="text-muted font-light text-sm mb-3">Pick up your order from our fulfilment centers:</p>
+                              <div className="space-y-2">
+                                <div className={`p-3 rounded-lg border ${pickupLocation === 'avana' ? 'border-accent bg-accent/10' : 'border-white/10 bg-white/5'}`}>
+                                  <label className="flex items-start gap-2 cursor-pointer w-full">
+                                    <input
+                                      type="radio"
+                                      name="pickup"
+                                      checked={pickupLocation === 'avana'}
+                                      onChange={() => setPickupLocation('avana')}
+                                      className="mt-1 accent-accent"
+                                    />
+                                    <div>
+                                      <div className="font-medium text-white pickup-location-text text-sm shadow-text">🎯 Avana Motors</div>
+                                      <div className="text-white/90 pickup-location-text text-xs shadow-text">Harare Fulfilment Center<br/>Ready in 2-3 hours</div>
+                                    </div>
+                                  </label>
+                                </div>
+                                <div className={`p-3 rounded-lg border ${pickupLocation === 'office' ? 'border-accent bg-accent/10' : 'border-white/10 bg-white/5'}`}>
+                                  <label className="flex items-start gap-2 cursor-pointer w-full">
+                                    <input
+                                      type="radio"
+                                      name="pickup"
+                                      checked={pickupLocation === 'office'}
+                                      onChange={() => setPickupLocation('office')}
+                                      className="mt-1 accent-accent"
+                                    />
+                                    <div>
+                                      <div className="font-medium text-white pickup-location-text text-sm shadow-text">🏢 Simbi Market Office</div>
+                                      <div className="text-white/90 pickup-location-text text-xs shadow-text">Harare Head Office<br/>Ready in 1-2 hours</div>
+                                    </div>
+                                  </label>
+                                </div>
+                              </div>
+                              <div className="mt-4 p-3 bg-accent/10 rounded border border-accent">
+                                <p className="text-accent font-medium text-sm">Free pickup • No delivery fees</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       {paymentMethod === "cash" && (
                         <div className="bg-white/5 rounded-lg p-6">
                           <div className="flex items-start gap-4">
@@ -1078,12 +1138,7 @@ export default function CheckoutPage() {
                       <Button 
                         onClick={handlePlaceOrder} 
                         className="flex-1 bg-accent hover:bg-accent/90"
-                        disabled={
-                          isPlacingOrder || 
-                          (isAuthenticated && (!selectedAddressId && !showNewAddressForm)) ||
-                          (isAuthenticated && showNewAddressForm && (!shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province)) ||
-                          (!isAuthenticated && (!guestInfo.firstName || !guestInfo.lastName || !guestInfo.email || !guestInfo.phoneNumber || guestInfo.phoneNumber.length < 7 || !shippingForm.addressLine1 || !shippingForm.city || !shippingForm.province))
-                        }
+                        disabled={isPlacingOrder}
                       >
                         {isPlacingOrder ? (
                           <>

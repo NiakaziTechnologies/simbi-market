@@ -276,7 +276,7 @@ export function CatalogContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="glass-card rounded-2xl p-8 md:p-10 border-2 border-gray-400 dark:border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] bg-gray-100 dark:bg-black/60 mb-12"
+          className="catalog-search-card glass-card rounded-2xl p-8 md:p-10 border-2 border-gray-400 dark:border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] bg-gray-100 dark:bg-black/60 mb-12"
         >
           <div className="space-y-6">
             <div className="flex flex-col gap-0 overflow-hidden">
@@ -293,7 +293,7 @@ export function CatalogContent() {
                 placeholder="Search by part name, category, or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-14 pl-12 bg-white dark:bg-white/5 border-2 border-gray-400 dark:border-white/10 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/30 text-lg transition-all focus:ring-black dark:focus:ring-white focus:border-black dark:focus:border-white rounded-xl"
+                className="catalog-search-input h-14 pl-12 bg-white dark:bg-white/5 border-2 border-gray-400 dark:border-white/10 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/30 text-lg transition-all focus:ring-black dark:focus:ring-white focus:border-black dark:focus:border-white rounded-xl"
               />
             </div>
           </div>
