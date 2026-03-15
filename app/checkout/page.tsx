@@ -1081,7 +1081,7 @@ export default function CheckoutPage() {
                                     />
                                     <div>
                                       <div className="font-medium text-white pickup-location-text text-sm shadow-text">🎯 Avana Motors</div>
-                                      <div className="text-white/90 pickup-location-text text-xs shadow-text">Harare Fulfilment Center<br/>Ready in 2-3 hours</div>
+                                      <div className="text-white/90 pickup-location-text text-xs shadow-text">7 Botha Road, Cnr St Patricks, Seke Rd<br/>Harare</div>
                                     </div>
                                   </label>
                                 </div>
@@ -1096,7 +1096,7 @@ export default function CheckoutPage() {
                                     />
                                     <div>
                                       <div className="font-medium text-white pickup-location-text text-sm shadow-text">🏢 Simbi Market Office</div>
-                                      <div className="text-white/90 pickup-location-text text-xs shadow-text">Harare Head Office<br/>Ready in 1-2 hours</div>
+                                      <div className="text-white/90 pickup-location-text text-xs shadow-text">ZB Centre 4th floor<br/>Corner First Street and Union Ave, Harare</div>
                                     </div>
                                   </label>
                                 </div>
