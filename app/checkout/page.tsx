@@ -10,7 +10,7 @@ import { createOrderFromCart, type CreateOrderResponse } from "@/lib/api/orders"
 import { getAddresses, createAddress, type Address } from "@/lib/api/addresses"
 import { createGuestOrder, type GuestOrderResponse } from "@/lib/api/guest-orders"
 import { Navigation } from "@/components/navigation"
-import { Trash2, Minus, Plus, Lock, CreditCard, Truck, Shield, ChevronRight, ShoppingBag, Loader2, MapPin, PlusCircle } from "lucide-react"
+import { Trash2, Minus, Plus, Lock, CreditCard, Truck, Shield, ChevronRight, ChevronDown, ShoppingBag, Loader2, MapPin, PlusCircle, Smartphone, Building2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -23,8 +23,10 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(1)
   const [orderComplete, setOrderComplete] = useState(false)
   const [orderData, setOrderData] = useState<CreateOrderResponse | null>(null)
-  const [paymentMethod, setPaymentMethod] = useState<"paynow" | "paypal" | "cash" | "pickup">("paynow")
+const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zimswitch" | "paynow_ecocash" | "paynow_onemoney" | "paynow_telecash" | "paynow_bank" | "paypal" | "cash" | "pickup">("paynow_cards")
   const [pickupLocation, setPickupLocation] = useState<"avana" | "office">("avana")
+  const [selectedChannel, setSelectedChannel] = useState<"cards" | "zimswitch" | "ecocash" | "onemoney" | "telecash" | "bank">("cards")
+  const [showPayNowChannels, setShowPayNowChannels] = useState(false)
   const [updatingItems, setUpdatingItems] = useState<Set<string>>(new Set())
   const [removingItems, setRemovingItems] = useState<Set<string>>(new Set())
   const [isPlacingOrder, setIsPlacingOrder] = useState(false)
@@ -976,16 +978,58 @@ export default function CheckoutPage() {
                         <label className="text-sm text-muted-foreground dark:text-muted font-light mb-3 block">Payment Method</label>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           <button
-                            onClick={() => setPaymentMethod("paynow")}
-                            className={`p-4 rounded-lg border transition-all ${
-                              paymentMethod === "paynow"
+                            onClick={() => setShowPayNowChannels(!showPayNowChannels)}
+                            className={`p-4 rounded-lg border transition-all col-span-2 md:col-span-1 ${
+                              paymentMethod.startsWith("paynow")
                                 ? "border-accent bg-accent/10"
                                 : "border-border dark:border-white/10 bg-muted dark:bg-white/5 hover:border-accent dark:hover:border-white/20"
                             }`}
                           >
                             <CreditCard className="h-6 w-6 mx-auto mb-2 text-foreground dark:text-white" />
-                            <p className="text-foreground dark:text-white font-light text-sm">Pay Now</p>
+                            <p className="text-foreground dark:text-white font-light text-sm">PayNow & Local</p>
+                            <ChevronDown className={`h-4 w-4 ml-auto transition-transform ${showPayNowChannels ? 'rotate-180' : ''}`} />
                           </button>
+                          {showPayNowChannels && paymentMethod.startsWith("paynow") && (
+                            <div className="col-span-2 md:col-span-3 grid grid-cols-3 md:grid-cols-6 gap-2 p-2 bg-accent/5 rounded-lg">
+                              {[
+                                { id: 'cards', label: 'VISA' },
+                                { id: 'zimswitch', label: 'ZimSwitch' },
+                                { id: 'ecocash', label: 'EcoCash' },
+                                { id: 'onemoney', label: 'OneMoney' },
+                                { id: 'telecash', label: 'TeleCash' },
+                                { id: 'bank', label: 'Bank Transfer' }
+                              ].map(({ id, label }) => (
+                                <button
+                                  key={id}
+                                  onClick={() => {
+                                    const method = `paynow_${id}` as typeof paymentMethod
+                                    setPaymentMethod(method)
+                                    setSelectedChannel(id as any)
+                                    setShowPayNowChannels(false)
+                                  }}
+                                  className={`p-2 rounded border transition-all flex flex-col items-center gap-1 ${
+                                    paymentMethod === `paynow_${id}`
+                                      ? "border-accent bg-accent/20 shadow-md"
+                                      : "border-border dark:border-white/10 hover:border-accent hover:bg-accent/10"
+                                  }`}
+                                >
+                                  {id === 'cards' ? (
+                                    <Image src="/new/visa.jpg" alt="Visa" width={32} height={32} className="w-8 h-8 object-contain rounded" />
+                                  ) : id === 'bank' ? (
+                                    <Building2 className="h-4 w-4" />
+                                  ) : (
+                                    <Image 
+                                      src={`/new/${id === 'ecocash' ? 'EcoCash.png' : id === 'telecash' ? 'Telecash.png' : id === 'onemoney' ? '1money.jpeg' : 'zimswitch.jpeg'}`} 
+                                      alt={label} 
+                                      width={32} 
+                                      height={32} 
+                                      className="w-8 h-8 object-contain rounded" 
+                                    />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                           <button
                             onClick={() => setPaymentMethod("paypal")}
                             className={`p-4 rounded-lg border transition-all ${
@@ -1027,17 +1071,27 @@ export default function CheckoutPage() {
                       </div>
 
                       {/* Payment Method Info */}
-                      {paymentMethod === "paynow" && (
+                      {paymentMethod.startsWith("paynow") && (
                         <div className="bg-white/5 rounded-lg p-6">
                           <div className="flex items-start gap-4">
                             <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
                               <CreditCard className="h-6 w-6 text-accent" />
                             </div>
                             <div>
-                              <h3 className="text-white font-light mb-2">Pay Now</h3>
+                              <h3 className="text-white font-light mb-2">PayNow - {selectedChannel === 'cards' ? 'Visa/Mastercard' : selectedChannel === 'zimswitch' ? 'ZimSwitch' : selectedChannel === 'ecocash' ? 'EcoCash' : selectedChannel === 'onemoney' ? 'OneMoney' : selectedChannel === 'telecash' ? 'TeleCash' : 'Bank Transfer'}</h3>
                               <p className="text-muted font-light text-sm leading-relaxed">
-                                You will be redirected to the payment gateway to complete your payment securely.
+                                Complete payment via {selectedChannel === 'cards' || selectedChannel === 'zimswitch' ? 'card details' : selectedChannel === 'bank' ? 'bank transfer details' : 'mobile money'}. Secure gateway redirect.
                               </p>
+                              {selectedChannel === 'ecocash' || selectedChannel === 'onemoney' || selectedChannel === 'telecash' && (
+                                <div className="mt-4 p-3 bg-green-500/10 rounded border border-green-500/30">
+                                  <p className="text-green-400 font-medium text-sm">Enter your mobile number on next step</p>
+                                </div>
+                              )}
+                              {selectedChannel === 'bank' && (
+                                <div className="mt-4 p-3 bg-purple-500/10 rounded border border-purple-500/30">
+                                  <p className="text-purple-400 font-medium text-sm">Use bank details shown after order confirmation</p>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

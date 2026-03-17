@@ -170,12 +170,6 @@ export function SearchFilters({ className }: { className?: string }) {
         <div className="relative w-full">
             <div className={cn("grid grid-cols-2 md:grid-cols-4 w-full", className)}>
                 <SearchableSelect
-                    options={years}
-                    placeholder="Year"
-                    value={filters.year}
-                    onValueChange={(value) => handleFilterChange('year', value)}
-                />
-                <SearchableSelect
                     options={vehicleData.makes}
                     placeholder="Make"
                     value={filters.make}
@@ -183,9 +177,16 @@ export function SearchFilters({ className }: { className?: string }) {
                 />
                 <SearchableSelect
                     options={modelOptions}
-                    placeholder={filters.make ? "Model" : "Select Make First"}
+                    placeholder="Model(Select Make first)"
                     value={filters.model}
                     onValueChange={(value) => handleFilterChange('model', value)}
+                />
+
+                <SearchableSelect
+                    options={years}
+                    placeholder="Year"
+                    value={filters.year}
+                    onValueChange={(value) => handleFilterChange('year', value)}
                 />
                 <SearchableSelect
                     options={vehicleData.categories}
@@ -193,6 +194,7 @@ export function SearchFilters({ className }: { className?: string }) {
                     value={filters.category}
                     onValueChange={(value) => handleFilterChange('category', value)}
                 />
+
             </div>
 
             {hasActiveFilters && (
