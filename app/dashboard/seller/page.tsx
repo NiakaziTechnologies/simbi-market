@@ -15,12 +15,14 @@ import {
   Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { LoanCard } from "@/components/dashboard/loan-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts"
 import { getSellerDashboardComprehensive, type SellerDashboardComprehensiveResponse } from "@/lib/api/seller-dashboard"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+
 
 function formatCurrency(value: number, unit: string = "$"): string {
   if (unit === "$") {
@@ -150,7 +152,8 @@ export default function SellerDashboardPage() {
       </motion.div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <LoanCard type="seller" />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -203,7 +206,7 @@ export default function SellerDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="glass-card rounded-xl p-6"
+          className="glass-card rounded-xl p-6 lg:col-span-1"
         >
           <div className="flex items-center justify-between mb-4">
             <Users className="h-8 w-8 text-accent" />

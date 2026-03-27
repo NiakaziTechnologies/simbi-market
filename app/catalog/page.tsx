@@ -45,3 +45,4 @@ function CatalogSkeleton() {
     </section>
   )
 }
+

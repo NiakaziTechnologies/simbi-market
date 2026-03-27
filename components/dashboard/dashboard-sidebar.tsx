@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   RotateCcw,
+  CreditCard,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -20,7 +21,10 @@ const menuItems = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, href: "/dashboard/buyer" },
   { id: "orders", label: "Orders", icon: Package, href: "/dashboard/buyer/orders" },
   { id: "returns", label: "Returns", icon: RotateCcw, href: "/dashboard/buyer/returns" },
+  { id: "loans", label: "Loans", icon: CreditCard, href: "/dashboard/buyer/loans" },
   { id: "settings", label: "Settings", icon: Settings, href: "/dashboard/buyer/settings" },
+
+
 ]
 
 const secondaryItems = [
@@ -37,6 +41,7 @@ export function DashboardSidebar({ isMobileOpen = false, onMobileClose }: Dashbo
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const getActiveTab = () => {
+    if (pathname?.includes("/loans")) return "loans"
     if (pathname?.includes("/orders")) return "orders"
     if (pathname?.includes("/returns")) return "returns"
     if (pathname?.includes("/settings")) return "settings"

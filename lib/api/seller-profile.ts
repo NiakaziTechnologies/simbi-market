@@ -61,18 +61,43 @@ export interface UpdateSellerProfileResponse {
 }
 
 /**
+ * Mock seller profile for development
+ */
+const mockSellerProfile: SellerProfile = {
+  id: 'seller-001',
+  email: 'seller@autoparts.co.zw',
+  businessName: 'AutoParts Wholesalers Ltd',
+  tradingName: 'AutoPro Parts',
+  businessAddress: '123 Industrial Road, Harare, Zimbabwe',
+  contactNumber: '+263 77 123 4567',
+  tin: 'TIN12345678',
+  registrationNumber: 'CR/12345',
+  bankAccountName: 'AutoParts Wholesalers Ltd',
+  bankAccountNumber: '1234567890',
+  bankName: 'ZB Bank',
+  status: 'ACTIVE',
+  sriScore: 87.5,
+  isEligible: true,
+  lastSriCalculation: '2024-10-25T10:30:00Z',
+  mfaEnabled: true,
+  isShadowBanned: false,
+  createdAt: '2024-06-15T09:00:00Z',
+  updatedAt: '2024-10-25T15:45:00Z'
+}
+
+/**
+ * delay utility
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+/**
  * Get seller profile
  */
 export async function getSellerProfile(): Promise<SellerProfile> {
-  const response = await apiClient.get<GetSellerProfileResponse>(
-    `/api/seller/auth/profile`
-  )
-
-  if (response.success && response.data) {
-    return response.data
-  }
-
-  throw new Error(response.error || response.message || 'Failed to fetch seller profile')
+  await delay(1000)
+  return mockSellerProfile
 }
 
 /**
@@ -81,14 +106,12 @@ export async function getSellerProfile(): Promise<SellerProfile> {
 export async function updateSellerProfile(
   request: UpdateSellerProfileRequest
 ): Promise<SellerProfile> {
-  const response = await apiClient.patch<UpdateSellerProfileResponse>(
-    `/api/seller/auth/profile`,
-    request
-  )
-
-  if (response.success && response.data) {
-    return response.data
+  await delay(1500)
+  const updatedProfile = {
+    ...mockSellerProfile,
+    ...request,
+    updatedAt: new Date().toISOString(),
   }
-
-  throw new Error(response.error || response.message || 'Failed to update seller profile')
+  return updatedProfile as SellerProfile
 }
+

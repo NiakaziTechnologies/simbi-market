@@ -20,6 +20,7 @@ import {
   LogOut,
   Bell,
 } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth/auth-context"
@@ -70,19 +71,30 @@ const allMenuItems = [
     href: "/dashboard/seller/returns",
     roles: ['seller', 'DISPATCHER', 'FULL_ACCESS']
   },
-  { 
+  {
     id: "finance", 
     label: "Finance", 
     icon: DollarSign, 
     href: "/dashboard/seller/finance",
-    roles: ['seller', 'FINANCE_VIEW', 'FULL_ACCESS']
+    roles: ['seller', 'FINANCE_VIEW', 'FULL_ACCESS'],
+    className: "text-blue-600",
+    isParent: true
+  },
+  {
+    id: "loans", 
+    label: "  Loans", 
+    icon: CreditCard, 
+    href: "/dashboard/seller/loans",
+    roles: ['seller', 'STOCK_MANAGER', 'DISPATCHER', 'FINANCE_VIEW', 'FULL_ACCESS'],
+    className: "ml-6 pl-4 border-l-2 border-blue-500/50 text-blue-600/80",
+    parentId: "finance"
   },
   { 
     id: "staff", 
     label: "Staff", 
     icon: Users, 
     href: "/dashboard/seller/staff",
-    roles: ['seller', 'FULL_ACCESS'] // Only sellers and full access staff
+    roles: ['seller', 'FULL_ACCESS'] 
   },
   { 
     id: "reports", 
@@ -103,7 +115,7 @@ const allMenuItems = [
     label: "Profile", 
     icon: User, 
     href: "/dashboard/seller/profile",
-    roles: ['seller'] // Only sellers can access profile, not staff
+    roles: ['seller']
   },
 ]
 
@@ -135,6 +147,7 @@ export function SellerSidebar({ isMobileOpen = false, onMobileClose }: SellerSid
   }, [userType, role])
 
   const getActiveTab = () => {
+    if (pathname?.includes("/loans")) return "loans"
     if (pathname?.includes("/notifications")) return "notifications"
     if (pathname?.includes("/inventory")) return "inventory"
     if (pathname?.includes("/orders")) return "orders"
@@ -199,8 +212,8 @@ export function SellerSidebar({ isMobileOpen = false, onMobileClose }: SellerSid
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden h-8 w-8"
               onClick={onMobileClose}
+              className="lg:hidden h-8 w-8"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -251,3 +264,4 @@ export function SellerSidebar({ isMobileOpen = false, onMobileClose }: SellerSid
     </>
   )
 }
+

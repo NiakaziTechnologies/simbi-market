@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { LoanCard } from "@/components/dashboard/loan-card"
 import { getComprehensiveAnalytics, type ComprehensiveAnalytics } from "@/lib/api/analytics"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts"
@@ -28,6 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 import React from "react"
+
 
 const statusConfig = {
   PENDING_PAYMENT: { icon: Clock, label: "Pending Payment", color: "text-yellow-400" },
@@ -183,8 +185,9 @@ export default function BuyerDashboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+        className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8"
       >
+        <LoanCard type="buyer" />
         <div className="glass-card rounded-lg p-6">
           <div className="flex items-center justify-between mb-2">
             <p className="text-muted-foreground font-light text-sm">Total Spend YTD</p>
@@ -235,7 +238,7 @@ export default function BuyerDashboardPage() {
           </div>
         </div>
 
-        <div className="glass-card rounded-lg p-6">
+        <div className="glass-card rounded-lg p-6 lg:col-span-1">
           <div className="flex items-center justify-between mb-2">
             <p className="text-muted-foreground font-light text-sm">Available Monthly Budget</p>
             <Wallet className="h-5 w-5 text-muted-foreground" />
