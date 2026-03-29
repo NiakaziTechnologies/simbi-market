@@ -164,14 +164,19 @@ export function CatalogContent() {
   // Show loading state
   if (isLoading) {
     return (
-      <section className="pt-32 pb-16 px-6">
+      <section className="pt-24 pb-16 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground mb-4">
-              Explore Parts <span className="font-semibold">Catalogue</span>
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="w-8 h-[3px] rounded-full bg-accent/50" />
+              <span className="text-accent text-[11px] font-semibold tracking-[0.2em] uppercase">Premium Auto Parts</span>
+              <div className="w-8 h-[3px] rounded-full bg-accent/50" />
+            </div>
+            <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-foreground leading-tight mb-3">
+              Explore Parts <span className="text-muted-foreground font-light">Catalogue</span>
             </h1>
-            <p className="text-muted font-light leading-relaxed max-w-2xl mx-auto">
-              Premium automotive components engineered for excellence
+            <p className="text-muted-foreground text-sm md:text-[15px] max-w-lg mx-auto leading-relaxed">
+              Premium Autoparts delivered straight to your doorstep
             </p>
           </div>
           <div className="flex items-center justify-center py-24">
@@ -185,20 +190,25 @@ export function CatalogContent() {
   // Show error state
   if (error) {
     return (
-      <section className="pt-32 pb-16 px-6">
+      <section className="pt-24 pb-16 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground mb-4">
-              Explore Parts <span className="font-semibold">Catalogue</span>
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="w-8 h-[3px] rounded-full bg-accent/50" />
+              <span className="text-accent text-[11px] font-semibold tracking-[0.2em] uppercase">Premium Auto Parts</span>
+              <div className="w-8 h-[3px] rounded-full bg-accent/50" />
+            </div>
+            <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-foreground leading-tight mb-3">
+              Explore Parts <span className="text-muted-foreground font-light">Catalogue</span>
             </h1>
-            <p className="text-muted font-light leading-relaxed max-w-2xl mx-auto">
-              Premium automotive components engineered for excellence
+            <p className="text-muted-foreground text-sm md:text-[15px] max-w-lg mx-auto leading-relaxed">
+              Premium Autoparts delivered straight to your doorstep
             </p>
           </div>
-          <div className="glass-card rounded-xl p-12 max-w-md mx-auto border border-destructive/50 text-center">
+          <div className="search-card rounded-xl p-12 max-w-md mx-auto border border-destructive/50 text-center">
             <PackageX className="w-16 h-16 text-destructive mx-auto mb-6" />
             <h3 className="text-2xl font-light text-foreground mb-4">Error Loading Products</h3>
-            <p className="text-muted font-light mb-8 leading-relaxed">{error}</p>
+            <p className="text-muted-foreground font-light mb-8 leading-relaxed">{error}</p>
             <Button
               onClick={() => window.location.reload()}
               className="bg-accent hover:bg-accent/90 text-white"
@@ -269,30 +279,52 @@ export function CatalogContent() {
   }
 
   return (
-    <section className="pt-32 pb-16 px-6">
+    <section className="pt-24 pb-16 px-6">
       <div className="max-w-7xl mx-auto">
+        {/* Hero Section */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8"
         >
-          <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground mb-4">
-            Explore Parts <span className="font-semibold">Catalogue</span>
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="w-8 h-[3px] rounded-full bg-accent/50" />
+            <span className="text-accent text-[11px] font-semibold tracking-[0.2em] uppercase">Premium Auto Parts</span>
+            <div className="w-8 h-[3px] rounded-full bg-accent/50" />
+          </div>
+
+          <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-foreground leading-tight mb-3">
+            Explore Parts <span className="text-muted-foreground font-light">Catalogue</span>
           </h1>
-          <p className="text-muted font-light leading-relaxed max-w-2xl mx-auto">
-            Premium automotive components engineered for excellence
+          <p className="text-muted-foreground text-sm md:text-[15px] max-w-lg mx-auto leading-relaxed mb-5">
+            Premium Autoparts delivered straight to your doorstep
           </p>
+
+          {/* Quick stats */}
+          <div className="flex flex-wrap items-center justify-center gap-6">
+            {[
+              { num: totalResults > 0 ? `${totalResults}+` : "1000+", label: "Parts Available" },
+              { num: "100%", label: "Genuine Quality" },
+              { num: "24/7", label: "Support" },
+            ].map((stat) => (
+              <div key={stat.label} className="flex items-center gap-2">
+                <span className="text-foreground font-bold text-lg">{stat.num}</span>
+                <span className="text-muted-foreground text-xs">{stat.label}</span>
+              </div>
+            ))}
+          </div>
         </motion.div>
 
-        {/* Search and Filters */}
+        {/* Search & Filter Card */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="catalog-search-card glass-card rounded-2xl p-8 md:p-10 border-2 border-gray-400 dark:border-white/20 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] bg-gray-100 dark:bg-black/60 mb-12"
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="search-card glass-card rounded-2xl p-6 md:p-8 border border-accent/10 dark:border-white/10 shadow-[0_24px_80px_-20px_rgba(0,122,255,0.12)] mb-6"
         >
-          <div className="space-y-6">
+          <div className="space-y-5">
+            {/* Filter dropdowns */}
             <div className="flex flex-col gap-0 overflow-hidden">
               <SearchFilters />
             </div>
@@ -300,14 +332,14 @@ export function CatalogContent() {
             {/* Search Input */}
             <div className="relative group max-w-3xl mx-auto">
               <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-600 dark:text-white/40 group-focus-within:text-black dark:group-focus-within:text-white transition-colors" />
+                <Search className="h-5 w-5 text-muted-foreground/50 group-focus-within:text-accent transition-colors" />
               </div>
               <Input
                 type="text"
-                placeholder="Search by part name, category, or description..."
+                placeholder="Search by part name, OEM number, or keyword..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="catalog-search-input h-14 pl-12 bg-white dark:bg-white/5 border-2 border-gray-400 dark:border-white/10 text-black dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/30 text-lg transition-all focus:ring-black dark:focus:ring-white focus:border-black dark:focus:border-white rounded-xl"
+                className="catalog-search-input h-12 pl-12 pr-4 bg-white/80 dark:bg-white/5 border border-border dark:border-white/10 text-foreground placeholder:text-muted-foreground/50 text-[15px] transition-all focus:ring-accent/30 focus:border-accent rounded-xl shadow-sm"
               />
             </div>
           </div>
@@ -318,41 +350,41 @@ export function CatalogContent() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-muted font-light"
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-muted-foreground text-sm"
           >
             {totalResults > 0
-              ? `Showing ${startIndex}–${endIndex} of ${totalResults} ${totalResults === 1 ? "result" : "results"}`
-              : "Showing 0 results"}
+              ? `Showing ${startIndex}–${endIndex} of ${totalResults} ${totalResults === 1 ? "part" : "parts"}`
+              : "Showing 0 parts"}
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg border border-border"
+            transition={{ duration: 0.6, delay: 0.45 }}
+            className="flex items-center gap-1 bg-white/50 dark:bg-white/5 p-1 rounded-lg border border-border/50 dark:border-white/10"
           >
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setViewMode("grid")}
-              className={`h-9 w-9 p-0 transition-all ${viewMode === "grid"
-                  ? "bg-accent/20 text-accent shadow-inner"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              className={`h-8 w-8 p-0 rounded-md transition-all ${viewMode === "grid"
+                  ? "bg-accent text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/5"
                 }`}
             >
-              <Grid3X3 className="h-4 w-4" />
+              <Grid3X3 className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setViewMode("list")}
-              className={`h-9 w-9 p-0 transition-all ${viewMode === "list"
-                  ? "bg-accent/20 text-accent shadow-inner"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              className={`h-8 w-8 p-0 rounded-md transition-all ${viewMode === "list"
+                  ? "bg-accent text-white shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent/5"
                 }`}
             >
-              <List className="h-4 w-4" />
+              <List className="h-3.5 w-3.5" />
             </Button>
           </motion.div>
         </div>

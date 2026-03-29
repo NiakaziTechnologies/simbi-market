@@ -135,6 +135,31 @@
   border: 1px solid rgba(0, 122, 255, 0.06);
 }
 
+/* Search card - strong sky blue */
+.search-card {
+  background: linear-gradient(135deg, #b3d9ff 0%, #ccebff 100%);
+  border: 1px solid rgba(0, 122, 255, 0.3);
+  position: relative;
+}
+.search-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 122, 255, 0.7), transparent);
+  border-radius: 0 0 2px 2px;
+}
+.dark .search-card {
+  background: linear-gradient(135deg, rgba(0, 80, 160, 0.4) 0%, rgba(0, 50, 100, 0.3) 100%);
+  border: 1px solid rgba(0, 122, 255, 0.35);
+}
+.dark .search-card::before {
+  background: linear-gradient(90deg, transparent, rgba(0, 122, 255, 0.6), transparent);
+}
+
 /* Dark mode glass card - dark grey */
 .dark .glass-card {
   background: rgba(29, 29, 31, 0.8);
@@ -148,18 +173,17 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Catalog search card - Light theme blue background */
+/* Catalog search card - Light theme subtle blue tint */
 .light .catalog-search-card {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
-  border: 2px solid #2563eb !important;
+  background: rgba(240, 247, 255, 0.95) !important;
+  border: 1px solid rgba(0, 122, 255, 0.08) !important;
 }
 
-/* Catalog search input - Light theme white text */
+/* Catalog search input - Strong blue */
 .light .catalog-search-input {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
-  backdrop-filter: blur(10px);
+  background: #b3d9ff !important;
+  color: #1a1a1a !important;
+  border: 1px solid rgba(0, 122, 255, 0.3) !important;
 }
 
 /* Pickup locations - Light mode dark text */
@@ -176,17 +200,17 @@
 }
 
 .light .catalog-search-input::placeholder {
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: rgba(0, 0, 0, 0.35) !important;
 }
 
 .light .catalog-search-input:focus {
-  background: rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4) !important;
-  border-color: white !important;
+  background: #c4e0ff !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2) !important;
+  border-color: #007aff !important;
 }
 
 .light .catalog-search-card .search-filters * {
-  color: white !important;
+  color: #1a1a1a !important;
 }
 
 /* Line clamp utilities */

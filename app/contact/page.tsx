@@ -78,8 +78,7 @@ export default function ContactPage() {
               Get In <span className="font-semibold">Touch</span>
             </h1>
             <p className="text-lg text-muted-foreground dark:text-muted font-light max-w-2xl mx-auto">
-              Have questions about our products or services? Our team is here to help you find the perfect parts for
-              your vehicle.
+            We deliver premium automotive components right to your door step
             </p>
           </motion.div>
         </div>

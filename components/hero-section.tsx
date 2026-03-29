@@ -87,15 +87,15 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.6 }}
-            className="glass-card dark:glass-card rounded-2xl p-8 md:p-10 border border-border dark:border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] bg-white backdrop-blur-2xl"
+            className="search-card glass-card rounded-2xl p-8 md:p-10 border border-accent/15 dark:border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)]"
           >
             {/* Search Type Toggle */}
             <div className="flex justify-center mb-10">
-              <div className="inline-flex p-1.5 bg-gray-100 rounded-xl border border-gray-200">
+              <div className="inline-flex p-1.5 bg-white/60 rounded-xl border border-accent/10">
                 <Button
                   variant={searchType === "part" ? "default" : "ghost"}
                   onClick={() => setSearchType("part")}
-                  className={`px-8 py-2 rounded-lg font-medium transition-all duration-300 ${searchType === "part" ? "bg-accent text-white shadow-lg" : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
+                  className={`px-8 py-2 rounded-lg font-medium transition-all duration-300 ${searchType === "part" ? "bg-accent text-white shadow-lg" : "text-foreground hover:text-accent hover:bg-white/80"
                     }`}
                 >
                   <Search className="mr-2 h-4 w-4" />
@@ -104,7 +104,7 @@ export function HeroSection() {
                 <Button
                   variant={searchType === "vin" ? "default" : "ghost"}
                   onClick={() => setSearchType("vin")}
-                  className={`px-8 py-2 rounded-lg font-medium transition-all duration-300 ${searchType === "vin" ? "bg-accent text-white shadow-lg" : "text-gray-700 hover:text-gray-900 hover:bg-gray-200"
+                  className={`px-8 py-2 rounded-lg font-medium transition-all duration-300 ${searchType === "vin" ? "bg-accent text-white shadow-lg" : "text-foreground hover:text-accent hover:bg-white/80"
                     }`}
                 >
                   <Scan className="mr-2 h-4 w-4" />
@@ -124,11 +124,9 @@ export function HeroSection() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
-                  // Build catalog URL with search parameters
                   const params = new URLSearchParams()
                   
                   if (searchType === "part") {
-                    // Part search - include filters and query
                     if (searchQuery.trim()) {
                       params.set("q", searchQuery.trim())
                     }
@@ -137,7 +135,6 @@ export function HeroSection() {
                     if (filters.model) params.set("model", filters.model)
                     if (filters.category) params.set("category", filters.category)
                   } else {
-                    // VIN search - just the VIN query
                     if (searchQuery.trim()) {
                       params.set("vin", searchQuery.trim())
                     }
@@ -148,14 +145,14 @@ export function HeroSection() {
               >
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400 group-focus-within:text-accent transition-colors" />
+                    <Search className="h-5 w-5 text-muted-foreground/50 group-focus-within:text-accent transition-colors" />
                   </div>
                   <Input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={searchType === "vin" ? "Enter your 17-digit VIN" : "Enter part name or number"}
-                    className={`h-16 pl-12 pr-36 bg-gray-100 border border-gray-200 text-gray-900 placeholder:text-gray-400 text-lg transition-all focus:ring-accent focus:border-accent rounded-xl ${searchType === "vin" ? "font-mono tracking-widest uppercase" : ""
+                    className={`catalog-search-input h-14 pl-12 pr-36 bg-white/80 border border-accent/10 text-foreground placeholder:text-muted-foreground/50 text-[15px] transition-all focus:ring-accent/30 focus:border-accent rounded-xl shadow-sm ${searchType === "vin" ? "font-mono tracking-widest uppercase" : ""
                       }`}
                   />
                   <Button 
@@ -169,15 +166,15 @@ export function HeroSection() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-8 mt-10">
-              <p className="text-xs text-gray-600 font-light flex items-center">
+              <p className="text-xs text-muted-foreground font-light flex items-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 mr-2 shrink-0" />
                 Secure Encrypted Search
               </p>
-              <p className="text-xs text-gray-600 font-light flex items-center">
+              <p className="text-xs text-muted-foreground font-light flex items-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-2 shrink-0" />
                 3M+ Parts Indexed
               </p>
-              <p className="text-xs text-gray-600 font-light flex items-center">
+              <p className="text-xs text-muted-foreground font-light flex items-center">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent mr-2 shrink-0" />
                 Instant Results
               </p>
