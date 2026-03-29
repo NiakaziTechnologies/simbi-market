@@ -29,19 +29,21 @@ export default function AdminProductsPage() {
         <TabsList className="grid w-full grid-cols-2 bg-background/50 border border-border">
           <TabsTrigger
             value="seller-products"
-            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            className="text-xs sm:text-sm text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
             style={activeTab === "seller-products" ? { backgroundColor: "#2563eb", color: "white" } : {}}
           >
-            <Package className="h-4 w-4 mr-2" />
-            Seller Products
+            <Package className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Seller Products</span>
+            <span className="sm:hidden">Sellers</span>
           </TabsTrigger>
           <TabsTrigger
             value="master-products"
-            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            className="text-xs sm:text-sm text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
             style={activeTab === "master-products" ? { backgroundColor: "#2563eb", color: "white" } : {}}
           >
-            <Package className="h-4 w-4 mr-2" />
-            Master Products
+            <Package className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Master Products</span>
+            <span className="sm:hidden">Master</span>
           </TabsTrigger>
         </TabsList>
 

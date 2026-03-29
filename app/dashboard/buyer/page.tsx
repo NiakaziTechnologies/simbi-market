@@ -272,33 +272,41 @@ export default function BuyerDashboardPage() {
               {charts.monthlySpendingTrend.subtitle}
             </p>
           </div>
-          <ChartContainer config={spendingChartConfig} className="h-[300px]">
-            <AreaChart data={monthlySpendingData}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis
-                dataKey="month"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                className="text-xs"
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                className="text-xs"
-                tickFormatter={(value) => `$${value}`}
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Area
-                type="monotone"
-                dataKey="amount"
-                stroke="hsl(var(--chart-1))"
-                fill="hsl(var(--chart-1))"
-                fillOpacity={0.2}
-              />
-            </AreaChart>
-          </ChartContainer>
+          <div className="overflow-x-auto -mx-2 px-2">
+            <ChartContainer config={spendingChartConfig} className="h-[220px] sm:h-[300px] min-w-[400px]">
+              <AreaChart data={monthlySpendingData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="month"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  className="text-xs"
+                  tick={{ fontSize: 10 }}
+                  angle={-30}
+                  textAnchor="end"
+                  height={50}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  className="text-xs"
+                  tick={{ fontSize: 10 }}
+                  tickFormatter={(value) => `$${value}`}
+                  width={45}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Area
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="hsl(var(--chart-1))"
+                  fill="hsl(var(--chart-1))"
+                  fillOpacity={0.2}
+                />
+              </AreaChart>
+            </ChartContainer>
+          </div>
         </motion.div>
 
         {/* Budget Utilization */}
@@ -377,34 +385,39 @@ export default function BuyerDashboardPage() {
                 {charts.spendingByCategory.subtitle}
               </p>
             </div>
-            <ChartContainer config={categoryChartConfig} className="h-[300px]">
-              <BarChart data={spendingByCategoryData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis
-                  dataKey="category"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  className="text-xs"
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  className="text-xs"
-                  tickFormatter={(value) => `$${value}`}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar
-                  dataKey="amount"
-                  fill="hsl(var(--chart-1))"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ChartContainer>
+            <div className="overflow-x-auto -mx-2 px-2">
+              <ChartContainer config={categoryChartConfig} className="h-[220px] sm:h-[300px] min-w-[400px]">
+                <BarChart data={spendingByCategoryData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="category"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    className="text-xs"
+                    tick={{ fontSize: 10 }}
+                    angle={-30}
+                    textAnchor="end"
+                    height={50}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    className="text-xs"
+                    tick={{ fontSize: 10 }}
+                    tickFormatter={(value) => `$${value}`}
+                    width={45}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar
+                    dataKey="amount"
+                    fill="hsl(var(--chart-1))"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ChartContainer>
+            </div>
           </motion.div>
         ) : (
           <motion.div

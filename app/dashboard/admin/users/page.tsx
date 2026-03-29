@@ -98,25 +98,25 @@ export default function AdminUsersPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-light text-foreground mb-2">Users</h1>
-            <p className="text-muted-foreground font-light">
+            <h1 className="text-2xl sm:text-3xl font-light text-foreground mb-2">Users</h1>
+            <p className="text-muted-foreground font-light text-sm">
               Manage all platform users (buyers, sellers, admins)
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <div className="text-sm text-muted-foreground">Total Users</div>
-              <div className="text-2xl font-light text-foreground">{total}</div>
+          <div className="flex items-center gap-4 sm:gap-6">
+            <div>
+              <div className="text-xs text-muted-foreground">Total</div>
+              <div className="text-xl sm:text-2xl font-light text-foreground">{total}</div>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-muted-foreground">Sellers</div>
-              <div className="text-2xl font-light text-green-400">{sellerCount}</div>
+            <div>
+              <div className="text-xs text-muted-foreground">Sellers</div>
+              <div className="text-xl sm:text-2xl font-light text-green-400">{sellerCount}</div>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-muted-foreground">Buyers</div>
-              <div className="text-2xl font-light text-purple-400">{buyerCount}</div>
+            <div>
+              <div className="text-xs text-muted-foreground">Buyers</div>
+              <div className="text-xl sm:text-2xl font-light text-purple-400">{buyerCount}</div>
             </div>
           </div>
         </div>
@@ -130,9 +130,9 @@ export default function AdminUsersPage() {
       >
         <Card className="glass-card border-border">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <CardTitle className="text-xl font-light flex items-center gap-2">
+                <CardTitle className="text-lg sm:text-xl font-light flex items-center gap-2">
                   <Users className="h-5 w-5" />
                   User Management
                 </CardTitle>
@@ -140,7 +140,7 @@ export default function AdminUsersPage() {
                   {total > 0 ? `${total} total users` : "View, edit, and manage user accounts"}
                 </CardDescription>
               </div>
-              <div className="relative w-64">
+              <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
@@ -177,8 +177,8 @@ export default function AdminUsersPage() {
               </div>
             ) : (
               <>
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <Table>
+                <div className="rounded-lg border border-border overflow-x-auto">
+                  <Table className="min-w-[800px]">
                     <TableHeader>
                       <TableRow className="bg-muted/30">
                         <TableHead className="w-[200px]">User</TableHead>
@@ -306,9 +306,9 @@ export default function AdminUsersPage() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-6 pt-6 border-t border-border">
+                  <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-6 border-t border-border gap-3">
                     <div className="text-sm text-muted-foreground">
-                      Showing page {page} of {totalPages} ({total} total users)
+                      Page {page} of {totalPages} ({total} users)
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
@@ -318,7 +318,7 @@ export default function AdminUsersPage() {
                         disabled={page === 1 || isLoading}
                       >
                         <ChevronLeft className="h-4 w-4 mr-1" />
-                        Previous
+                        Prev
                       </Button>
                       <Button
                         variant="outline"

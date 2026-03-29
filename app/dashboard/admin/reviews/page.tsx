@@ -129,9 +129,9 @@ export default function AdminReviewsPage() {
       >
         <Card className="glass-card border-border">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <CardTitle className="text-xl font-light flex items-center gap-2">
+                <CardTitle className="text-lg sm:text-xl font-light flex items-center gap-2">
                   <Star className="h-5 w-5" />
                   Product Reviews
                 </CardTitle>
@@ -139,7 +139,7 @@ export default function AdminReviewsPage() {
                   {total > 0 ? `${total} total reviews` : "View and manage all product reviews"}
                 </CardDescription>
               </div>
-              <div className="relative w-64">
+              <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
@@ -176,8 +176,8 @@ export default function AdminReviewsPage() {
               </div>
             ) : (
               <>
-                <div className="rounded-lg border border-border overflow-hidden">
-                  <Table>
+                <div className="rounded-lg border border-border overflow-x-auto">
+                  <Table className="min-w-[700px]">
                     <TableHeader>
                       <TableRow className="bg-muted/30">
                         <TableHead>Product</TableHead>
@@ -255,9 +255,9 @@ export default function AdminReviewsPage() {
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-6 pt-6 border-t border-border">
+                  <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-6 border-t border-border gap-3">
                     <div className="text-sm text-muted-foreground">
-                      Showing page {page} of {totalPages} ({total} total reviews)
+                      Page {page} of {totalPages} ({total} reviews)
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
@@ -267,7 +267,7 @@ export default function AdminReviewsPage() {
                         disabled={page === 1 || isLoading}
                       >
                         <ChevronLeft className="h-4 w-4 mr-1" />
-                        Previous
+                        Prev
                       </Button>
                       <Button
                         variant="outline"

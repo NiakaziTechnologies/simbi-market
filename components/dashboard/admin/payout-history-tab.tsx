@@ -171,9 +171,9 @@ export function PayoutHistoryTab() {
       {/* Payouts Table */}
       <Card className="glass-card border-border">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-xl font-light flex items-center gap-2">
+              <CardTitle className="text-lg sm:text-xl font-light flex items-center gap-2">
                 <History className="h-5 w-5" />
                 Payout History
               </CardTitle>
@@ -181,7 +181,7 @@ export function PayoutHistoryTab() {
                 {total > 0 ? `${total} total payout(s)` : "View all processed payouts"}
               </CardDescription>
             </div>
-            <div className="relative w-64">
+            <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"

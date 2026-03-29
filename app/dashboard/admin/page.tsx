@@ -54,31 +54,31 @@ export default function AdminDashboardPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-background/50 border border-border">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-background/50 border border-border">
           <TabsTrigger
             value="overview"
-            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            className="text-xs sm:text-sm text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
             style={activeTab === "overview" ? { backgroundColor: "#2563eb", color: "white" } : {}}
           >
             Overview
           </TabsTrigger>
           <TabsTrigger
             value="analytics"
-            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            className="text-xs sm:text-sm text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
             style={activeTab === "analytics" ? { backgroundColor: "#2563eb", color: "white" } : {}}
           >
             Analytics
           </TabsTrigger>
           <TabsTrigger
             value="activity"
-            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            className="text-xs sm:text-sm text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
             style={activeTab === "activity" ? { backgroundColor: "#2563eb", color: "white" } : {}}
           >
             Activity
           </TabsTrigger>
           <TabsTrigger
             value="reports"
-            className="text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            className="text-xs sm:text-sm text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
             style={activeTab === "reports" ? { backgroundColor: "#2563eb", color: "white" } : {}}
           >
             Reports

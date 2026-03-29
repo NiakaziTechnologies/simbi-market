@@ -277,51 +277,59 @@ export default function SellerDashboardPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="glass-card rounded-xl p-6"
+          className="glass-card rounded-xl p-4 sm:p-6"
         >
-          <div className="mb-4">
-            <h3 className="text-lg font-light text-foreground mb-1">{salesPerformanceAnalytics?.title || "Sales Performance"}</h3>
-            <p className="text-sm text-muted-foreground">{salesPerformanceAnalytics?.subtitle || ""}</p>
+          <div className="mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg font-light text-foreground mb-1">{salesPerformanceAnalytics?.title || "Sales Performance"}</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">{salesPerformanceAnalytics?.subtitle || ""}</p>
           </div>
           {salesPerformanceData.length > 0 ? (
-            <ChartContainer config={chartConfig} className="h-[300px]">
-              <AreaChart data={salesPerformanceData}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                className="text-xs"
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                className="text-xs"
-              />
-              <ChartTooltip content={<ChartTooltipContent />} />
-              <Area
-                type="monotone"
-                dataKey="sales"
-                stroke="#3b82f6"
-                fill="#3b82f6"
-                fillOpacity={0.2}
-                strokeWidth={2}
-              />
-              <Area
-                type="monotone"
-                dataKey="unfulfilledOrders"
-                stroke="#ef4444"
-                fill="#ef4444"
-                fillOpacity={0.2}
-                strokeWidth={2}
-              />
-            </AreaChart>
-          </ChartContainer>
+            <div className="overflow-x-auto -mx-2 px-2">
+              <ChartContainer config={chartConfig} className="h-[220px] sm:h-[300px] min-w-[400px]">
+                <AreaChart data={salesPerformanceData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  className="text-xs"
+                  tick={{ fontSize: 10 }}
+                  angle={-30}
+                  textAnchor="end"
+                  height={50}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  className="text-xs"
+                  tick={{ fontSize: 10 }}
+                  width={40}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Area
+                  type="monotone"
+                  dataKey="sales"
+                  stroke="#3b82f6"
+                  fill="#3b82f6"
+                  fillOpacity={0.2}
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="unfulfilledOrders"
+                  stroke="#ef4444"
+                  fill="#ef4444"
+                  fillOpacity={0.2}
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ChartContainer>
+            </div>
           ) : (
-            <div className="flex items-center justify-center h-[300px]">
-              <p className="text-muted-foreground">No sales data available</p>
+            <div className="flex items-center justify-center h-[220px] sm:h-[300px]">
+              <p className="text-muted-foreground text-sm">No sales data available</p>
             </div>
           )}
         </motion.div>
@@ -357,8 +365,8 @@ export default function SellerDashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-[300px]">
-              <p className="text-muted-foreground">No category data available</p>
+            <div className="flex items-center justify-center h-[220px] sm:h-[300px]">
+              <p className="text-muted-foreground text-sm">No category data available</p>
             </div>
           )}
         </motion.div>

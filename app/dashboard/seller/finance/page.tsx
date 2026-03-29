@@ -212,36 +212,38 @@ export default function FinancePage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-muted/50">
-          <TabsTrigger 
-            value="income-statement" 
-            className="flex items-center gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
-          >
-            <FileText className="h-4 w-4" />
-            Income Statement
-          </TabsTrigger>
-          <TabsTrigger 
-            value="trial-balance" 
-            className="flex items-center gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
-          >
-            <BookOpen className="h-4 w-4" />
-            Trial Balance
-          </TabsTrigger>
-          <TabsTrigger 
-            value="general-ledger" 
-            className="flex items-center gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
-          >
-            <FileText className="h-4 w-4" />
-            General Ledger
-          </TabsTrigger>
-          <TabsTrigger 
-            value="expenses-analysis" 
-            className="flex items-center gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
-          >
-            <PieChart className="h-4 w-4" />
-            Expenses Analysis
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-1 px-1">
+          <TabsList className="flex w-max sm:w-full sm:grid sm:grid-cols-4 bg-muted/50">
+            <TabsTrigger 
+              value="income-statement" 
+              className="flex-shrink-0 sm:flex-shrink whitespace-nowrap px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
+            >
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Income Statement
+            </TabsTrigger>
+            <TabsTrigger 
+              value="trial-balance" 
+              className="flex-shrink-0 sm:flex-shrink whitespace-nowrap px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
+            >
+              <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Trial Balance
+            </TabsTrigger>
+            <TabsTrigger 
+              value="general-ledger" 
+              className="flex-shrink-0 sm:flex-shrink whitespace-nowrap px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
+            >
+              <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              General Ledger
+            </TabsTrigger>
+            <TabsTrigger 
+              value="expenses-analysis" 
+              className="flex-shrink-0 sm:flex-shrink whitespace-nowrap px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
+            >
+              <PieChart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Expenses Analysis
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Income Statement Tab */}
         <TabsContent value="income-statement" className="space-y-6">

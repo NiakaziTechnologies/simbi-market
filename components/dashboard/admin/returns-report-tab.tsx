@@ -229,24 +229,24 @@ export function ReturnsReportTab() {
         >
           <Card className="glass-card border-border">
             <CardHeader>
-              <CardTitle className="text-xl font-light">Returns by Status</CardTitle>
+              <CardTitle className="text-lg sm:text-xl font-light">Returns by Status</CardTitle>
               <CardDescription>Distribution of return statuses</CardDescription>
             </CardHeader>
             <CardContent>
               {statusData.length > 0 ? (
-                <ChartContainer config={statusChartConfig} className="h-80">
+                <ChartContainer config={statusChartConfig} className="h-[250px] sm:h-80">
                   <PieChart>
                     <Pie
                       data={statusData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, value, percent }) => `${name}\n${value} (${(percent * 100).toFixed(0)}%)`}
-                      outerRadius={90}
-                      innerRadius={40}
+                      label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
+                      outerRadius={70}
+                      innerRadius={35}
                       fill="#8884d8"
                       dataKey="value"
-                      style={{ fontSize: '12px', fontWeight: '500' }}
+                      style={{ fontSize: '11px', fontWeight: '500' }}
                     >
                       {statusData.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -257,11 +257,11 @@ export function ReturnsReportTab() {
                         if (active && payload && payload.length) {
                           return (
                             <div className="rounded-lg border bg-background p-3 shadow-lg">
-                              <div className="font-semibold text-foreground">{payload[0].payload.name}</div>
-                              <div className="text-sm text-muted-foreground">
+                              <div className="font-semibold text-foreground text-sm">{payload[0].payload.name}</div>
+                              <div className="text-xs text-muted-foreground">
                                 Count: <span className="font-medium">{payload[0].value}</span>
                               </div>
-                              <div className="text-sm text-muted-foreground">
+                              <div className="text-xs text-muted-foreground">
                                 Percentage: <span className="font-medium">{((payload[0].value / statusData.reduce((sum, item) => sum + item.value, 0)) * 100).toFixed(1)}%</span>
                               </div>
                             </div>
@@ -273,7 +273,7 @@ export function ReturnsReportTab() {
                   </PieChart>
                 </ChartContainer>
               ) : (
-                <div className="flex items-center justify-center h-80 text-muted-foreground">
+                <div className="flex items-center justify-center h-[250px] sm:h-80 text-muted-foreground">
                   No status data available
                 </div>
               )}
@@ -289,47 +289,53 @@ export function ReturnsReportTab() {
         >
           <Card className="glass-card border-border">
             <CardHeader>
-              <CardTitle className="text-xl font-light">Returns by Fault Classification</CardTitle>
+              <CardTitle className="text-lg sm:text-xl font-light">Returns by Fault Classification</CardTitle>
               <CardDescription>Fault-based distribution</CardDescription>
             </CardHeader>
             <CardContent>
               {faultData.length > 0 ? (
-                <ChartContainer config={statusChartConfig} className="h-80">
-                  <BarChart data={faultData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis
-                      dataKey="name"
-                      className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                    />
-                    <YAxis
-                      className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                    />
-                    <ChartTooltip
-                      content={({ active, payload, label }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <div className="rounded-lg border bg-background p-3 shadow-lg">
-                              <div className="font-semibold text-foreground">{label}</div>
-                              <div className="text-sm text-muted-foreground">
-                                Count: <span className="font-medium">{payload[0].value}</span>
+                <div className="overflow-x-auto -mx-2 px-2">
+                  <ChartContainer config={statusChartConfig} className="h-[250px] sm:h-80 min-w-[350px]">
+                    <BarChart data={faultData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis
+                        dataKey="name"
+                        className="text-xs"
+                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                        angle={-20}
+                        textAnchor="end"
+                        height={50}
+                      />
+                      <YAxis
+                        className="text-xs"
+                        tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                        width={35}
+                      />
+                      <ChartTooltip
+                        content={({ active, payload, label }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="rounded-lg border bg-background p-3 shadow-lg">
+                                <div className="font-semibold text-foreground text-sm">{label}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Count: <span className="font-medium">{payload[0].value}</span>
+                                </div>
                               </div>
-                            </div>
-                          )
-                        }
-                        return null
-                      }}
-                    />
-                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                      {faultData.map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ChartContainer>
+                            )
+                          }
+                          return null
+                        }}
+                      />
+                      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                        {faultData.map((entry: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
+                </div>
               ) : (
-                <div className="flex items-center justify-center h-80 text-muted-foreground">
+                <div className="flex items-center justify-center h-[250px] sm:h-80 text-muted-foreground">
                   No fault classification data available
                 </div>
               )}
@@ -347,30 +353,37 @@ export function ReturnsReportTab() {
         >
           <Card className="glass-card border-border">
             <CardHeader>
-              <CardTitle className="text-xl font-light">Returns Trends</CardTitle>
+              <CardTitle className="text-lg sm:text-xl font-light">Returns Trends</CardTitle>
               <CardDescription>Returns over time</CardDescription>
             </CardHeader>
             <CardContent>
-              <ChartContainer config={trendsChartConfig} className="h-80">
-                <BarChart data={trendsData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis
-                    dataKey="date"
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                  />
-                  <YAxis
-                    className="text-xs"
-                    tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                  />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <Bar dataKey="returns" radius={[4, 4, 0, 0]}>
-                    {trendsData.map((entry: any, index: number) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ChartContainer>
+              <div className="overflow-x-auto -mx-2 px-2">
+                <ChartContainer config={trendsChartConfig} className="h-[250px] sm:h-80 min-w-[400px]">
+                  <BarChart data={trendsData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                    <XAxis
+                      dataKey="date"
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                      angle={-45}
+                      textAnchor="end"
+                      height={50}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      className="text-xs"
+                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                      width={35}
+                    />
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Bar dataKey="returns" radius={[4, 4, 0, 0]}>
+                      {trendsData.map((entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
@@ -437,8 +450,8 @@ export function ReturnsReportTab() {
               <CardDescription>Seller return rates and performance metrics</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="rounded-lg border border-border overflow-hidden">
-                <table className="w-full">
+              <div className="rounded-lg border border-border overflow-x-auto">
+                <table className="w-full min-w-[600px]">
                   <thead className="bg-muted/30">
                     <tr>
                       <th className="text-left p-3 text-sm font-medium">Seller</th>

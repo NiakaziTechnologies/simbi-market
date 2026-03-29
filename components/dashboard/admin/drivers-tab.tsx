@@ -154,9 +154,9 @@ export function DriversTab() {
     <>
       <Card className="glass-card border-border">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-xl font-light flex items-center gap-2">
+              <CardTitle className="text-lg sm:text-xl font-light flex items-center gap-2">
                 <Truck className="h-5 w-5" />
                 Drivers
               </CardTitle>
@@ -164,8 +164,8 @@ export function DriversTab() {
                 {drivers.length > 0 ? `${drivers.length} total drivers` : "View and manage all drivers"}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative w-64">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              <div className="relative w-full sm:w-56">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
@@ -177,7 +177,7 @@ export function DriversTab() {
               </div>
               <Button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-accent hover:bg-accent/90"
+                className="bg-accent hover:bg-accent/90 whitespace-nowrap"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Driver

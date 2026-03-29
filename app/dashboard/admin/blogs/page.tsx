@@ -381,17 +381,17 @@ export default function AdminBlogsPage() {
       </div>
       <Card className="border-border">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-xl font-light flex items-center gap-2"><FileText className="h-5 w-5" />Blog Posts</CardTitle>
+              <CardTitle className="text-lg sm:text-xl font-light flex items-center gap-2"><FileText className="h-5 w-5" />Blog Posts</CardTitle>
               <CardDescription>{totalBlogs > 0 ? `${totalBlogs} total blog posts` : "No blog posts yet"}</CardDescription>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="relative w-64">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              <div className="relative w-full sm:w-56">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input type="search" placeholder="Search posts..." className="pl-9 bg-muted/50 border-border" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
               </div>
-              <Button onClick={() => { setSelectedBlog(null); setIsCreateDialogOpen(true); }}><Plus className="h-4 w-4 mr-2" />Create Post</Button>
+              <Button onClick={() => { setSelectedBlog(null); setIsCreateDialogOpen(true); }} className="whitespace-nowrap"><Plus className="h-4 w-4 mr-2" />Create Post</Button>
             </div>
           </div>
         </CardHeader>
@@ -405,30 +405,30 @@ export default function AdminBlogsPage() {
           ) : (
             <div className="grid gap-3">
               {filteredBlogs.map((blog) => (
-                <div key={blog.id} className="flex items-center gap-4 p-4 rounded-lg border border-border hover:bg-muted/30">
-                  <div className="relative h-16 w-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                    {blog.image ? (
-                      <img src={blog.image} alt={blog.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <Image src="/placeholder.svg" alt={blog.title} fill className="object-cover" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium text-foreground truncate">{blog.title}</h3>
-                      <Badge variant="outline" className={blog.isPublished ? "bg-green-500/20 text-green-400 border-green-500/30 text-xs" : "bg-amber-500/20 text-amber-400 border-amber-500/30 text-xs"}>{blog.isPublished ? "Published" : "Draft"}</Badge>
+                <div key={blog.id} className="p-3 sm:p-4 rounded-lg border border-border hover:bg-muted/30">
+                  <div className="flex gap-3">
+                    <div className="relative h-12 w-12 sm:h-16 sm:w-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                      {blog.image ? (
+                        <img src={blog.image} alt={blog.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <Image src="/placeholder.svg" alt={blog.title} fill className="object-cover" />
+                      )}
                     </div>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <Badge variant="outline" className="bg-muted/50 text-xs">{blog.category}</Badge>
-                      <span>{blog.author}</span>
-                      <span>{formatDate(blog.date)}</span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-foreground text-sm sm:text-base mb-1 line-clamp-2">{blog.title}</h3>
+                      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs text-muted-foreground">
+                        <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${blog.isPublished ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-amber-500/20 text-amber-400 border-amber-500/30"}`}>{blog.isPublished ? "Pub" : "Draft"}</Badge>
+                        <Badge variant="outline" className="bg-muted/50 text-[10px] px-1.5 py-0">{blog.category}</Badge>
+                        <span>{blog.author}</span>
+                        <span className="hidden sm:inline">{formatDate(blog.date)}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    <Button variant="ghost" size="sm" onClick={() => { setSelectedBlog(blog); setIsPreviewDialogOpen(true); }} title="Preview"><Eye className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="sm" onClick={() => togglePublishStatus(blog)} title={blog.isPublished ? "Unpublish" : "Publish"}>{blog.isPublished ? <EyeOff className="h-4 w-4 text-amber-500" /> : <Eye className="h-4 w-4 text-green-500" />}</Button>
-                    <Button variant="ghost" size="sm" onClick={() => { setSelectedBlog(blog); setIsEditDialogOpen(true); }} title="Edit"><Pencil className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="sm" onClick={() => { setSelectedBlog(blog); setIsDeleteDialogOpen(true); }} title="Delete" className="hover:text-destructive"><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                  <div className="flex items-center justify-end gap-0.5 mt-2 pt-2 border-t border-border/50 sm:border-0 sm:mt-0 sm:pt-0">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { setSelectedBlog(blog); setIsPreviewDialogOpen(true); }} title="Preview"><Eye className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => togglePublishStatus(blog)} title={blog.isPublished ? "Unpublish" : "Publish"}>{blog.isPublished ? <EyeOff className="h-3.5 w-3.5 text-amber-500" /> : <Eye className="h-3.5 w-3.5 text-green-500" />}</Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { setSelectedBlog(blog); setIsEditDialogOpen(true); }} title="Edit"><Pencil className="h-3.5 w-3.5" /></Button>
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hover:text-destructive" onClick={() => { setSelectedBlog(blog); setIsDeleteDialogOpen(true); }} title="Delete"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
                   </div>
                 </div>
               ))}

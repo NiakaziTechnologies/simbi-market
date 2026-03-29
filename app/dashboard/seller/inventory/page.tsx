@@ -282,17 +282,17 @@ export default function InventoryPage() {
         transition={{ duration: 0.6 }}
         className="mb-8"
       >
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-light tracking-tight text-foreground mb-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-light tracking-tight text-foreground mb-2">
               Inventory
             </h1>
-            <p className="text-muted-foreground font-light">
+            <p className="text-muted-foreground font-light text-sm">
               Manage your product listings and stock levels
             </p>
           </div>
           <Button 
-            className="bg-accent hover:bg-accent/90"
+            className="bg-accent hover:bg-accent/90 whitespace-nowrap"
             onClick={() => setIsAddProductOpen(true)}
           >
             <Plus className="h-4 w-4 mr-2" />
@@ -322,7 +322,7 @@ export default function InventoryPage() {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-center">
               {/* Donut Chart */}
               <div className="relative flex items-center justify-center">
                 <ChartContainer
@@ -331,7 +331,7 @@ export default function InventoryPage() {
                       label: "Value",
                     },
                   }}
-                  className="h-64 w-full"
+                  className="h-48 sm:h-64 w-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
@@ -339,8 +339,8 @@ export default function InventoryPage() {
                         data={categoryValueData.categories}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
+                        innerRadius={45}
+                        outerRadius={75}
                         paddingAngle={2}
                         dataKey="value"
                         startAngle={90}
@@ -364,7 +364,7 @@ export default function InventoryPage() {
                                     />
                                     <span className="text-sm font-medium">{data.name}</span>
                                   </div>
-                                  <div className="text-sm">
+                                  <div className="text-xs">
                                     <div>Value: {formatCurrency(data.value)}</div>
                                     <div>Percentage: {data.percentage.toFixed(1)}%</div>
                                     <div>Items: {data.count}</div>
@@ -380,39 +380,39 @@ export default function InventoryPage() {
                   </ResponsiveContainer>
                 </ChartContainer>
                 {/* Center Text */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                  <div className="text-3xl font-bold text-foreground">
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-4">
+                  <div className="text-lg sm:text-3xl font-bold text-foreground text-center">
                     {formatCurrency(categoryValueData.totalValue)}
                   </div>
-                  <div className="text-sm text-muted-foreground font-light">
+                  <div className="text-xs sm:text-sm text-muted-foreground font-light">
                     Total Value
                   </div>
                 </div>
               </div>
 
               {/* Category Breakdown */}
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {categoryValueData.categories.map((category, index) => (
-                  <div key={category.name} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div key={category.name} className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                       <div
-                        className="h-4 w-4 rounded-full flex-shrink-0"
+                        className="h-3 w-3 sm:h-4 sm:w-4 rounded-full flex-shrink-0"
                         style={{ backgroundColor: COLORS[index % COLORS.length] }}
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="font-medium text-foreground truncate">
+                        <div className="font-medium text-foreground truncate text-sm sm:text-base">
                           {category.name}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs sm:text-sm text-muted-foreground">
                           {category.count} item{category.count !== 1 ? 's' : ''}
                         </div>
                       </div>
                     </div>
-                    <div className="text-right flex-shrink-0 ml-4">
-                      <div className="font-bold text-foreground">
+                    <div className="text-right flex-shrink-0">
+                      <div className="font-bold text-foreground text-sm sm:text-base">
                         {formatCurrency(category.value)}
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-xs sm:text-sm text-muted-foreground">
                         {category.percentage.toFixed(1)}%
                       </div>
                     </div>
@@ -427,9 +427,9 @@ export default function InventoryPage() {
       {/* Inventory Table */}
       <Card className="glass-card border-border">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-xl font-light flex items-center gap-2">
+              <CardTitle className="text-lg sm:text-xl font-light flex items-center gap-2">
                 <Package className="h-5 w-5" />
                 Inventory Listings
               </CardTitle>
@@ -437,7 +437,7 @@ export default function InventoryPage() {
                 {total > 0 ? `${total} total inventory item${total !== 1 ? 's' : ''}` : "No inventory items"}
               </CardDescription>
             </div>
-            <div className="relative w-64">
+            <div className="relative w-full sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
@@ -480,8 +480,8 @@ export default function InventoryPage() {
             </div>
           ) : (
             <>
-              <div className="rounded-lg border border-border overflow-hidden">
-                <Table>
+              <div className="rounded-lg border border-border overflow-x-auto">
+                <Table className="min-w-[900px]">
                   <TableHeader>
                     <TableRow className="bg-muted/30">
                       <TableHead className="w-[300px]">Product</TableHead>
@@ -639,9 +639,9 @@ export default function InventoryPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6 pt-6 border-t border-border">
+                <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-6 border-t border-border gap-3">
                   <div className="text-sm text-muted-foreground">
-                    Showing page {page} of {totalPages} ({total} total items)
+                    Page {page} of {totalPages} ({total} items)
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -651,7 +651,7 @@ export default function InventoryPage() {
                       disabled={page === 1 || isLoading}
                     >
                       <ChevronLeft className="h-4 w-4 mr-1" />
-                      Previous
+                      Prev
                     </Button>
                     <Button
                       variant="outline"

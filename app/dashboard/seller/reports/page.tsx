@@ -243,36 +243,38 @@ export default function ReportsPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-muted/50">
-          <TabsTrigger 
-            value="sales" 
-            className="flex items-center gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
-          >
-            <BarChart3 className="h-4 w-4" />
-            Sales Report
-          </TabsTrigger>
-          <TabsTrigger 
-            value="products" 
-            className="flex items-center gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
-          >
-            <Package className="h-4 w-4" />
-            Products Report
-          </TabsTrigger>
-          <TabsTrigger 
-            value="financial" 
-            className="flex items-center gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
-          >
-            <DollarSign className="h-4 w-4" />
-            Financial Report
-          </TabsTrigger>
-          <TabsTrigger 
-            value="returns" 
-            className="flex items-center gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
-          >
-            <RotateCcw className="h-4 w-4" />
-            Returns Report
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-1 px-1">
+          <TabsList className="flex w-max sm:w-full sm:grid sm:grid-cols-4 bg-muted/50">
+            <TabsTrigger 
+              value="sales" 
+              className="flex-shrink-0 sm:flex-shrink whitespace-nowrap px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
+            >
+              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Sales Report
+            </TabsTrigger>
+            <TabsTrigger 
+              value="products" 
+              className="flex-shrink-0 sm:flex-shrink whitespace-nowrap px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
+            >
+              <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Products Report
+            </TabsTrigger>
+            <TabsTrigger 
+              value="financial" 
+              className="flex-shrink-0 sm:flex-shrink whitespace-nowrap px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
+            >
+              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Financial Report
+            </TabsTrigger>
+            <TabsTrigger 
+              value="returns" 
+              className="flex-shrink-0 sm:flex-shrink whitespace-nowrap px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 data-[state=inactive]:text-foreground/70 data-[state=active]:text-foreground data-[state=active]:bg-background"
+            >
+              <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              Returns Report
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Sales Report Tab */}
         <TabsContent value="sales" className="space-y-6">

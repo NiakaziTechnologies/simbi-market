@@ -190,7 +190,7 @@ export default function AdminReportsPage() {
             <CardDescription>Select the period for analysis</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4">
               <div className="flex-1">
                 <label className="text-sm text-muted-foreground mb-2 block">From</label>
                 <Input
@@ -209,8 +209,8 @@ export default function AdminReportsPage() {
                   className="bg-muted/50 border-border"
                 />
               </div>
-              <div className="flex items-end">
-                <Button onClick={handleDateChange} className="mt-6">
+              <div>
+                <Button onClick={handleDateChange} className="w-full sm:w-auto">
                   Apply
                 </Button>
               </div>
@@ -359,7 +359,7 @@ export default function AdminReportsPage() {
         >
           <Card className="glass-card border-border">
             <CardHeader>
-              <CardTitle className="text-xl font-light">
+              <CardTitle className="text-lg sm:text-xl font-light">
                 {data?.monthlyRevenueTrend?.title || 'Monthly Revenue Trend'}
               </CardTitle>
               <CardDescription>
@@ -368,60 +368,66 @@ export default function AdminReportsPage() {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <Skeleton className="h-80" />
+                <Skeleton className="h-[250px] sm:h-80" />
               ) : revenueChartData.length === 0 ? (
-                <div className="flex items-center justify-center h-80 text-muted-foreground">
+                <div className="flex items-center justify-center h-[250px] sm:h-80 text-muted-foreground">
                   No data available
                 </div>
               ) : (
-                <ChartContainer config={revenueChartConfig} className="h-80">
-                  <LineChart data={revenueChartData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis
-                      dataKey="month"
-                      className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                    />
-                    <YAxis
-                      className="text-xs"
-                      tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                      tickFormatter={(value) => formatCurrency(value)}
-                    />
-                    <ChartTooltip
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <div className="rounded-lg border bg-background p-2 shadow-sm">
-                              <div className="grid gap-2">
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className="h-2.5 w-2.5 rounded-full"
-                                    style={{ backgroundColor: payload[0].color }}
-                                  />
-                                  <span className="text-sm font-medium">
-                                    {formatCurrency(payload[0].value as number)}
-                                  </span>
+                <div className="overflow-x-auto -mx-2 px-2">
+                  <ChartContainer config={revenueChartConfig} className="h-[250px] sm:h-80 min-w-[400px]">
+                    <LineChart data={revenueChartData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis
+                        dataKey="month"
+                        className="text-xs"
+                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                        angle={-30}
+                        textAnchor="end"
+                        height={50}
+                      />
+                      <YAxis
+                        className="text-xs"
+                        tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                        tickFormatter={(value) => formatCurrency(value)}
+                        width={55}
+                      />
+                      <ChartTooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            return (
+                              <div className="rounded-lg border bg-background p-2 shadow-sm">
+                                <div className="grid gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className="h-2.5 w-2.5 rounded-full"
+                                      style={{ backgroundColor: payload[0].color }}
+                                    />
+                                    <span className="text-sm font-medium">
+                                      {formatCurrency(payload[0].value as number)}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">
+                                    {payload[0].payload.month}
+                                  </p>
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                  {payload[0].payload.month}
-                                </p>
                               </div>
-                            </div>
-                          )
-                        }
-                        return null
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#3b82f6"
-                      strokeWidth={2}
-                      dot={{ fill: '#3b82f6', r: 4 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ChartContainer>
+                            )
+                          }
+                          return null
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#3b82f6"
+                        strokeWidth={2}
+                        dot={{ fill: '#3b82f6', r: 3 }}
+                        activeDot={{ r: 5 }}
+                      />
+                    </LineChart>
+                  </ChartContainer>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -435,7 +441,7 @@ export default function AdminReportsPage() {
         >
           <Card className="glass-card border-border">
             <CardHeader>
-              <CardTitle className="text-xl font-light">
+              <CardTitle className="text-lg sm:text-xl font-light">
                 {data?.salesByCategory?.title || 'Sales by Category'}
               </CardTitle>
               <CardDescription>
@@ -444,24 +450,25 @@ export default function AdminReportsPage() {
             </CardHeader>
             <CardContent>
               {isLoading ? (
-                <Skeleton className="h-80" />
+                <Skeleton className="h-[250px] sm:h-80" />
               ) : pieChartData.length === 0 ? (
-                <div className="flex items-center justify-center h-80 text-muted-foreground">
+                <div className="flex items-center justify-center h-[250px] sm:h-80 text-muted-foreground">
                   No data available
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <ChartContainer config={salesByCategoryConfig} className="h-80">
+                  <ChartContainer config={salesByCategoryConfig} className="h-[250px] sm:h-80">
                     <PieChart>
                       <Pie
                         data={pieChartData}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percentage }) => `${name}: ${percentage.toFixed(2)}%`}
-                        outerRadius={100}
+                        label={({ name, percentage }) => `${(percentage).toFixed(0)}%`}
+                        outerRadius={75}
                         fill="#8884d8"
                         dataKey="value"
+                        style={{ fontSize: '10px', fontWeight: '500' }}
                       >
                         {pieChartData.map((entry: any, index: number) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -481,7 +488,7 @@ export default function AdminReportsPage() {
                                     />
                                     <span className="text-sm font-medium">{data.name}</span>
                                   </div>
-                                  <div className="text-sm">
+                                  <div className="text-xs">
                                     <div>Amount: {formatCurrency(data.value)}</div>
                                     <div>Percentage: {data.percentage.toFixed(2)}%</div>
                                     <div>Orders: {data.orderCount}</div>

@@ -242,9 +242,9 @@ export function PendingPayoutsTab() {
       {/* Orders Table */}
       <Card className="glass-card border-border">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-xl font-light flex items-center gap-2">
+              <CardTitle className="text-lg sm:text-xl font-light flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />
                 Pending Payout Orders
               </CardTitle>
@@ -253,11 +253,11 @@ export function PendingPayoutsTab() {
               </CardDescription>
             </div>
             {selectedOrders.size > 0 && (
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-4">
                 <div className="text-sm text-muted-foreground">
                   Selected: <span className="font-medium text-foreground">{selectedOrders.size}</span> order(s) - {formatCurrency(selectedTotal, selectedCurrency)}
                 </div>
-                <Button onClick={handleOpenPayoutModal} className="gap-2">
+                <Button onClick={handleOpenPayoutModal} className="gap-2 whitespace-nowrap">
                   <CreditCard className="h-4 w-4" />
                   Process Payout
                 </Button>

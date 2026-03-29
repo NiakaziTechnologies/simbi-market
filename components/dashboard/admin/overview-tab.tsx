@@ -235,36 +235,40 @@ export function OverviewTab() {
             <CardDescription>Daily revenue and order count</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={revenueChartConfig} className="h-[300px]">
-              <AreaChart data={revenueChartData}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis
-                  dataKey="date"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  className="text-xs"
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  className="text-xs"
-                  tickFormatter={(value) => `$${value}`}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Area
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#2563eb"
-                  fill="#2563eb"
-                  fillOpacity={0.2}
-                />
-              </AreaChart>
-            </ChartContainer>
+            <div className="overflow-x-auto -mx-2 px-2">
+              <ChartContainer config={revenueChartConfig} className="h-[220px] sm:h-[300px] min-w-[500px]">
+                <AreaChart data={revenueChartData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    className="text-xs"
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={8}
+                    className="text-xs"
+                    tickFormatter={(value) => `$${value}`}
+                    width={50}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#2563eb"
+                    fill="#2563eb"
+                    fillOpacity={0.2}
+                  />
+                </AreaChart>
+              </ChartContainer>
+            </div>
           </CardContent>
         </Card>
       </motion.div>

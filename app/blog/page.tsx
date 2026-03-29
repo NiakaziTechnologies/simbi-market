@@ -222,10 +222,10 @@ export default function BlogPage() {
             className="text-center mb-16"
           >
             <p className="text-accent text-sm font-medium tracking-widest uppercase mb-4">Our Blog</p>
-            <h1 className="text-5xl md:text-7xl font-light tracking-tight text-foreground dark:text-white mb-6">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-light tracking-tight text-foreground dark:text-white mb-4 sm:mb-6">
               Automotive <span className="font-semibold">Insights</span>
             </h1>
-            <p className="text-lg text-muted-foreground dark:text-muted font-light max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-muted-foreground dark:text-muted font-light max-w-2xl mx-auto">
               Expert guides, industry news, and tips to help you get the most out of your vehicle.
             </p>
           </motion.div>
@@ -235,13 +235,13 @@ export default function BlogPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-wrap justify-center gap-3 mb-16"
+            className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-10 sm:mb-16"
           >
             {categories.map((category, index) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                className={`px-4 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
                   selectedCategory === category ? "bg-accent text-white" : "bg-secondary dark:bg-white/5 text-foreground dark:text-white/70 hover:bg-accent/10 dark:hover:bg-white/10 hover:text-foreground dark:hover:text-white"
                 }`}
               >
@@ -264,7 +264,7 @@ export default function BlogPage() {
             >
               <Link href={`/blog/${featuredPost.id}`}>
                 <div className="group relative overflow-hidden rounded-2xl">
-                  <div className="relative h-[500px]">
+                  <div className="relative h-[300px] sm:h-[400px] md:h-[500px]">
                     {featuredPost.image?.startsWith("blob:") ? (
                       <img src={featuredPost.image} alt={featuredPost.title} className="w-full h-full object-cover" />
                     ) : (
@@ -277,25 +277,25 @@ export default function BlogPage() {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
                   </div>
-                  <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
-                    <span className="inline-block px-3 py-1 bg-accent text-white text-xs font-medium rounded-full mb-4">
+                  <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 md:p-12">
+                    <span className="inline-block px-3 py-1 bg-accent text-white text-xs font-medium rounded-full mb-3 sm:mb-4">
                       {featuredPost.category}
                     </span>
-                    <h2 className="text-3xl md:text-4xl font-light text-white mb-4 group-hover:text-accent transition-colors">
+                    <h2 className="text-xl sm:text-2xl md:text-4xl font-light text-white mb-3 sm:mb-4 group-hover:text-accent transition-colors">
                       {featuredPost.title}
                     </h2>
-                    <p className="text-white/70 font-light mb-6 max-w-2xl">{featuredPost.excerpt}</p>
-                    <div className="flex items-center gap-6 text-sm text-white/50">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
+                    <p className="text-white/70 font-light mb-4 sm:mb-6 max-w-2xl text-sm sm:text-base line-clamp-2 sm:line-clamp-none">{featuredPost.excerpt}</p>
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-white/50">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         {featuredPost.author}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         {featuredPost.date}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         {featuredPost.readTime}
                       </div>
                     </div>
@@ -322,7 +322,7 @@ export default function BlogPage() {
                 >
                   <Link href={`/blog/${post.id}`}>
                     <article className="group">
-                      <div className="relative h-56 rounded-xl overflow-hidden mb-4">
+                      <div className="relative h-44 sm:h-56 rounded-xl overflow-hidden mb-4">
                         {post.image?.startsWith("blob:") ? (
                           <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                         ) : (
@@ -339,17 +339,17 @@ export default function BlogPage() {
                           </span>
                         </div>
                       </div>
-                      <h3 className="text-xl font-medium text-foreground dark:text-white mb-2 group-hover:text-accent transition-colors line-clamp-2">
+                       <h3 className="text-lg sm:text-xl font-medium text-foreground dark:text-white mb-2 group-hover:text-accent transition-colors line-clamp-2">
                         {post.title}
                       </h3>
-                      <p className="text-muted-foreground dark:text-muted font-light mb-4 line-clamp-2">{post.excerpt}</p>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground dark:text-muted">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
+                      <p className="text-sm sm:text-base text-muted-foreground dark:text-muted font-light mb-3 sm:mb-4 line-clamp-2">{post.excerpt}</p>
+                      <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground dark:text-muted">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           {post.date}
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           {post.readTime}
                         </div>
                       </div>
