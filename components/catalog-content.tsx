@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from "react-redux"
 import type { RootState } from "@/lib/store"
 import { filterByCategory, searchParts, clearFilters, setFilters } from "@/lib/features/parts-slice"
 import { useCart } from "@/lib/hooks/use-cart"
-import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX, Loader2, Star, Wrench, Hash, Factory, Car, Tag } from "lucide-react"
+import { Search, Filter, Grid3X3, List, Plus, Check, Eye, PackageX, Loader2, Star, Wrench, Hash, Factory, Car, Tag, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -254,6 +254,20 @@ export function CatalogContent() {
     setSearchQuery("")
   }
 
+  const getCategoryClass = (category: string) => {
+    const map: Record<string, string> = {
+      'Brakes': 'cat-brakes',
+      'Engine': 'cat-engine',
+      'Suspension': 'cat-suspension',
+      'Exhaust': 'cat-exhaust',
+      'Wheels': 'cat-wheels',
+      'Electrical': 'cat-electrical',
+      'Transmission': 'cat-transmission',
+      'Body': 'cat-body',
+    }
+    return map[category] || 'text-accent'
+  }
+
   return (
     <section className="pt-32 pb-16 px-6">
       <div className="max-w-7xl mx-auto">
@@ -375,160 +389,220 @@ export function CatalogContent() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"
             >
-              {displayItems.map((item, index) => (
+               {displayItems.map((item, index) => (
                 <motion.div
                   key={item.id}
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  transition={{ duration: 0.5, delay: index * 0.06 }}
+                  whileHover={{ y: -6 }}
                 >
-                  <div 
-                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300 border border-border dark:border-white/10"
-                  >
+                  <div className="card-glow group relative glass-card rounded-xl overflow-hidden border border-border dark:border-white/10 hover:border-transparent transition-all duration-300 hover:shadow-[0_24px_80px_-20px_rgba(0,122,255,0.2)]">
+                    <div className="card-glow-inner">
+                    {/* OEM/Genuine corner ribbon */}
+                    {item.partType && (item.partType === 'OEM' || item.partType === 'Genuine') && (
+                      <div className={`corner-ribbon ${item.partType === 'OEM' ? 'corner-ribbon-oem' : 'corner-ribbon-genuine'}`}>
+                        {item.partType}
+                      </div>
+                    )}
+
                     {/* Image */}
                     <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
-                      <div className="relative h-64 overflow-hidden bg-muted/30">
+                      <div className="card-shimmer relative h-56 overflow-hidden bg-muted/20">
                         {!item.image || imageErrors.has(item.id) ? (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
-                            <Wrench className="h-20 w-20 text-muted-foreground/50" />
+                          <div className="placeholder-orbs absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/30 via-muted/20 to-muted/10">
+                            <div className="flex flex-col items-center gap-2">
+                              <Wrench className="h-14 w-14 text-muted-foreground/30" />
+                              <span className="text-[10px] text-muted-foreground/40 font-medium tracking-wider uppercase">No Image</span>
+                            </div>
                           </div>
                         ) : (
                           <Image
                             src={item.image}
                             alt={item.name}
                             fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            className="object-cover transition-transform duration-700 group-hover:scale-110"
                             onError={() => setImageErrors(prev => new Set(prev).add(item.id))}
                           />
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        {item.inStock ? (
-                          <div className="absolute top-4 right-4 px-3 py-1 bg-green-500/90 text-white text-xs font-medium rounded">
-                            In Stock
-                          </div>
-                        ) : (
-                          <div className="absolute top-4 right-4 px-3 py-1 bg-destructive/90 text-white text-xs font-medium rounded">
-                            Out of Stock
-                          </div>
-                        )}
-                      </div>
-                    </Link>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                    {/* Content */}
-                    <div className="p-6">
-                      <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
-                        <span className="text-xs text-accent font-medium tracking-wider uppercase">{item.category}</span>
-                        <h3 className="text-xl font-light text-foreground mt-2 mb-2 group-hover:text-accent transition-colors">
-                          {item.name}
-                        </h3>
-                        <p className="text-muted font-light text-sm leading-relaxed mb-3">{item.description || 'No description available'}</p>
-                      </Link>
-
-                      {/* Product Details - Brand, OEM, SKU, Part Type, Compatible Vehicles */}
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {item.brand && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                            <Factory className="h-3 w-3" />
-                            <span>{item.brand}</span>
-                          </div>
-                        )}
-                        {item.oemPartNumber && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                            <Hash className="h-3 w-3" />
-                            <span>OEM: {item.oemPartNumber}</span>
-                          </div>
-                        )}
-                        {item.sku && !item.oemPartNumber && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                            <Hash className="h-3 w-3" />
-                            <span>SKU: {item.sku}</span>
-                          </div>
-                        )}
-                        {item.partType && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                            <Tag className="h-3 w-3" />
-                            <span className="capitalize">{item.partType === 'OEM' ? 'OEM' : item.partType === 'Genuine' ? 'Genuine' : item.partType}</span>
-                          </div>
-                        )}
-                        {item.vehicleModels && item.vehicleModels.length > 0 && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                            <Car className="h-3 w-3" />
-                            <span className="truncate max-w-[100px]">{item.vehicleModels[0]}</span>
-                            {item.vehicleModels.length > 1 && <span className="text-[10px]">+{item.vehicleModels.length - 1}</span>}
-                          </div>
-                        )}
-                        {item.vehicleYears && item.vehicleYears.length > 0 && (
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded">
-                            <span>{Math.min(...item.vehicleYears)}-{Math.max(...item.vehicleYears)}</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Ratings */}
-                      {(item.averageRating !== undefined && item.averageRating > 0) || (item.reviewCount !== undefined && item.reviewCount > 0) ? (
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="flex items-center gap-1">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-3.5 w-3.5 ${
-                                  star <= Math.round(item.averageRating || 0)
-                                    ? "fill-yellow-400 text-yellow-400"
-                                    : "fill-muted text-muted-foreground"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-sm text-muted-foreground">
-                            {item.averageRating?.toFixed(1) || "0.0"}
-                            {item.reviewCount !== undefined && item.reviewCount > 0 && (
-                              <span className="ml-1">({item.reviewCount})</span>
-                            )}
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
-                          <Star className="h-3.5 w-3.5 fill-muted text-muted-foreground" />
-                          <span>No reviews yet</span>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-2xl font-light text-foreground">${(item.price || 0).toLocaleString()}</span>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="border-border hover:bg-muted"
+                        {/* Quick action overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 z-10">
+                          <motion.button
+                            whileHover={{ scale: 1.15 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
                               router.push(`/parts/${item.id}`)
                             }}
+                            className="flex items-center justify-center w-11 h-11 rounded-full bg-white/95 text-gray-800 shadow-xl hover:bg-white transition-colors"
                           >
                             <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button 
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.15 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
                               handleAddToCart(item)
-                            }} 
-                            disabled={!item.inStock || addingToCart.has(item.id)} 
-                            size="sm"
+                            }}
+                            disabled={!item.inStock || addingToCart.has(item.id)}
+                            className="flex items-center justify-center w-11 h-11 rounded-full bg-accent text-white shadow-xl hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {addingToCart.has(item.id) ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : addedItems.has(item.id) ? (
                               <Check className="h-4 w-4" />
                             ) : (
-                              <Plus className="h-4 w-4" />
+                              <ShoppingCart className="h-4 w-4" />
+                            )}
+                          </motion.button>
+                        </div>
+
+                        {/* Stock badge */}
+                        <div className="absolute top-3 left-3 z-10">
+                          {item.inStock ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full tracking-wider shadow-lg shadow-emerald-500/20">
+                              <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                              IN STOCK
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full tracking-wider shadow-lg shadow-red-500/20">
+                              <span className="w-1.5 h-1.5 bg-white/50 rounded-full" />
+                              SOLD OUT
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+
+                    {/* Content */}
+                    <div className="p-4">
+                      <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
+                        <span className={`inline-block text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-md ${getCategoryClass(item.category || '')}`}>
+                          {item.category}
+                        </span>
+                        <h3 className="text-[14px] font-semibold text-foreground mt-2 mb-1.5 leading-snug group-hover:text-accent transition-colors line-clamp-2 min-h-[2.5em]">
+                          {item.name}
+                        </h3>
+                        <p className="text-muted-foreground font-light text-[12px] leading-relaxed mb-3 line-clamp-2 min-h-[2.4em]">
+                          {item.description || 'No description available'}
+                        </p>
+                      </Link>
+
+                      {/* Metadata badges */}
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {item.brand && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-foreground/70 bg-foreground/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                            <Factory className="h-2.5 w-2.5" />
+                            {item.brand}
+                          </span>
+                        )}
+                        {item.oemPartNumber && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-foreground/70 bg-foreground/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                            <Hash className="h-2.5 w-2.5" />
+                            {item.oemPartNumber}
+                          </span>
+                        )}
+                        {item.sku && !item.oemPartNumber && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-foreground/70 bg-foreground/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                            <Hash className="h-2.5 w-2.5" />
+                            {item.sku}
+                          </span>
+                        )}
+                        {item.vehicleModels && item.vehicleModels.length > 0 && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-foreground/70 bg-foreground/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                            <Car className="h-2.5 w-2.5" />
+                            <span className="truncate max-w-[70px]">{item.vehicleModels[0]}</span>
+                            {item.vehicleModels.length > 1 && <span>+{item.vehicleModels.length - 1}</span>}
+                          </span>
+                        )}
+                        {item.vehicleYears && item.vehicleYears.length > 0 && (
+                          <span className="inline-flex items-center text-[10px] font-semibold text-foreground/70 bg-foreground/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                            {Math.min(...item.vehicleYears)}-{Math.max(...item.vehicleYears)}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Ratings */}
+                      {(item.averageRating !== undefined && item.averageRating > 0) || (item.reviewCount !== undefined && item.reviewCount > 0) ? (
+                        <div className="flex items-center gap-1.5 mb-3">
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`h-3 w-3 ${
+                                  star <= Math.round(item.averageRating || 0)
+                                    ? "fill-amber-400 text-amber-400 drop-shadow-sm"
+                                    : "fill-muted/20 text-muted-foreground/30"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-[11px] text-muted-foreground font-semibold">
+                            {item.averageRating?.toFixed(1)}
+                            {item.reviewCount !== undefined && item.reviewCount > 0 && (
+                              <span className="text-muted-foreground/50 font-normal ml-0.5">({item.reviewCount})</span>
+                            )}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 mb-3">
+                          <div className="flex items-center gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star key={star} className="h-3 w-3 fill-muted/15 text-muted-foreground/25" />
+                            ))}
+                          </div>
+                          <span className="text-[10px] text-muted-foreground/40 font-medium">No reviews</span>
+                        </div>
+                      )}
+
+                      {/* Price & Actions */}
+                      <div className="flex items-center justify-between pt-3 border-t border-border/40 dark:border-white/5">
+                        <div>
+                          <div className="price-highlight text-lg font-extrabold text-foreground tracking-tight">
+                            ${(item.price || 0).toLocaleString()}
+                          </div>
+                        </div>
+                        <div className="flex gap-1.5">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 w-8 p-0 rounded-lg border-border/50 hover:border-accent/50 hover:bg-accent/5 hover:text-accent transition-all"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              router.push(`/parts/${item.id}`)
+                            }}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            className={`h-8 rounded-lg bg-accent hover:bg-accent/90 text-white shadow-sm hover:shadow-lg hover:shadow-accent/20 transition-all ${addedItems.has(item.id) ? 'cart-success bg-emerald-500 hover:bg-emerald-500' : ''}`}
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleAddToCart(item)
+                            }}
+                            disabled={!item.inStock || addingToCart.has(item.id)}
+                          >
+                            {addingToCart.has(item.id) ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : addedItems.has(item.id) ? (
+                              <Check className="h-3.5 w-3.5" />
+                            ) : (
+                              <Plus className="h-3.5 w-3.5" />
                             )}
                           </Button>
                         </div>
                       </div>
+                    </div>
                     </div>
                   </div>
                 </motion.div>
@@ -543,32 +617,66 @@ export function CatalogContent() {
               transition={{ duration: 0.3 }}
               className="space-y-4"
             >
-              {displayItems.map((item, index) => (
+               {displayItems.map((item, index) => (
                 <motion.div
                   key={item.id}
-                  initial={{ opacity: 0, x: -30 }}
+                  initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  transition={{ duration: 0.5, delay: index * 0.06 }}
                 >
-                  <div 
-                    className="group glass-card rounded-lg overflow-hidden hover:border-accent/50 transition-all duration-300 border border-border dark:border-white/10"
-                  >
+                  <div className="card-glow group relative glass-card rounded-xl overflow-hidden border border-border dark:border-white/10 hover:border-transparent transition-all duration-300 hover:shadow-[0_24px_80px_-20px_rgba(0,122,255,0.15)]">
+                    <div className="card-glow-inner">
+                    {/* OEM/Genuine corner ribbon */}
+                    {item.partType && (item.partType === 'OEM' || item.partType === 'Genuine') && (
+                      <div className={`corner-ribbon ${item.partType === 'OEM' ? 'corner-ribbon-oem' : 'corner-ribbon-genuine'}`} style={{ top: '18px', right: '-32px' }}>
+                        {item.partType}
+                      </div>
+                    )}
+
                     <div className="flex flex-col md:flex-row">
                       {/* Image */}
-                      <Link href={`/parts/${item.id}`} className="block md:w-64 flex-shrink-0" prefetch={false}>
-                        <div className="relative w-full h-48 md:h-64 overflow-hidden bg-muted/30">
+                      <Link href={`/parts/${item.id}`} className="block md:w-72 lg:w-80 flex-shrink-0" prefetch={false}>
+                        <div className="card-shimmer relative w-full h-48 md:h-full md:min-h-[260px] overflow-hidden bg-muted/20">
                           {!item.image || imageErrors.has(item.id) ? (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/50 to-muted/30">
-                              <Wrench className="h-20 w-20 text-muted-foreground/50" />
+                            <div className="placeholder-orbs absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/30 via-muted/20 to-muted/10">
+                              <div className="flex flex-col items-center gap-2">
+                                <Wrench className="h-14 w-14 text-muted-foreground/30" />
+                                <span className="text-[10px] text-muted-foreground/40 font-medium tracking-wider uppercase">No Image</span>
+                              </div>
                             </div>
                           ) : (
                             <Image
                               src={item.image}
                               alt={item.name}
                               fill
-                              className="object-cover transition-transform duration-500 group-hover:scale-110"
+                              className="object-cover transition-transform duration-700 group-hover:scale-105"
                               onError={() => setImageErrors(prev => new Set(prev).add(item.id))}
                             />
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/10 hidden md:block" />
+
+                          {/* Stock badge */}
+                          <div className="absolute top-3 left-3 z-10">
+                            {item.inStock ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full tracking-wider shadow-lg shadow-emerald-500/20">
+                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                                IN STOCK
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold rounded-full tracking-wider shadow-lg shadow-red-500/20">
+                                <span className="w-1.5 h-1.5 bg-white/50 rounded-full" />
+                                SOLD OUT
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Part type badge */}
+                          {item.partType && item.partType !== 'OEM' && item.partType !== 'Genuine' && (
+                            <div className="absolute top-3 right-3 z-10">
+                              <span className="px-2.5 py-1 bg-black/60 backdrop-blur-sm text-white text-[10px] font-bold rounded-full tracking-wider">
+                                {item.partType.toUpperCase()}
+                              </span>
+                            </div>
                           )}
                         </div>
                       </Link>
@@ -576,67 +684,107 @@ export function CatalogContent() {
                       {/* Content */}
                       <div className="flex-1 p-6 flex flex-col justify-between">
                         <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs text-accent font-medium tracking-wider uppercase">
+                          <div className="flex items-start justify-between gap-4 mb-1">
+                            <span className={`inline-block text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-md ${getCategoryClass(item.category || '')}`}>
                               {item.category}
                             </span>
-                            {item.inStock ? (
-                              <span className="px-3 py-1 bg-green-500/90 text-white text-xs font-medium rounded">
-                                In Stock
+                          </div>
+                          <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
+                            <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-accent transition-colors leading-snug">
+                              {item.name}
+                            </h3>
+                          </Link>
+
+                          {/* Ratings */}
+                          {(item.averageRating !== undefined && item.averageRating > 0) || (item.reviewCount !== undefined && item.reviewCount > 0) ? (
+                            <div className="flex items-center gap-1.5 mb-3">
+                              <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`h-3.5 w-3.5 ${
+                                      star <= Math.round(item.averageRating || 0)
+                                        ? "fill-amber-400 text-amber-400 drop-shadow-sm"
+                                        : "fill-muted/20 text-muted-foreground/30"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-sm text-muted-foreground font-semibold">
+                                {item.averageRating?.toFixed(1)}
+                                {item.reviewCount !== undefined && item.reviewCount > 0 && (
+                                  <span className="text-muted-foreground/50 font-normal ml-1">({item.reviewCount} reviews)</span>
+                                )}
                               </span>
-                            ) : (
-                              <span className="px-3 py-1 bg-destructive/90 text-white text-xs font-medium rounded">
-                                Out of Stock
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1.5 mb-3">
+                              <div className="flex items-center gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star key={star} className="h-3.5 w-3.5 fill-muted/15 text-muted-foreground/25" />
+                                ))}
+                              </div>
+                              <span className="text-[10px] text-muted-foreground/40 font-medium">No reviews</span>
+                            </div>
+                          )}
+
+                          <p className="text-muted-foreground font-light text-sm leading-relaxed mb-3 line-clamp-2">
+                            {item.description || 'No description available'}
+                          </p>
+
+                          {/* Metadata badges */}
+                          <div className="flex flex-wrap gap-1.5 mb-3">
+                            {item.brand && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-foreground/70 bg-foreground/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                                <Factory className="h-2.5 w-2.5" />
+                                {item.brand}
+                              </span>
+                            )}
+                            {item.oemPartNumber && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-foreground/70 bg-foreground/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                                <Hash className="h-2.5 w-2.5" />
+                                OEM: {item.oemPartNumber}
+                              </span>
+                            )}
+                            {item.sku && !item.oemPartNumber && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-foreground/70 bg-foreground/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                                <Hash className="h-2.5 w-2.5" />
+                                SKU: {item.sku}
+                              </span>
+                            )}
+                            {item.vehicleModels && item.vehicleModels.length > 0 && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-foreground/70 bg-foreground/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                                <Car className="h-2.5 w-2.5" />
+                                {item.vehicleModels.slice(0, 2).join(", ")}
+                                {item.vehicleModels.length > 2 && ` +${item.vehicleModels.length - 2}`}
+                              </span>
+                            )}
+                            {item.vehicleYears && item.vehicleYears.length > 0 && (
+                              <span className="inline-flex items-center text-[10px] font-semibold text-foreground/70 bg-foreground/5 dark:bg-white/5 px-2 py-0.5 rounded-md">
+                                {Math.min(...item.vehicleYears)}-{Math.max(...item.vehicleYears)}
                               </span>
                             )}
                           </div>
-                          <Link href={`/parts/${item.id}`} className="block" prefetch={false}>
-                            <h3 className="text-2xl font-light text-foreground mb-2 group-hover:text-accent transition-colors">
-                              {item.name}
-                            </h3>
-                            {/* Ratings */}
-                            {(item.averageRating !== undefined && item.averageRating > 0) || (item.reviewCount !== undefined && item.reviewCount > 0) ? (
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="flex items-center gap-1">
-                                  {[1, 2, 3, 4, 5].map((star) => (
-                                    <Star
-                                      key={star}
-                                      className={`h-4 w-4 ${
-                                        star <= Math.round(item.averageRating || 0)
-                                          ? "fill-yellow-400 text-yellow-400"
-                                          : "fill-muted text-muted-foreground"
-                                      }`}
-                                    />
-                                  ))}
-                                </div>
-                                <span className="text-sm text-muted-foreground">
-                                  {item.averageRating?.toFixed(1) || "0.0"}
-                                  {item.reviewCount !== undefined && item.reviewCount > 0 && (
-                                    <span className="ml-1">({item.reviewCount} reviews)</span>
-                                  )}
-                                </span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-2 mb-2 text-sm text-muted-foreground">
-                                <Star className="h-4 w-4 fill-muted text-muted-foreground" />
-                                <span>No reviews yet</span>
-                              </div>
-                            )}
-                          </Link>
-                          <p className="text-muted font-light leading-relaxed mb-4">{item.description || 'No description available'}</p>
+
                           {item.compatibility && item.compatibility.length > 0 && (
-                            <p className="text-sm text-muted font-light">
-                              Compatible with: {item.compatibility.join(", ")}
+                            <p className="text-xs text-muted-foreground/60 font-light">
+                              <span className="font-semibold text-foreground/70">Compatible:</span> {item.compatibility.slice(0, 3).join(", ")}
+                              {item.compatibility.length > 3 && ` +${item.compatibility.length - 3} more`}
                             </p>
                           )}
                         </div>
 
-                        <div className="flex items-center justify-between mt-6 gap-4">
-                          <span className="text-3xl font-light text-foreground">${(item.price || 0).toLocaleString()}</span>
+                        {/* Price & Actions */}
+                        <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/40 dark:border-white/5 gap-4">
+                          <div>
+                            <div className="price-highlight text-2xl font-extrabold text-foreground tracking-tight">
+                              ${(item.price || 0).toLocaleString()}
+                            </div>
+                          </div>
                           <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              className="border-border hover:bg-muted"
+                            <Button
+                              variant="outline"
+                              className="h-10 rounded-lg border-border/50 hover:border-accent/50 hover:bg-accent/5 hover:text-accent transition-all"
                               onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()
@@ -646,14 +794,14 @@ export function CatalogContent() {
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
                             </Button>
-                            <Button 
+                            <Button
+                              className={`h-10 rounded-lg bg-accent hover:bg-accent/90 text-white shadow-sm hover:shadow-lg hover:shadow-accent/20 transition-all ${addedItems.has(item.id) ? 'cart-success bg-emerald-500 hover:bg-emerald-500' : ''}`}
                               onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()
                                 handleAddToCart(item)
-                              }} 
-                              disabled={!item.inStock || addingToCart.has(item.id)} 
-                              size="lg"
+                              }}
+                              disabled={!item.inStock || addingToCart.has(item.id)}
                             >
                               {addingToCart.has(item.id) ? (
                                 <>
@@ -667,7 +815,7 @@ export function CatalogContent() {
                                 </>
                               ) : (
                                 <>
-                                  <Plus className="h-4 w-4 mr-2" />
+                                  <ShoppingCart className="h-4 w-4 mr-2" />
                                   Add to Cart
                                 </>
                               )}
@@ -675,6 +823,7 @@ export function CatalogContent() {
                           </div>
                         </div>
                       </div>
+                    </div>
                     </div>
                   </div>
                 </motion.div>
