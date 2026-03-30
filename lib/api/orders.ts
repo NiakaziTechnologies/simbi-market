@@ -46,6 +46,8 @@ export interface CreateOrderRequest {
 export interface CreateOrderFromCartRequest {
   shippingAddressId?: string
   shippingAddress?: ShippingAddress
+  /** When platform shipping mode is distance; omit to use server flat fallback */
+  deliveryDistanceKm?: number
   poNumber?: string
   costCenter?: string
   notes?: string

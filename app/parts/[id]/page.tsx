@@ -208,8 +208,7 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
   const handleAddToCart = async () => {
     if (!part) return
     
-    // Prevent adding out-of-stock items
-    if (!part.inStock) {
+    if (part.inStock === false) {
       toast({
         title: "Out of Stock",
         description: "This item is out of stock and cannot be added to cart.",
@@ -220,20 +219,16 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
     
     setIsAddingToCart(true)
     try {
-      await addToCart({
-        id: part.id,
-        name: part.name,
-        price: part.price,
-        image: part.image || "/placeholder.svg",
-        quantity,
-        inventoryId: part.inventoryId,
-      })
-      setAddedToCart(true)
-      toast({
-        title: "Added to cart",
-        description: `${part.name} has been added to your cart.`,
-      })
-      setTimeout(() => setAddedToCart(false), 2000)
+      // useCart.addToCart expects (part, quantity) — not a single object (missing inStock caused false "out of stock")
+      const success = await addToCart(part, quantity)
+      if (success) {
+        setAddedToCart(true)
+        toast({
+          title: "Added to cart",
+          description: `${part.name} has been added to your cart.`,
+        })
+        setTimeout(() => setAddedToCart(false), 2000)
+      }
     } catch (error) {
       toast({
         title: "Error",
@@ -397,7 +392,7 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
                 <span className="text-4xl font-light text-foreground">
                   ${part.price?.toLocaleString() || "0"}
                 </span>
-                {part.inStock ? (
+                {part.inStock !== false ? (
                   <span className="text-sm text-green-500 flex items-center gap-1">
                     <Check className="h-4 w-4" /> In Stock
                   </span>
@@ -425,7 +420,7 @@ export default function PartDetailPage({ params }: { params: Promise<{ id: strin
                 </div>
                 <Button
                   onClick={handleAddToCart}
-                  disabled={!part.inStock || isAddingToCart}
+                  disabled={part.inStock === false || isAddingToCart}
                   className="flex-1 h-12"
                 >
                   {isAddingToCart ? (

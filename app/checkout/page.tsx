@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/lib/store"
@@ -9,12 +10,29 @@ import { useAuth } from "@/lib/auth/auth-context"
 import { createOrderFromCart, type CreateOrderResponse } from "@/lib/api/orders"
 import { getAddresses, createAddress, type Address } from "@/lib/api/addresses"
 import { createGuestOrder, type GuestOrderResponse } from "@/lib/api/guest-orders"
+import { getCommerceShippingConfig } from "@/lib/api/commerce-shipping-config"
+import type { CommerceShippingConfigData } from "@/lib/api/commerce-shipping-config"
+import {
+  countDistinctSellers,
+  estimateShippingTotal,
+} from "@/lib/commerce/shipping-estimate"
+import { haversineKm } from "@/lib/commerce/haversine-km"
+import { WAREHOUSE_POSITION } from "@/lib/commerce/warehouse-location"
+import type { DeliveryLocationSavePayload } from "@/lib/geocode/types"
 import { Navigation } from "@/components/navigation"
-import { Trash2, Minus, Plus, Lock, CreditCard, Truck, Shield, ChevronRight, ChevronDown, ShoppingBag, Loader2, MapPin, PlusCircle, Smartphone, Building2 } from "lucide-react"
+import { Trash2, Minus, Plus, Lock, CreditCard, Truck, Shield, ChevronRight, ChevronDown, ShoppingBag, Loader2, MapPin, PlusCircle, Smartphone, Building2, Map, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import Link from "next/link"
+
+const DeliveryLocationModal = dynamic(
+  () =>
+    import("@/components/checkout/delivery-location-modal").then(
+      (m) => m.DeliveryLocationModal
+    ),
+  { ssr: false, loading: () => null }
+)
 
 export default function CheckoutPage() {
   const { items, total } = useSelector((state: RootState) => state.cart)
@@ -66,6 +84,98 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
     couponCode: "",
   })
 
+  // Public shipping config (no auth) — fixed vs distance + rates
+  const [shippingConfig, setShippingConfig] = useState<CommerceShippingConfigData | null>(null)
+  const [shippingConfigLoading, setShippingConfigLoading] = useState(true)
+  const [shippingConfigError, setShippingConfigError] = useState(false)
+  const [deliveryModalOpen, setDeliveryModalOpen] = useState(false)
+  const [deliveryDropLatLng, setDeliveryDropLatLng] = useState<{
+    lat: number
+    lng: number
+  } | null>(null)
+
+  const deliveryDistanceKm = useMemo(() => {
+    if (!deliveryDropLatLng) return null
+    return haversineKm(WAREHOUSE_POSITION, deliveryDropLatLng)
+  }, [deliveryDropLatLng])
+
+  const sellerCount = useMemo(() => countDistinctSellers(items), [items])
+
+  const sellerFingerprint = useMemo(
+    () =>
+      [...items]
+        .map((i) => i.sellerId || i.inventoryId || i.id)
+        .sort()
+        .join(","),
+    [items]
+  )
+
+  const loadShippingConfig = useCallback(() => {
+    setShippingConfigLoading(true)
+    setShippingConfigError(false)
+    getCommerceShippingConfig()
+      .then((data) => {
+        setShippingConfig(data)
+        setShippingConfigError(false)
+      })
+      .catch(() => {
+        setShippingConfig(null)
+        setShippingConfigError(true)
+      })
+      .finally(() => setShippingConfigLoading(false))
+  }, [])
+
+  useEffect(() => {
+    loadShippingConfig()
+  }, [loadShippingConfig, sellerFingerprint])
+
+  useEffect(() => {
+    if (shippingConfig?.mode !== "distance") {
+      setDeliveryDropLatLng(null)
+      setDeliveryModalOpen(false)
+    }
+  }, [shippingConfig?.mode])
+
+  const shippingEstimate = useMemo(() => {
+    if (!shippingConfig) return null
+    if (paymentMethod === "pickup") {
+      return {
+        amount: 0,
+        usedDistanceFormula: false,
+        usedFlatFallback: false,
+        pendingDistanceSelection: false,
+      }
+    }
+    return estimateShippingTotal(
+      shippingConfig,
+      sellerCount,
+      deliveryDistanceKm
+    )
+  }, [shippingConfig, sellerCount, deliveryDistanceKm, paymentMethod])
+
+  const shippingNumericForTotal =
+    shippingEstimate?.amount != null ? shippingEstimate.amount : 0
+  const tax = total * 0.145
+  const grandTotal = total + shippingNumericForTotal + tax
+
+  const shippingRowPending =
+    shippingConfig?.mode === "distance" &&
+    paymentMethod !== "pickup" &&
+    shippingEstimate?.pendingDistanceSelection === true
+
+  const handleDeliverySave = useCallback((payload: DeliveryLocationSavePayload) => {
+    setDeliveryDropLatLng(payload.location)
+    if (payload.location && payload.shippingFromPin) {
+      const s = payload.shippingFromPin
+      setShippingForm((prev) => ({
+        ...prev,
+        ...(s.addressLine1 ? { addressLine1: s.addressLine1 } : {}),
+        ...(s.city ? { city: s.city } : {}),
+        ...(s.province ? { province: s.province } : {}),
+      }))
+    }
+  }, [])
+
   // Load cart and addresses from API on mount and when auth status changes
   useEffect(() => {
     console.log('Checkout page: Auth status - isAuthenticated:', isAuthenticated, 'authLoading:', authLoading)
@@ -101,10 +211,6 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
       }
     }
   }, [isAuthenticated, authLoading, loadCart])
-
-  const shipping = total > 500 ? 0 : 49.99
-  const tax = total * 0.145  // Zimbabwe VAT 14.5%
-  const grandTotal = total + shipping + tax
 
   const handleQuantityChange = async (item: typeof items[0], change: number) => {
     // Use cartItemId if available (authenticated), otherwise use id (guest)
@@ -218,9 +324,27 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
         if (orderDetails.notes) orderRequest.notes = orderDetails.notes
         if (orderDetails.couponCode) orderRequest.couponCode = orderDetails.couponCode
         if (paymentMethod) orderRequest.paymentMethod = paymentMethod
-        
+
+        if (
+          shippingConfig?.mode === "distance" &&
+          paymentMethod !== "pickup" &&
+          (deliveryDistanceKm == null ||
+            !Number.isFinite(deliveryDistanceKm) ||
+            deliveryDistanceKm < 0)
+        ) {
+          alert(
+            "Please open the map on the Shipping step and choose your delivery location."
+          )
+          setIsPlacingOrder(false)
+          return
+        }
+
+        if (deliveryDistanceKm != null && Number.isFinite(deliveryDistanceKm) && deliveryDistanceKm >= 0) {
+          orderRequest.deliveryDistanceKm = deliveryDistanceKm
+        }
+
         // Create order from cart
-  const response = await createOrderFromCart(orderRequest)
+        const response = await createOrderFromCart(orderRequest)
         
         // Store order data and clear cart  
         setOrderData(response)
@@ -284,10 +408,29 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
             })),
           notes: orderDetails.notes,
           currency: "USD" as const,
+          ...(deliveryDistanceKm != null &&
+          Number.isFinite(deliveryDistanceKm) &&
+          deliveryDistanceKm >= 0
+            ? { deliveryDistanceKm }
+            : {}),
         }
 
         if (guestOrderRequest.items.length === 0) {
           alert('No valid items in cart. Please add items to your cart.')
+          setIsPlacingOrder(false)
+          return
+        }
+
+        if (
+          shippingConfig?.mode === "distance" &&
+          paymentMethod !== "pickup" &&
+          (deliveryDistanceKm == null ||
+            !Number.isFinite(deliveryDistanceKm) ||
+            deliveryDistanceKm < 0)
+        ) {
+          alert(
+            "Please open the map on the Shipping step and choose your delivery location."
+          )
           setIsPlacingOrder(false)
           return
         }
@@ -884,6 +1027,34 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                         </div>
                       </div>
                     )}
+
+                    {shippingConfig?.mode === "distance" && (
+                      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 px-4 py-3 dark:border-white/10 dark:bg-white/[0.03]">
+                        <div className="flex items-center gap-2 text-sm font-light text-foreground dark:text-white">
+                          {deliveryDropLatLng ? (
+                            <Check
+                              className="h-4 w-4 shrink-0 text-green-600 dark:text-green-400"
+                              aria-hidden
+                            />
+                          ) : (
+                            <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          )}
+                          <span>
+                            {deliveryDropLatLng ? "Delivery pin saved" : "Delivery pin"}
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          className="shrink-0"
+                          onClick={() => setDeliveryModalOpen(true)}
+                        >
+                          <Map className="mr-2 h-4 w-4" />
+                          Map
+                        </Button>
+                      </div>
+                    )}
                     
                     {/* Order Details Section */}
                     <div className="glass-card dark:glass-card rounded-lg p-6">
@@ -1317,10 +1488,50 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                       <span>Subtotal</span>
                       <span>${total.toLocaleString()}</span>
                     </div>
-                    <div className="flex justify-between text-muted-foreground dark:text-muted font-light">
+                    <div className="flex justify-between text-muted-foreground dark:text-muted font-light items-start gap-2">
                       <span>Shipping</span>
-                      <span>{shipping === 0 ? "Free" : `$${shipping}`}</span>
+                      <span className="text-right">
+                        {shippingConfigLoading ? (
+                          "…"
+                        ) : shippingConfigError ? (
+                          "—"
+                        ) : paymentMethod === "pickup" ? (
+                          <span className="text-green-600 dark:text-green-400">Free</span>
+                        ) : shippingEstimate?.amount == null ? (
+                          "…"
+                        ) : (
+                          `$${shippingEstimate.amount.toFixed(2)}`
+                        )}
+                      </span>
                     </div>
+                    {shippingRowPending &&
+                      !shippingConfigLoading &&
+                      !shippingConfigError && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setStep(2)
+                            setDeliveryModalOpen(true)
+                          }}
+                          className="-mt-1 text-left text-xs font-light text-accent hover:underline"
+                        >
+                          {step >= 2
+                            ? "Open delivery map"
+                            : "Go to shipping & open map"}
+                        </button>
+                      )}
+                    {shippingEstimate?.hint &&
+                      !shippingConfigError &&
+                      !shippingConfigLoading && (
+                      <p className="text-xs text-muted-foreground dark:text-muted font-light -mt-1">
+                        {shippingEstimate.hint}
+                      </p>
+                    )}
+                    {shippingConfigError && !shippingConfigLoading && (
+                      <p className="text-xs text-muted-foreground dark:text-muted font-light -mt-1">
+                        Shipping is finalized when your order is placed.
+                      </p>
+                    )}
                     <div className="flex justify-between text-muted-foreground dark:text-muted font-light">
                       <span>Tax</span>
                       <span>${tax.toFixed(2)}</span>
@@ -1348,6 +1559,16 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
           </div>
         </div>
       </section>
+
+      {shippingConfig?.mode === "distance" && (
+        <DeliveryLocationModal
+          open={deliveryModalOpen}
+          onOpenChange={setDeliveryModalOpen}
+          warehouse={WAREHOUSE_POSITION}
+          committed={deliveryDropLatLng}
+          onSave={handleDeliverySave}
+        />
+      )}
     </main>
   )
 }

@@ -222,8 +222,7 @@ export function CatalogContent() {
   }
 
   const handleAddToCart = async (item: Part) => {
-    // Prevent adding out-of-stock items
-    if (!item.inStock) {
+    if (item.inStock === false) {
       alert('This item is out of stock and cannot be added to cart.')
       return
     }
@@ -483,7 +482,7 @@ export function CatalogContent() {
                               e.stopPropagation()
                               handleAddToCart(item)
                             }}
-                            disabled={!item.inStock || addingToCart.has(item.id)}
+                            disabled={item.inStock === false || addingToCart.has(item.id)}
                             className="flex items-center justify-center w-11 h-11 rounded-full bg-accent text-white shadow-xl hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {addingToCart.has(item.id) ? (
@@ -622,7 +621,7 @@ export function CatalogContent() {
                               e.stopPropagation()
                               handleAddToCart(item)
                             }}
-                            disabled={!item.inStock || addingToCart.has(item.id)}
+                            disabled={item.inStock === false || addingToCart.has(item.id)}
                           >
                             {addingToCart.has(item.id) ? (
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -833,7 +832,7 @@ export function CatalogContent() {
                                 e.stopPropagation()
                                 handleAddToCart(item)
                               }}
-                              disabled={!item.inStock || addingToCart.has(item.id)}
+                              disabled={item.inStock === false || addingToCart.has(item.id)}
                             >
                               {addingToCart.has(item.id) ? (
                                 <>

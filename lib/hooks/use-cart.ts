@@ -9,8 +9,8 @@ import { useRouter } from 'next/navigation'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAuth } from '../auth/auth-context'
 import { addItemToCart, getCart, updateCartItemQuantity, removeCartItem, clearCart as clearCartApi, type CartItem as ApiCartItem, type CartSummary } from '../api/cart'
-import { setCartItems, setCartLoading, updateCartItem, clearCart as clearCartAction, addToCart as addToCartAction, removeFromCart as removeFromCartAction, updateQuantity as updateQuantityAction, setGuestCartItems } from '../features/cart-slice'
-import type { Part, CartItem } from '../features/parts-slice'
+import { setCartItems, setCartLoading, updateCartItem, clearCart as clearCartAction, addToCart as addToCartAction, removeFromCart as removeFromCartAction, updateQuantity as updateQuantityAction, setGuestCartItems, type CartItem } from '../features/cart-slice'
+import type { Part } from '../features/parts-slice'
 import type { RootState } from '../store'
 
 const GUEST_CART_KEY = 'guest_cart'
@@ -118,8 +118,8 @@ export function useCart() {
       return false
     }
 
-    // Prevent adding out-of-stock items
-    if (!part.inStock) {
+    // Only block explicit out-of-stock; undefined = unknown (caller must pass full Part from API/catalog)
+    if (part.inStock === false) {
       alert('This item is out of stock and cannot be added to cart.')
       return false
     }

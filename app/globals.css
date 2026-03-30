@@ -386,3 +386,9 @@
 .cart-success {
   animation: cart-bounce 0.4s ease;
 }
+
+/* Checkout map: warehouse divIcon without default leaflet tile background */
+.leaflet-warehouse-icon {
+  border: none !important;
+  background: transparent !important;
+}
