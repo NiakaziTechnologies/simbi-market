@@ -1,16 +1,9 @@
-# Fix Buyer Loans Page JSX Parse Error & Improvements
+# Checkout Payment Text Fix TODO
 
-## Status: Complete ✅
-
-### Steps:
-1. [x] Read & analyze buyer/seller loans pages
-2. [x] Rewrite buyer/loans/page.tsx cleanly (Fragment wrap, flatten structure)
-3. [x] Move Loans after Returns in dashboard sidebar
-4. [x] UI upgrade to match seller style (Tabs, cards, stats, gradients)
-5. [x] Update TODO & complete
-
-**Final Structure:**
-- Sidebar: Overview > Orders > Returns > Loans > Settings
-- Page: Tabs + polished cards matching seller design
-
-All done.
+## Steps:
+- [x] Step 1: Create TODO.md (this file)
+- [x] Step 2: Edit app/checkout/page.tsx - Update PayNow h3 className
+- [x] Step 3: Edit app/checkout/page.tsx - Update PayPal h3 className  
+- [x] Step 4: Edit app/checkout/page.tsx - Update Cash on Delivery h3 className
+- [x] Step 5: Update TODO.md - Mark all complete
+- [x] Step 6: Test with dev server

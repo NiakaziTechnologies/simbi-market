@@ -1249,7 +1249,7 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                               <CreditCard className="h-6 w-6 text-accent" />
                             </div>
                             <div>
-                              <h3 className="text-white font-light mb-2">PayNow - {selectedChannel === 'cards' ? 'Visa/Mastercard' : selectedChannel === 'zimswitch' ? 'ZimSwitch' : selectedChannel === 'ecocash' ? 'EcoCash' : selectedChannel === 'onemoney' ? 'OneMoney' : selectedChannel === 'telecash' ? 'TeleCash' : 'Bank Transfer'}</h3>
+<h3 className="text-foreground dark:text-white font-light mb-2">PayNow - {selectedChannel === 'cards' ? 'Visa/Mastercard' : selectedChannel === 'zimswitch' ? 'ZimSwitch' : selectedChannel === 'ecocash' ? 'EcoCash' : selectedChannel === 'onemoney' ? 'OneMoney' : selectedChannel === 'telecash' ? 'TeleCash' : 'Bank Transfer'}</h3>
                               <p className="text-muted font-light text-sm leading-relaxed">
                                 Complete payment via {selectedChannel === 'cards' || selectedChannel === 'zimswitch' ? 'card details' : selectedChannel === 'bank' ? 'bank transfer details' : 'mobile money'}. Secure gateway redirect.
                               </p>
@@ -1275,7 +1275,7 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                               <span className="text-accent font-bold">PP</span>
                             </div>
                             <div>
-                              <h3 className="text-white font-light mb-2">PayPal</h3>
+<h3 className="text-foreground dark:text-white font-light mb-2">PayPal</h3>
                               <p className="text-muted font-light text-sm leading-relaxed">
                                 You will be redirected to PayPal to complete your payment.
                               </p>
@@ -1340,7 +1340,7 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                               <Truck className="h-6 w-6 text-accent" />
                             </div>
                             <div>
-                              <h3 className="text-white font-light mb-2">Cash on Delivery</h3>
+<h3 className="text-foreground dark:text-white font-light mb-2">Cash on Delivery</h3>
                               <p className="text-muted font-light text-sm leading-relaxed">
                                 Pay with cash when your order is delivered to your doorstep. Our delivery partner will
                                 collect the payment upon delivery.
