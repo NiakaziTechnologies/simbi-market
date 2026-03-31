@@ -352,7 +352,7 @@ export function AdminNotificationsDropdown() {
                                 </span>
                                 {notification.order && (
                                   <Link
-                                    href={`/dashboard/admin/orders`}
+                                    href={`/dashboard/admin/dispatch`}
                                     onClick={(e) => e.stopPropagation()}
                                     className="text-xs text-accent hover:underline flex items-center gap-1"
                                   >

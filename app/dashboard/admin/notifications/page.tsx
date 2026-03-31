@@ -272,7 +272,7 @@ export default function AdminNotificationsPage() {
                           <span>{formatTime(notification.createdAt)}</span>
                           {notification.order && (
                             <Link
-                              href="/dashboard/admin/orders"
+                              href="/dashboard/admin/dispatch"
                               className="text-accent hover:underline flex items-center gap-1"
                             >
                               View Order

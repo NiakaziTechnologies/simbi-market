@@ -10,6 +10,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Loader2, Save } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { FinancialPartnersTab } from "@/components/dashboard/admin/financial-partners-tab"
+import { LoanApplicationsTab } from "@/components/dashboard/admin/loan-applications-tab"
 import {
   getCommercePricing,
   updateCommercePricing,
@@ -42,6 +45,7 @@ function applySnapshotToForm(
 
 export default function AdminSettingsPage() {
   const { toast } = useToast()
+  const [activeTab, setActiveTab] = useState("commerce")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [snapshot, setSnapshot] = useState<CommercePricingData | null>(null)
@@ -218,7 +222,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-8 w-full">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -226,10 +230,36 @@ export default function AdminSettingsPage() {
       >
         <h1 className="text-3xl font-light text-foreground mb-2">Settings</h1>
         <p className="text-muted-foreground font-light">
-          Platform commerce pricing, shipping, and commission.
+          Commerce pricing, financial partners, and loan applications (admin API required).
         </p>
       </motion.div>
 
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-6 grid w-full grid-cols-1 sm:grid-cols-3 bg-background/50 border border-border">
+          <TabsTrigger
+            value="commerce"
+            className="text-xs sm:text-sm text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "commerce" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
+            Commerce pricing
+          </TabsTrigger>
+          <TabsTrigger
+            value="partners"
+            className="text-xs sm:text-sm text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "partners" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
+            Financial partners
+          </TabsTrigger>
+          <TabsTrigger
+            value="loans"
+            className="text-xs sm:text-sm text-foreground hover:bg-blue-500 transition-all duration-200 ease-in-out"
+            style={activeTab === "loans" ? { backgroundColor: "#2563eb", color: "white" } : {}}
+          >
+            Loan applications
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="commerce" className="mt-0">
       <Card className="border-border">
         <CardHeader>
           <CardTitle className="text-xl font-light">Commerce pricing</CardTitle>
@@ -353,6 +383,38 @@ export default function AdminSettingsPage() {
           )}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="partners" className="mt-0">
+          <Card className="border-border">
+            <CardHeader>
+              <CardTitle className="text-xl font-light">Financial partners</CardTitle>
+              <CardDescription>
+                Configure lending partners, seller form fields (<code className="text-xs">fieldDefinitionsJson</code>
+                ), and HTTP integration. Secrets: use the key button or include on create only.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FinancialPartnersTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="loans" className="mt-0">
+          <Card className="border-border">
+            <CardHeader>
+              <CardTitle className="text-xl font-light">Loan applications</CardTitle>
+              <CardDescription>
+                Cross-seller applications for support. Backend:{" "}
+                <code className="text-xs">GET /api/admin/financial-partners/loan-applications</code>
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <LoanApplicationsTab />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

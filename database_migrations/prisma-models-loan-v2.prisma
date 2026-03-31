@@ -1,0 +1,45 @@
+// Copy into schema.prisma (adjust model names / relations to match your User/Seller tables).
+// After merge: npx prisma generate
+
+// model FinancialPartner {
+//   id                      String   @id @default(uuid()) @db.Uuid
+//   name                    String
+//   slug                    String   @unique
+//   description             String?
+//   minAmount               Decimal? @db.Decimal(14, 2)
+//   maxAmount               Decimal? @db.Decimal(14, 2)
+//   interestRate            Decimal? @db.Decimal(7, 4)
+//   termMonths              Int?
+//   logo                    String?
+//   contactEmail            String?
+//   feesAndTermsSummary     String?
+//   isActive                Boolean  @default(true)
+//   fieldDefinitionsJson    Json     @default("[]")
+//   integrationConfigJson   Json     @default("{}")
+//   integrationSecretsJson  Json     @default("{}")
+//   apiEndpoint             String?
+//   apiKey                  String?
+//   webhookUrl              String?
+//   createdAt               DateTime @default(now())
+//   updatedAt               DateTime @updatedAt
+//   loanApplications        LoanApplication[]
+// }
+//
+// model LoanApplication {
+//   id                  String   @id @default(uuid()) @db.Uuid
+//   partnerId           String   @db.Uuid
+//   partner             FinancialPartner @relation(fields: [partnerId], references: [id])
+//   sellerId            String   @db.Uuid
+//   status              String   @default("DRAFT")
+//   requestedAmount     Decimal? @db.Decimal(14, 2)
+//   approvedAmount      Decimal? @db.Decimal(14, 2)
+//   partnerReferenceId  String?
+//   rejectionReason     String?
+//   customFieldsJson    Json     @default("{}")
+//   platformPayloadJson Json?
+//   createdAt           DateTime @default(now())
+//   updatedAt           DateTime @updatedAt
+//   @@index([partnerId])
+//   @@index([sellerId])
+//   @@index([status])
+// }
