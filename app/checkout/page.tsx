@@ -1149,7 +1149,11 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                         <label className="text-sm text-muted-foreground dark:text-muted font-light mb-3 block">Payment Method</label>
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           <button
-                            onClick={() => setShowPayNowChannels(!showPayNowChannels)}
+onClick={() => {
+  setPaymentMethod("paynow_cards");
+  setSelectedChannel("cards");
+  setShowPayNowChannels(true);
+}}
                             className={`p-4 rounded-lg border transition-all col-span-2 md:col-span-1 ${
                               paymentMethod.startsWith("paynow")
                                 ? "border-accent bg-accent/10"
@@ -1160,7 +1164,7 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                             <p className="text-foreground dark:text-white font-light text-sm">PayNow & Local</p>
                             <ChevronDown className={`h-4 w-4 ml-auto transition-transform ${showPayNowChannels ? 'rotate-180' : ''}`} />
                           </button>
-                          {showPayNowChannels && paymentMethod.startsWith("paynow") && (
+{showPayNowChannels && (
                             <div className="col-span-2 md:col-span-3 grid grid-cols-3 md:grid-cols-6 gap-2 p-2 bg-accent/5 rounded-lg">
                               {[
                                 { id: 'cards', label: 'VISA' },
@@ -1190,7 +1194,7 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                                     <Building2 className="h-4 w-4" />
                                   ) : (
                                     <Image 
-                                      src={`/new/${id === 'ecocash' ? 'EcoCash.png' : id === 'telecash' ? 'Telecash.png' : id === 'onemoney' ? '1money.jpeg' : 'zimswitch.jpeg'}`} 
+src={`/new/${id === 'ecocash' ? 'EcoCash.png' : id === 'telecash' ? 'Telecash.png' : id === 'onemoney' ? '1money.jpeg' : 'zimswitch.jpeg'}`.trim()}
                                       alt={label} 
                                       width={32} 
                                       height={32} 
@@ -1452,11 +1456,11 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                       <h3 className="text-sm text-muted-foreground dark:text-muted font-light mb-3">Payment Method</h3>
                       <div className="bg-muted dark:bg-white/5 rounded-lg p-4 border border-border dark:border-white/10">
                         <div className="flex items-center gap-2">
-                          {paymentMethod === "paynow" && <CreditCard className="h-4 w-4 text-accent" />}
+{paymentMethod.startsWith("paynow") && <CreditCard className="h-4 w-4 text-accent" />}
                           {paymentMethod === "paypal" && <span className="text-accent font-bold text-xs">PP</span>}
                           {paymentMethod === "cash" && <Truck className="h-4 w-4 text-accent" />}
                           <span className="text-foreground dark:text-white font-light text-sm capitalize">
-                            {paymentMethod === "paynow" ? "Pay Now" : paymentMethod === "paypal" ? "PayPal" : "Cash on Delivery"}
+{paymentMethod.startsWith("paynow") ? "PayNow " + (selectedChannel === 'cards' ? 'Cards' : selectedChannel === 'zimswitch' ? 'ZimSwitch' : selectedChannel === 'ecocash' ? 'EcoCash' : selectedChannel === 'onemoney' ? 'OneMoney' : selectedChannel === 'telecash' ? 'TeleCash' : 'Bank') : paymentMethod === "paypal" ? "PayPal" : paymentMethod === "cash" ? "Cash on Delivery" : "Pickup"}
                           </span>
                         </div>
                       </div>
