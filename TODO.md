@@ -1,10 +1,6 @@
-# Fix PayNow & Local Payment UI in Checkout
+# Remove Admin Finance Page - Progress Tracker
 
-## Current Status\n- [x] Diagnose issue: UI not clickable/selected\n- [x] Create TODO.md
-- [x] Edit app/checkout/page.tsx (button onClick logic)\n- [x] Test PayNow flow
-- [ ] Backend validation (if needed)
-- [ ] Complete
-
-## Steps
-1. Update PayNow button: Click → set default PayNow + open dropdown
-2. [x] Verify channel selection highlights & order preview\n3. [x] Test full flow
+## Steps:
+- [x] 1. Delete `app/dashboard/admin/finance/page.tsx`
+- [x] 2. Update `components/dashboard/admin-sidebar.tsx` (remove nav item & active logic)
+- [ ] 3. Verify navigation works (test dashboard)

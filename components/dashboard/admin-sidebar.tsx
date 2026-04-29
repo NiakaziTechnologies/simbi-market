@@ -35,7 +35,7 @@ const menuItems = [
   { id: "returns", label: "Returns", icon: RotateCcw, href: "/dashboard/admin/returns" },
   { id: "reviews", label: "Reviews", icon: Star, href: "/dashboard/admin/reviews" },
   { id: "reports", label: "Reports", icon: BarChart3, href: "/dashboard/admin/reports" },
-  { id: "finance", label: "Finance", icon: DollarSign, href: "/dashboard/admin/finance" },
+
   { id: "settings", label: "Settings", icon: Settings, href: "/dashboard/admin/settings" },
 ]
 
@@ -59,7 +59,7 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
     if (pathname?.includes("/returns")) return "returns"
     if (pathname?.includes("/reviews")) return "reviews"
     if (pathname?.includes("/reports")) return "reports"
-    if (pathname?.includes("/finance")) return "finance"
+
     if (pathname?.includes("/settings")) return "settings"
     return "dashboard"
   }
