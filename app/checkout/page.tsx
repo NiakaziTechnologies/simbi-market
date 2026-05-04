@@ -23,7 +23,25 @@ import { haversineKm } from "@/lib/commerce/haversine-km"
 import { WAREHOUSE_POSITION } from "@/lib/commerce/warehouse-location"
 import type { DeliveryLocationSavePayload } from "@/lib/geocode/types"
 import { Navigation } from "@/components/navigation"
-import { Trash2, Minus, Plus, Lock, CreditCard, Truck, Shield, ChevronRight, ChevronDown, ShoppingBag, Loader2, MapPin, PlusCircle, Smartphone, Building2, Map, Check } from "lucide-react"
+import {
+  Trash2,
+  Minus,
+  Plus,
+  Lock,
+  CreditCard,
+  Truck,
+  Shield,
+  ChevronRight,
+  ChevronDown,
+  ShoppingBag,
+  Loader2,
+  MapPin,
+  PlusCircle,
+  Smartphone,
+  Building2,
+  Map as MapIcon,
+  Check,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -1220,7 +1238,7 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                           className="shrink-0"
                           onClick={() => setDeliveryModalOpen(true)}
                         >
-                          <Map className="mr-2 h-4 w-4" />
+                          <MapIcon className="mr-2 h-4 w-4" />
                           Map
                         </Button>
                       </div>
