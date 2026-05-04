@@ -4,6 +4,11 @@
  */
 
 import { apiClient } from "./api-client"
+import {
+  extractArray,
+  extractEntity,
+  normalizeListEnvelope,
+} from "./normalize-api-response"
 
 const BASE = "/api/seller/loans"
 
@@ -94,7 +99,14 @@ export async function listSellerLoanPartners(): Promise<{
   data: SellerLoanPartner[]
   message?: string
 }> {
-  return apiClient.get(`${BASE}/partners`)
+  const raw = await apiClient.get<Record<string, unknown>>(`${BASE}/partners`)
+  const n = normalizeListEnvelope<SellerLoanPartner>(raw, [
+    "data",
+    "partners",
+    "items",
+    "rows",
+  ])
+  return { success: n.success, data: n.data, message: n.message }
 }
 
 export async function listSellerLoanApplications(params?: {
@@ -105,15 +117,47 @@ export async function listSellerLoanApplications(params?: {
   message?: string
 }> {
   const q = params?.status ? `?status=${encodeURIComponent(params.status)}` : ""
-  return apiClient.get(`${BASE}/applications${q}`)
+  const raw = await apiClient.get<Record<string, unknown>>(
+    `${BASE}/applications${q}`
+  )
+  const n = normalizeListEnvelope<LoanApplicationSellerView>(raw, [
+    "data",
+    "applications",
+    "requests",
+    "items",
+    "loans",
+    "rows",
+  ])
+  return { success: n.success, data: n.data, message: n.message }
 }
 
 export async function getSellerLoanApplication(id: string): Promise<{
   success: boolean
-  data: LoanApplicationSellerView
+  data?: LoanApplicationSellerView
   message?: string
 }> {
-  return apiClient.get(`${BASE}/applications/${encodeURIComponent(id)}`)
+  const raw = await apiClient.get<Record<string, unknown>>(
+    `${BASE}/applications/${encodeURIComponent(id)}`
+  )
+  if (!raw || typeof raw !== "object") {
+    return { success: false, message: "Invalid response" }
+  }
+  const r = raw as Record<string, unknown>
+  const data = extractEntity<LoanApplicationSellerView>(raw, [
+    "data",
+    "application",
+    "item",
+  ])
+  return {
+    success: r.success !== false && data != null,
+    data: data ?? undefined,
+    message:
+      typeof r.message === "string"
+        ? r.message
+        : typeof r.error === "string"
+          ? r.error
+          : undefined,
+  }
 }
 
 export async function getSellerLoanStatusEvents(id: string): Promise<{
@@ -121,19 +165,61 @@ export async function getSellerLoanStatusEvents(id: string): Promise<{
   data: LoanStatusEvent[]
   message?: string
 }> {
-  return apiClient.get(
+  const raw = await apiClient.get<Record<string, unknown>>(
     `${BASE}/applications/${encodeURIComponent(id)}/status-events`
   )
+  if (!raw || typeof raw !== "object") {
+    return { success: false, data: [], message: "Invalid response" }
+  }
+  const r = raw as Record<string, unknown>
+  const data = extractArray<LoanStatusEvent>(raw, [
+    "data",
+    "events",
+    "statusEvents",
+    "items",
+  ])
+  return {
+    success: r.success !== false,
+    data,
+    message:
+      typeof r.message === "string"
+        ? r.message
+        : typeof r.error === "string"
+          ? r.error
+          : undefined,
+  }
 }
 
 export async function submitSellerLoanApplication(
   body: SubmitLoanApplicationBody
 ): Promise<{
   success: boolean
-  data: LoanApplicationSellerView
+  data?: LoanApplicationSellerView
   message?: string
 }> {
-  return apiClient.post(`${BASE}/applications`, body)
+  const raw = await apiClient.post<Record<string, unknown>>(
+    `${BASE}/applications`,
+    body
+  )
+  if (!raw || typeof raw !== "object") {
+    return { success: false, message: "Invalid response" }
+  }
+  const r = raw as Record<string, unknown>
+  const data = extractEntity<LoanApplicationSellerView>(raw, [
+    "data",
+    "application",
+    "item",
+  ])
+  return {
+    success: r.success !== false,
+    data: data ?? undefined,
+    message:
+      typeof r.message === "string"
+        ? r.message
+        : typeof r.error === "string"
+          ? r.error
+          : undefined,
+  }
 }
 
 export async function syncSellerLoanApplicationStatus(id: string): Promise<{
@@ -141,7 +227,29 @@ export async function syncSellerLoanApplicationStatus(id: string): Promise<{
   message?: string
   data?: LoanApplicationSellerView
 }> {
-  return apiClient.post(`${BASE}/applications/${encodeURIComponent(id)}/sync-status`, {})
+  const raw = await apiClient.post<Record<string, unknown>>(
+    `${BASE}/applications/${encodeURIComponent(id)}/sync-status`,
+    {}
+  )
+  if (!raw || typeof raw !== "object") {
+    return { success: false, message: "Invalid response" }
+  }
+  const r = raw as Record<string, unknown>
+  const data = extractEntity<LoanApplicationSellerView>(raw, [
+    "data",
+    "application",
+    "item",
+  ])
+  return {
+    success: r.success !== false,
+    message:
+      typeof r.message === "string"
+        ? r.message
+        : typeof r.error === "string"
+          ? r.error
+          : undefined,
+    data: data ?? undefined,
+  }
 }
 
 export async function cancelSellerLoanApplication(id: string): Promise<{

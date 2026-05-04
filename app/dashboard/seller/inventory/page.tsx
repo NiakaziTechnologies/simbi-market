@@ -8,11 +8,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Eye,
-  Edit,
   AlertTriangle,
   Star,
   Loader2,
   Plus,
+  FileDown,
+  FileUp,
+  FileSpreadsheet,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -33,7 +35,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { getSellerInventory, getInventoryValueByCategory, getMasterCatalog, createInventoryListing, type InventoryListing, type CategoryValue, type MasterCatalogProduct, type CreateInventoryListingRequest } from "@/lib/api/seller-inventory"
+import {
+  createInventoryListing,
+  downloadBulkTemplate,
+  downloadInventoryCsv,
+  getBulkUploadStatus,
+  getInventoryValueByCategory,
+  getLowStockAlerts,
+  getMasterCatalog,
+  getSellerInventoryListings,
+  quickUpdateListing,
+  uploadBulkCsv,
+  type CreateInventoryListingRequest,
+  type InventoryListing,
+  type CategoryValue,
+  type MasterCatalogProduct,
+  type LowStockAlertItem,
+} from "@/lib/api/seller-inventory"
 import { format } from "date-fns"
 import Image from "next/image"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -95,6 +113,15 @@ export default function InventoryPage() {
   const [selectedProduct, setSelectedProduct] = useState<MasterCatalogProduct | null>(null)
   const [isProductSelectOpen, setIsProductSelectOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [lowStockAlerts, setLowStockAlerts] = useState<LowStockAlertItem[]>([])
+  const [loadingLowStock, setLoadingLowStock] = useState(true)
+  const [csvOpen, setCsvOpen] = useState(false)
+  const [csvFile, setCsvFile] = useState<File | null>(null)
+  const [csvUploadId, setCsvUploadId] = useState<string | null>(null)
+  const [csvStatus, setCsvStatus] = useState<Record<string, unknown> | null>(null)
+  const [csvBusy, setCsvBusy] = useState(false)
+  const [rowSaving, setRowSaving] = useState<string | null>(null)
+  const [editing, setEditing] = useState<{ id: string; field: "sellerPrice" | "quantity"; value: string } | null>(null)
   const { toast } = useToast()
 
   // Form state
@@ -114,7 +141,7 @@ export default function InventoryPage() {
     try {
       setIsLoading(true)
       setError(null)
-      const data = await getSellerInventory(page, limit)
+      const data = await getSellerInventoryListings({ page, limit })
       setInventory(data.inventory)
       setTotalPages(data.pagination.pages || 1)
       setTotal(data.pagination.total)
@@ -124,6 +151,18 @@ export default function InventoryPage() {
       setIsLoading(false)
     }
   }, [page, limit])
+
+  const loadLowStock = useCallback(async () => {
+    try {
+      setLoadingLowStock(true)
+      const data = await getLowStockAlerts(5)
+      setLowStockAlerts(data)
+    } catch (err: any) {
+      setLowStockAlerts([])
+    } finally {
+      setLoadingLowStock(false)
+    }
+  }, [])
 
   const loadCategoryValue = useCallback(async () => {
     try {
@@ -140,6 +179,7 @@ export default function InventoryPage() {
   useEffect(() => {
     loadInventory()
     loadCategoryValue()
+    loadLowStock()
   }, [loadInventory, loadCategoryValue])
 
   const filteredInventory = inventory.filter((item) => {
@@ -164,6 +204,113 @@ export default function InventoryPage() {
     setSelectedItem(item)
     setIsDetailOpen(true)
   }
+
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
+
+  const onSaveInline = async () => {
+    if (!editing) return
+    const { id, field, value } = editing
+    const num = field === "quantity" ? parseInt(value, 10) : parseFloat(value)
+    if (!Number.isFinite(num)) {
+      toast({ title: "Enter a valid number", variant: "destructive" })
+      return
+    }
+
+    setRowSaving(id)
+    setEditing(null)
+    const prev = inventory
+    setInventory((cur) =>
+      cur.map((r) => (r.id === id ? { ...r, [field]: num } as InventoryListing : r))
+    )
+
+    try {
+      const updated = await quickUpdateListing(id, field === "quantity" ? { quantity: num } : { sellerPrice: num })
+      setInventory((cur) => cur.map((r) => (r.id === id ? updated : r)))
+      void loadLowStock()
+    } catch (e: any) {
+      setInventory(prev)
+      toast({ title: "Update failed", description: e.message, variant: "destructive" })
+    } finally {
+      setRowSaving(null)
+    }
+  }
+
+  const startEdit = (item: InventoryListing, field: "sellerPrice" | "quantity") => {
+    setEditing({ id: item.id, field, value: String(item[field]) })
+  }
+
+  const onCsvDownloadExport = async () => {
+    setCsvBusy(true)
+    try {
+      const blob = await downloadInventoryCsv()
+      downloadBlob(blob, "inventory-export.csv")
+      toast({ title: "Export downloaded" })
+    } catch (e: any) {
+      toast({ title: "Export failed", description: e.message, variant: "destructive" })
+    } finally {
+      setCsvBusy(false)
+    }
+  }
+
+  const onCsvDownloadTemplate = async () => {
+    setCsvBusy(true)
+    try {
+      const blob = await downloadBulkTemplate()
+      downloadBlob(blob, "inventory-bulk-template.csv")
+      toast({ title: "Template downloaded" })
+    } catch (e: any) {
+      toast({ title: "Template download failed", description: e.message, variant: "destructive" })
+    } finally {
+      setCsvBusy(false)
+    }
+  }
+
+  const onCsvUpload = async () => {
+    if (!csvFile) {
+      toast({ title: "Choose a CSV file first", variant: "destructive" })
+      return
+    }
+    setCsvBusy(true)
+    setCsvStatus(null)
+    try {
+      const uploadId = await uploadBulkCsv(csvFile)
+      setCsvUploadId(uploadId)
+      toast({ title: "Upload accepted", description: "Processing started" })
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e.message, variant: "destructive" })
+    } finally {
+      setCsvBusy(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!csvUploadId) return
+    let cancelled = false
+    const tick = async () => {
+      try {
+        const status = await getBulkUploadStatus(csvUploadId)
+        if (cancelled) return
+        setCsvStatus(status)
+      } catch {
+        // ignore polling errors; user can retry by reopening
+      }
+    }
+    void tick()
+    const t = window.setInterval(() => void tick(), 2000)
+    return () => {
+      cancelled = true
+      window.clearInterval(t)
+    }
+  }, [csvUploadId])
 
   const loadCatalogProducts = useCallback(async (search?: string) => {
     try {
@@ -301,6 +448,56 @@ export default function InventoryPage() {
         </div>
       </motion.div>
 
+      {/* Top 5 Low Stock Alerts */}
+      <Card className="glass-card border-border">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-lg sm:text-xl font-light flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-amber-400" />
+                Top 5 Low Stock Alerts
+              </CardTitle>
+              <CardDescription>Items where quantity is below your threshold</CardDescription>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void loadLowStock()}
+              disabled={loadingLowStock}
+            >
+              {loadingLowStock ? <Loader2 className="h-4 w-4 animate-spin" /> : "Refresh"}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {loadingLowStock ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+            </div>
+          ) : lowStockAlerts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No low stock alerts right now.</p>
+          ) : (
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {lowStockAlerts.map((a) => (
+                <div key={a.id} className="rounded-lg border border-border/70 bg-muted/20 p-3">
+                  <div className="font-medium text-foreground truncate">{a.product.name}</div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    OEM: {a.product.oemPartNumber} · {a.product.masterPartId}
+                  </div>
+                  <div className="mt-2 flex items-center justify-between gap-3 text-sm">
+                    <div className="text-muted-foreground">Qty</div>
+                    <div className="font-medium text-destructive tabular-nums">
+                      {a.quantity} / {a.lowStockThreshold}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Inventory Value by Category Widget */}
       {categoryValueData && categoryValueData.categories.length > 0 && (
         <motion.div
@@ -437,15 +634,21 @@ export default function InventoryPage() {
                 {total > 0 ? `${total} total inventory item${total !== 1 ? 's' : ''}` : "No inventory items"}
               </CardDescription>
             </div>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search inventory..."
-                className="pl-9 bg-muted/50 border-border"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search inventory..."
+                  className="pl-9 bg-muted/50 border-border"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <Button type="button" variant="outline" className="gap-2" onClick={() => setCsvOpen(true)}>
+                <FileSpreadsheet className="h-4 w-4" />
+                CSV tools
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -486,11 +689,10 @@ export default function InventoryPage() {
                     <TableRow className="bg-muted/30">
                       <TableHead className="w-[300px]">Product</TableHead>
                       <TableHead>Price</TableHead>
-                      <TableHead>Stock</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead>Low stock threshold</TableHead>
                       <TableHead>Condition</TableHead>
-                      <TableHead>Rating</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Updated</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -498,7 +700,6 @@ export default function InventoryPage() {
                     {filteredInventory.map((item, index) => {
                       const imageUrl = item.sellerImages?.[0] || item.masterProduct.imageUrls?.[0]
                       const normalizedImageUrl = imageUrl ? normalizeImageUrl(imageUrl) : "/placeholder.svg"
-                      const stockStatus = getStockStatus(item.quantity, item.lowStockThreshold)
 
                       return (
                         <motion.tr
@@ -528,6 +729,11 @@ export default function InventoryPage() {
                                 <div className="text-sm text-muted-foreground truncate">
                                   OEM: {item.masterProduct.oemPartNumber}
                                 </div>
+                                {item.masterProduct.masterPartId && (
+                                  <div className="text-xs text-muted-foreground truncate">
+                                    Master: {item.masterProduct.masterPartId}
+                                  </div>
+                                )}
                                 {item.sellerSku && (
                                   <div className="text-xs text-muted-foreground truncate">
                                     SKU: {item.sellerSku}
@@ -540,60 +746,81 @@ export default function InventoryPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="font-medium text-foreground">
-                              {formatCurrency(item.sellerPrice, item.currency)}
-                            </div>
-                            {item.priceUpdateCount > 0 && (
-                              <div className="text-xs text-muted-foreground">
-                                Updated {item.priceUpdateCount} time{item.priceUpdateCount !== 1 ? 's' : ''}
+                            {editing?.id === item.id && editing.field === "sellerPrice" ? (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  className="h-8 w-28 bg-muted/40"
+                                  value={editing.value}
+                                  onChange={(e) => setEditing({ ...editing, value: e.target.value })}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") void onSaveInline()
+                                    if (e.key === "Escape") setEditing(null)
+                                  }}
+                                  onBlur={() => void onSaveInline()}
+                                  autoFocus
+                                />
+                                {rowSaving === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                               </div>
+                            ) : (
+                              <button
+                                type="button"
+                                className="text-left"
+                                onClick={() => startEdit(item, "sellerPrice")}
+                                disabled={rowSaving === item.id}
+                              >
+                                <div className="font-medium text-foreground">
+                                  {formatCurrency(item.sellerPrice, item.currency)}
+                                </div>
+                                <div className="text-xs text-muted-foreground">Click to edit</div>
+                              </button>
                             )}
                           </TableCell>
                           <TableCell>
-                            <div className="space-y-1">
+                            {editing?.id === item.id && editing.field === "quantity" ? (
                               <div className="flex items-center gap-2">
-                                <span className={`font-medium ${
-                                  item.quantity === 0 ? 'text-red-400' :
-                                  item.quantity <= item.lowStockThreshold ? 'text-yellow-400' :
-                                  'text-foreground'
-                                }`}>
+                                <Input
+                                  className="h-8 w-24 bg-muted/40"
+                                  value={editing.value}
+                                  onChange={(e) => setEditing({ ...editing, value: e.target.value })}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") void onSaveInline()
+                                    if (e.key === "Escape") setEditing(null)
+                                  }}
+                                  onBlur={() => void onSaveInline()}
+                                  autoFocus
+                                />
+                                {rowSaving === item.id ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                              </div>
+                            ) : (
+                              <button
+                                type="button"
+                                className="text-left"
+                                onClick={() => startEdit(item, "quantity")}
+                                disabled={rowSaving === item.id}
+                              >
+                                <div
+                                  className={cn(
+                                    "font-medium tabular-nums",
+                                    item.quantity === 0
+                                      ? "text-destructive"
+                                      : item.quantity <= item.lowStockThreshold
+                                        ? "text-amber-300"
+                                        : "text-foreground"
+                                  )}
+                                >
                                   {item.quantity}
-                                </span>
-                                {item.quantity <= item.lowStockThreshold && item.quantity > 0 && (
-                                  <AlertTriangle className="h-4 w-4 text-yellow-400" />
-                                )}
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                Threshold: {item.lowStockThreshold}
-                              </div>
-                              {item.reorderPoint > 0 && (
-                                <div className="text-xs text-muted-foreground">
-                                  Reorder: {item.reorderPoint}
                                 </div>
-                              )}
-                            </div>
+                                <div className="text-xs text-muted-foreground">Click to edit</div>
+                              </button>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-muted-foreground tabular-nums">{item.lowStockThreshold}</div>
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline" className="border-border">
                               {item.condition}
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            {item.reviewCount > 0 ? (
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-1">
-                                  <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                                  <span className="text-sm font-medium text-foreground">
-                                    {item.averageRating.toFixed(1)}
-                                  </span>
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  {item.reviewCount} review{item.reviewCount !== 1 ? 's' : ''}
-                                </div>
-                              </div>
-                            ) : (
-                              <span className="text-sm text-muted-foreground">No reviews</span>
-                            )}
                           </TableCell>
                           <TableCell>
                             <Badge
@@ -607,11 +834,6 @@ export default function InventoryPage() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="text-sm text-muted-foreground">
-                              {format(new Date(item.updatedAt), "MMM dd, yyyy")}
-                            </div>
-                          </TableCell>
-                          <TableCell>
                             <div className="flex items-center justify-end gap-2">
                               <Button
                                 variant="ghost"
@@ -620,13 +842,6 @@ export default function InventoryPage() {
                                 className="h-8"
                               >
                                 <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8"
-                              >
-                                <Edit className="h-4 w-4" />
                               </Button>
                             </div>
                           </TableCell>
@@ -841,6 +1056,90 @@ export default function InventoryPage() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* CSV Tools Wizard */}
+      <Dialog open={csvOpen} onOpenChange={setCsvOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto w-[96vw] sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>CSV tools</DialogTitle>
+            <DialogDescription>
+              Export your inventory or bulk update with a CSV upload.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="rounded-lg border border-border/70 bg-muted/20 p-4 space-y-2">
+              <div className="text-sm font-medium text-foreground">Step 1 — Get a CSV</div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => void onCsvDownloadTemplate()}
+                  disabled={csvBusy}
+                >
+                  <FileDown className="h-4 w-4" />
+                  Download template
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => void onCsvDownloadExport()}
+                  disabled={csvBusy}
+                >
+                  <FileDown className="h-4 w-4" />
+                  Export current inventory
+                </Button>
+                {csvBusy ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Columns: masterProductId,sellerPrice,currency,quantity,condition,lowStockThreshold,reorderPoint,sellerSku,sellerNotes
+              </p>
+            </div>
+
+            <div className="rounded-lg border border-border/70 bg-muted/20 p-4 space-y-3">
+              <div className="text-sm font-medium text-foreground">Step 2 — Upload CSV</div>
+              <Input
+                type="file"
+                accept=".csv,text/csv"
+                onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  className="gap-2"
+                  onClick={() => void onCsvUpload()}
+                  disabled={csvBusy || !csvFile}
+                >
+                  <FileUp className="h-4 w-4" />
+                  Upload and start processing
+                </Button>
+                {csvBusy ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
+              </div>
+              {csvUploadId && (
+                <p className="text-xs text-muted-foreground">
+                  Upload ID: <span className="font-mono">{csvUploadId}</span>
+                </p>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-border/70 bg-muted/20 p-4 space-y-2">
+              <div className="text-sm font-medium text-foreground">Step 3 — Processing status</div>
+              {csvUploadId ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">Polling status… (updates every 2s)</p>
+                  <pre className="max-h-56 overflow-y-auto rounded-md bg-background/40 border border-border p-3 text-xs">
+{JSON.stringify(csvStatus ?? { status: "waiting" }, null, 2)}
+                  </pre>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Upload a CSV to start.</p>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 

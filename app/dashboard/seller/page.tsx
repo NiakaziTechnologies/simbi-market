@@ -22,6 +22,11 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarC
 import { getSellerDashboardComprehensive, type SellerDashboardComprehensiveResponse } from "@/lib/api/seller-dashboard"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { SriSummaryCard } from "@/components/dashboard/seller/sri-summary-card"
+import { SriBreakdownDialog } from "@/components/dashboard/seller/sri-breakdown-dialog"
+import { FulfilmentQueueCard } from "@/components/dashboard/seller/fulfilment-queue-card"
+import { ComplianceHealthCard } from "@/components/dashboard/seller/compliance-health-card"
+import { ComplianceUploadDialog } from "@/components/dashboard/seller/compliance-upload-dialog"
 
 
 function formatCurrency(value: number, unit: string = "$"): string {
@@ -55,6 +60,8 @@ export default function SellerDashboardPage() {
   const [dashboardData, setDashboardData] = useState<SellerDashboardComprehensiveResponse['data'] | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [sriOpen, setSriOpen] = useState(false)
+  const [complianceOpen, setComplianceOpen] = useState(false)
 
   useEffect(() => {
     async function loadDashboard() {
@@ -150,6 +157,15 @@ export default function SellerDashboardPage() {
         </h1>
         <p className="text-muted-foreground font-light">Welcome to your seller dashboard</p>
       </motion.div>
+
+      {/* Action widgets */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <SriSummaryCard onViewBreakdown={() => setSriOpen(true)} />
+        <FulfilmentQueueCard />
+        <ComplianceHealthCard onOpenUpload={() => setComplianceOpen(true)} />
+      </div>
+      <SriBreakdownDialog open={sriOpen} onOpenChange={setSriOpen} />
+      <ComplianceUploadDialog open={complianceOpen} onOpenChange={setComplianceOpen} />
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">

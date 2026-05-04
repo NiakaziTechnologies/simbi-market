@@ -12,7 +12,7 @@ export interface CartItem {
   inventoryId: string // Seller inventory ID
   quantity: number
   product: {
-    id: string // Product ID
+    id: string // Catalog / master product id used for carrier quotes when engine is carrier_v1
     name: string
     oemPartNumber?: string
     manufacturer?: string

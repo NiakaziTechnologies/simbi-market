@@ -36,6 +36,8 @@ export interface GuestOrderRequest {
   currency?: "USD" | "ZWL"
   /** When platform shipping mode is distance; omit to use server flat fallback */
   deliveryDistanceKm?: number
+  regionCode?: string
+  paymentMethod?: string
 }
 
 /**

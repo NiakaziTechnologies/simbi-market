@@ -22,6 +22,11 @@ export interface ShippingEstimateResult {
   usedFlatFallback: boolean
   /** Distance mode but user has not chosen a map point yet — UI shows … and excludes shipping from total */
   pendingDistanceSelection?: boolean
+  /** carrier_v1: per-seller quotes still loading */
+  pendingCarrierQuotes?: boolean
+  /** carrier_v1: at least one seller quote failed */
+  carrierQuoteError?: boolean
+  usedCarrierQuotes?: boolean
   /** Optional UX hint */
   hint?: string
 }

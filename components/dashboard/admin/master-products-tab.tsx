@@ -8,6 +8,15 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -22,10 +31,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Search, ChevronLeft, ChevronRight, Package, Image as ImageIcon, Ruler, Weight, FileText, CheckCircle } from "lucide-react"
-import { getMasterProducts, type MasterProduct } from "@/lib/api/admin-products"
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Package,
+  Ruler,
+  Weight,
+  FileText,
+  CheckCircle,
+  Loader2,
+  Trash2,
+} from "lucide-react"
+import { deleteMasterProductComplete, getMasterProducts, type MasterProduct } from "@/lib/api/admin-products"
 import { formatDistanceToNow, format } from "date-fns"
 import Image from "next/image"
+import { useToast } from "@/hooks/use-toast"
 
 function normalizeImageUrl(url: string): string {
   if (!url) return "/placeholder.svg"
@@ -35,6 +56,7 @@ function normalizeImageUrl(url: string): string {
 }
 
 export function MasterProductsTab() {
+  const { toast } = useToast()
   const [products, setProducts] = useState<MasterProduct[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -44,6 +66,8 @@ export function MasterProductsTab() {
   const [searchQuery, setSearchQuery] = useState("")
   const [limit] = useState(20)
   const [selectedProduct, setSelectedProduct] = useState<MasterProduct | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<MasterProduct | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const loadProducts = useCallback(async () => {
     try {
@@ -81,6 +105,29 @@ export function MasterProductsTab() {
       return formatDistanceToNow(new Date(dateString), { addSuffix: true })
     } catch {
       return dateString
+    }
+  }
+
+  const confirmDeleteMasterProduct = async () => {
+    if (!deleteTarget) return
+    setDeletingId(deleteTarget.id)
+    try {
+      await deleteMasterProductComplete(deleteTarget.id)
+      toast({ title: "Master product removed from catalog" })
+      if (selectedProduct?.id === deleteTarget.id) {
+        setSelectedProduct(null)
+      }
+      setDeleteTarget(null)
+      await loadProducts()
+    } catch (e: unknown) {
+      const err = e as { message?: string }
+      toast({
+        title: "Could not delete product",
+        description: err.message,
+        variant: "destructive",
+      })
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -146,7 +193,7 @@ export function MasterProductsTab() {
                     <TableHead>Vehicle</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-right w-[130px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -240,13 +287,25 @@ export function MasterProductsTab() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => setSelectedProduct(product)}
-                          >
-                            View
-                          </Button>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedProduct(product)}
+                            >
+                              View
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => setDeleteTarget(product)}
+                              title="Delete from master catalog"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     )
@@ -500,11 +559,60 @@ export function MasterProductsTab() {
                       </div>
                     </CardContent>
                   </Card>
+
+                  <div className="flex flex-wrap justify-end gap-2 border-t border-border pt-4">
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => {
+                        if (selectedProduct) setDeleteTarget(selectedProduct)
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete from catalog
+                    </Button>
+                  </div>
                 </div>
               </>
             )}
           </DialogContent>
         </Dialog>
+
+        <AlertDialog
+          open={!!deleteTarget}
+          onOpenChange={(open) => {
+            if (!open && !deletingId) setDeleteTarget(null)
+          }}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete master product?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This permanently removes <strong className="text-foreground">{deleteTarget?.name}</strong> from
+                the master catalog ({deleteTarget?.oemPartNumber}). Seller listings and orders that depend on
+                it may be affected. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={!!deletingId}>Cancel</AlertDialogCancel>
+              <Button
+                variant="destructive"
+                disabled={!!deletingId}
+                onClick={() => void confirmDeleteMasterProduct()}
+                className="gap-2"
+              >
+                {deletingId ? (
+                  <>
+                    <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                    Deleting…
+                  </>
+                ) : (
+                  "Delete permanently"
+                )}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
     </>
   )
 }

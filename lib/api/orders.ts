@@ -38,6 +38,8 @@ export interface CreateOrderRequest {
   costCenter?: string
   notes?: string
   couponCode?: string
+  deliveryDistanceKm?: number
+  regionCode?: string
 }
 
 /**
@@ -48,6 +50,8 @@ export interface CreateOrderFromCartRequest {
   shippingAddress?: ShippingAddress
   /** When platform shipping mode is distance; omit to use server flat fallback */
   deliveryDistanceKm?: number
+  /** Logistics region (e.g. DEFAULT, ZW-HRE); backend default DEFAULT */
+  regionCode?: string
   poNumber?: string
   costCenter?: string
   notes?: string
@@ -167,6 +171,31 @@ export interface OrderItemResponse {
   }
 }
 
+export type OrderTrackingStandardStatus =
+  | "PENDING_PICKUP"
+  | "IN_TRANSIT"
+  | "OUT_FOR_DELIVERY"
+  | "DELIVERED"
+  | "FAILED_DELIVERY"
+  | "RETURNED_TO_SENDER"
+  | string
+
+export interface OrderShippingTrackingEvent {
+  standardStatus: OrderTrackingStandardStatus
+  statusLabel: string
+  rawStatus?: string | null
+  location?: string | null
+  notes?: string | null
+  source?: "WEBHOOK" | "POLL" | "ADMIN" | string
+  createdAt: string
+}
+
+export interface OrderShippingSummary {
+  carrierName?: string | null
+  trackingEvents?: OrderShippingTrackingEvent[]
+  [key: string]: unknown
+}
+
 /**
  * Shipping address from API response
  */
@@ -214,6 +243,7 @@ export interface OrderResponse {
   updatedAt: string
   items: OrderItemResponse[]
   shippingAddress: ShippingAddressResponse
+  shipping?: OrderShippingSummary | null
 }
 
 /**

@@ -11,7 +11,8 @@ export interface User {
   email: string
   name: string
   role: 'buyer' | 'seller' | 'admin'
-  // Add other user fields as needed
+  /** Admin JWT role when `role === 'admin'` (SUPER_ADMIN, FINOPS_ANALYST, …). */
+  adminRole?: string
 }
 
 export interface AuthTokens {

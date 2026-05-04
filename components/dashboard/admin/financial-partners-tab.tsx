@@ -33,6 +33,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { JsonSchemaJsonField } from "@/components/dashboard/admin/json-schema-example"
+import {
+  FP_FIELD_DEFINITIONS_EXAMPLE,
+  FP_INTEGRATION_CONFIG_EXAMPLE,
+  FP_SECRETS_MERGE_EXAMPLE,
+} from "@/lib/admin/financial-partner-json-examples"
 import {
   createFinancialPartner,
   deleteFinancialPartner,
@@ -393,11 +399,11 @@ export function FinancialPartnersTab() {
         <DialogContent className="max-h-[90vh] overflow-y-auto w-[98vw] sm:max-w-5xl">
           <DialogHeader>
             <DialogTitle>{editing ? "Edit partner" : "New partner"}</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-muted-foreground dark:text-zinc-400">
               Super admin only on save. JSON fields are validated before submit.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-3 py-2">
+          <div className="grid gap-4 py-2">
             <div className="grid gap-2">
               <Label htmlFor="fp-name">Name</Label>
               <Input
@@ -520,57 +526,37 @@ export function FinancialPartnersTab() {
                 placeholder="Full URL if not using integrationConfigJson"
               />
             </div>
-            <div className="grid gap-2">
-              <Label>fieldDefinitionsJson (seller form)</Label>
-              <Textarea
-                value={fieldsJson}
-                onChange={(e) => setFieldsJson(e.target.value)}
-                rows={6}
-                className="font-mono text-xs"
-                placeholder={`[
-  { "key": "nationalId", "label": "National ID", "type": "text", "required": true },
-  { "key": "yearsInBusiness", "label": "Years in business", "type": "number", "required": false }
-]`}
-              />
-              <p className="text-xs text-muted-foreground">
-                Example backend format:
-                <code className="ml-1 font-mono">
-                  [{`{"key":"nationalId","label":"National ID","type":"text","required":true}`}]
-                </code>
-              </p>
-            </div>
-            <div className="grid gap-2">
-              <Label>integrationConfigJson (non-secret)</Label>
+            <JsonSchemaJsonField
+              label="fieldDefinitionsJson (seller form)"
+              description="JSON array of field definitions shown to sellers on the loan application form."
+              example={FP_FIELD_DEFINITIONS_EXAMPLE}
+            >
+              <Textarea value={fieldsJson} onChange={(e) => setFieldsJson(e.target.value)} rows={10} spellCheck={false} />
+            </JsonSchemaJsonField>
+            <JsonSchemaJsonField
+              label="integrationConfigJson (non-secret)"
+              description="HTTP integration used by background jobs: base URL, submit/status paths and methods. Do not put secrets here."
+              example={FP_INTEGRATION_CONFIG_EXAMPLE}
+            >
               <Textarea
                 value={integrationJson}
                 onChange={(e) => setIntegrationJson(e.target.value)}
-                rows={8}
-                className="font-mono text-xs"
-                placeholder={`{
-  "baseUrl": "https://api.partner.co.zw",
-  "submitPath": "/loans/applications",
-  "submitMethod": "POST",
-  "statusPath": "/loans/applications/:partnerReferenceId/status",
-  "statusMethod": "GET"
-}`}
+                rows={12}
+                spellCheck={false}
               />
-              <p className="text-xs text-muted-foreground">
-                Example keys expected by backend polling/submission:{" "}
-                <code className="font-mono">
-                  baseUrl, submitPath, submitMethod, statusPath, statusMethod
-                </code>
-              </p>
-            </div>
+            </JsonSchemaJsonField>
             {!editing && (
-              <div className="grid gap-2">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <Label>integrationSecretsJson (create only)</Label>
+                  <Label className="text-sm font-semibold text-foreground dark:text-zinc-100">
+                    integrationSecretsJson (create only)
+                  </Label>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => setShowCreateSecrets((v) => !v)}
-                    className="h-8 gap-1.5"
+                    className="h-8 shrink-0 gap-1.5"
                   >
                     {showCreateSecrets ? (
                       <>
@@ -585,14 +571,19 @@ export function FinancialPartnersTab() {
                     )}
                   </Button>
                 </div>
-                <Textarea
-                  value={secretsJson}
-                  onChange={(e) => setSecretsJson(e.target.value)}
-                  rows={4}
-                  className="font-mono text-xs"
-                  style={!showCreateSecrets ? { WebkitTextSecurity: "disc" } : undefined}
-                  placeholder='{"apiKey":"...","webhookSigningSecret":"..."}'
-                />
+                <JsonSchemaJsonField
+                  description="Create-only merge. Keys are stored as integrationSecretsJson on the server."
+                  example={FP_SECRETS_MERGE_EXAMPLE}
+                  hint="Shown once when creating a partner. Use the eye control to reveal values while editing."
+                >
+                  <Textarea
+                    value={secretsJson}
+                    onChange={(e) => setSecretsJson(e.target.value)}
+                    rows={8}
+                    spellCheck={false}
+                    style={!showCreateSecrets ? { WebkitTextSecurity: "disc" } : undefined}
+                  />
+                </JsonSchemaJsonField>
               </div>
             )}
           </div>
@@ -608,10 +599,10 @@ export function FinancialPartnersTab() {
       </Dialog>
 
       <Dialog open={secretsDialogOpen} onOpenChange={setSecretsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[96vw] max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Integration secrets</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-muted-foreground dark:text-zinc-400">
               {secretsPartner?.name} — merge JSON keys. Use null or empty string to remove a key.
             </DialogDescription>
           </DialogHeader>
@@ -636,14 +627,19 @@ export function FinancialPartnersTab() {
               )}
             </Button>
           </div>
-          <Textarea
-            value={secretsBody}
-            onChange={(e) => setSecretsBody(e.target.value)}
-            rows={8}
-            className="font-mono text-xs"
-            style={!showEditSecrets ? { WebkitTextSecurity: "disc" } : undefined}
-            placeholder='{"apiKey":"new_key","webhookSigningSecret":null}'
-          />
+          <JsonSchemaJsonField
+            description="Merge patch: set new values or use null to remove a key from stored secrets."
+            example={FP_SECRETS_MERGE_EXAMPLE}
+            hint="Only keys you include are updated; other stored keys are left unchanged unless you set them to null."
+          >
+            <Textarea
+              value={secretsBody}
+              onChange={(e) => setSecretsBody(e.target.value)}
+              rows={12}
+              spellCheck={false}
+              style={!showEditSecrets ? { WebkitTextSecurity: "disc" } : undefined}
+            />
+          </JsonSchemaJsonField>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSecretsDialogOpen(false)}>
               Cancel

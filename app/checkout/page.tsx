@@ -12,10 +12,13 @@ import { getAddresses, createAddress, type Address } from "@/lib/api/addresses"
 import { createGuestOrder, type GuestOrderResponse } from "@/lib/api/guest-orders"
 import { getCommerceShippingConfig } from "@/lib/api/commerce-shipping-config"
 import type { CommerceShippingConfigData } from "@/lib/api/commerce-shipping-config"
+import { postCommerceShippingQuote, type ShippingQuoteData } from "@/lib/api/commerce-shipping-quote"
 import {
   countDistinctSellers,
   estimateShippingTotal,
+  roundShippingCents,
 } from "@/lib/commerce/shipping-estimate"
+import { masterProductIdForShippingQuote } from "@/lib/commerce/cart-master-product"
 import { haversineKm } from "@/lib/commerce/haversine-km"
 import { WAREHOUSE_POSITION } from "@/lib/commerce/warehouse-location"
 import type { DeliveryLocationSavePayload } from "@/lib/geocode/types"
@@ -33,6 +36,12 @@ const DeliveryLocationModal = dynamic(
     ),
   { ssr: false, loading: () => null }
 )
+
+type CarrierQuoteEntry =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "ok"; data: ShippingQuoteData }
+  | { status: "err"; message: string }
 
 export default function CheckoutPage() {
   const { items, total } = useSelector((state: RootState) => state.cart)
@@ -88,6 +97,8 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
   const [shippingConfig, setShippingConfig] = useState<CommerceShippingConfigData | null>(null)
   const [shippingConfigLoading, setShippingConfigLoading] = useState(true)
   const [shippingConfigError, setShippingConfigError] = useState(false)
+  const [regionCode, setRegionCode] = useState("DEFAULT")
+  const [carrierQuoteBySeller, setCarrierQuoteBySeller] = useState<Record<string, CarrierQuoteEntry>>({})
   const [deliveryModalOpen, setDeliveryModalOpen] = useState(false)
   const [deliveryDropLatLng, setDeliveryDropLatLng] = useState<{
     lat: number
@@ -100,6 +111,22 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
   }, [deliveryDropLatLng])
 
   const sellerCount = useMemo(() => countDistinctSellers(items), [items])
+
+  /** Lines per seller for carrier_v1 quote API (`masterProductId` from cart item). */
+  const sellerQuoteLineGroups = useMemo(() => {
+    const map = new Map<string, { masterProductId: string; quantity: number }[]>()
+    for (const item of items) {
+      const sid = item.sellerId
+      if (!sid) continue
+      const masterProductId = masterProductIdForShippingQuote(item)
+      const lines = map.get(sid) ?? []
+      const idx = lines.findIndex((l) => l.masterProductId === masterProductId)
+      if (idx >= 0) lines[idx] = { ...lines[idx], quantity: lines[idx].quantity + item.quantity }
+      else lines.push({ masterProductId, quantity: item.quantity })
+      map.set(sid, lines)
+    }
+    return map
+  }, [items])
 
   const sellerFingerprint = useMemo(
     () =>
@@ -136,6 +163,71 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
     }
   }, [shippingConfig?.mode])
 
+  const isCarrierEngine = shippingConfig?.shippingEngine === "carrier_v1"
+
+  useEffect(() => {
+    if (!shippingConfig || !isCarrierEngine) {
+      setCarrierQuoteBySeller({})
+      return
+    }
+    if (paymentMethod === "pickup") {
+      setCarrierQuoteBySeller({})
+      return
+    }
+    const entries = [...sellerQuoteLineGroups.entries()].filter(([, lines]) => lines.length > 0)
+    if (entries.length === 0) {
+      setCarrierQuoteBySeller({})
+      return
+    }
+    let cancelled = false
+    const loadingMap: Record<string, CarrierQuoteEntry> = {}
+    for (const [sid] of entries) loadingMap[sid] = { status: "loading" }
+    setCarrierQuoteBySeller(loadingMap)
+
+    void Promise.all(
+      entries.map(async ([sellerId, lines]) => {
+        try {
+          const data = await postCommerceShippingQuote({
+            sellerId,
+            lines,
+            deliveryDistanceKm:
+              deliveryDistanceKm != null && Number.isFinite(deliveryDistanceKm) && deliveryDistanceKm >= 0
+                ? deliveryDistanceKm
+                : undefined,
+            regionCode: regionCode.trim() || undefined,
+            currency: "USD",
+          })
+          return { sellerId, ok: true as const, data }
+        } catch (e) {
+          return {
+            sellerId,
+            ok: false as const,
+            message: (e as Error).message || "Quote failed",
+          }
+        }
+      })
+    ).then((results) => {
+      if (cancelled) return
+      const next: Record<string, CarrierQuoteEntry> = {}
+      for (const r of results) {
+        if (r.ok) next[r.sellerId] = { status: "ok", data: r.data }
+        else next[r.sellerId] = { status: "err", message: r.message }
+      }
+      setCarrierQuoteBySeller(next)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [
+    shippingConfig,
+    isCarrierEngine,
+    sellerQuoteLineGroups,
+    deliveryDistanceKm,
+    regionCode,
+    paymentMethod,
+    sellerFingerprint,
+  ])
+
   const shippingEstimate = useMemo(() => {
     if (!shippingConfig) return null
     if (paymentMethod === "pickup") {
@@ -146,12 +238,58 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
         pendingDistanceSelection: false,
       }
     }
-    return estimateShippingTotal(
-      shippingConfig,
-      sellerCount,
-      deliveryDistanceKm
-    )
-  }, [shippingConfig, sellerCount, deliveryDistanceKm, paymentMethod])
+    if (isCarrierEngine) {
+      const sellerIds = [...sellerQuoteLineGroups.keys()].filter((sid) => (sellerQuoteLineGroups.get(sid)?.length ?? 0) > 0)
+      if (sellerIds.length === 0) {
+        return {
+          amount: 0,
+          usedDistanceFormula: false,
+          usedFlatFallback: false,
+          pendingDistanceSelection: false,
+          usedCarrierQuotes: true,
+        }
+      }
+      if (sellerIds.some((sid) => !carrierQuoteBySeller[sid] || carrierQuoteBySeller[sid].status === "loading")) {
+        return {
+          amount: null,
+          usedDistanceFormula: false,
+          usedFlatFallback: false,
+          pendingDistanceSelection: false,
+          pendingCarrierQuotes: true,
+        }
+      }
+      if (sellerIds.some((sid) => carrierQuoteBySeller[sid].status === "err")) {
+        return {
+          amount: null,
+          usedDistanceFormula: false,
+          usedFlatFallback: false,
+          pendingDistanceSelection: false,
+          carrierQuoteError: true,
+        }
+      }
+      const sum = sellerIds.reduce((acc, sid) => {
+        const e = carrierQuoteBySeller[sid]
+        if (e.status !== "ok") return acc
+        return acc + (Number(e.data.cost) || 0)
+      }, 0)
+      return {
+        amount: roundShippingCents(sum),
+        usedDistanceFormula: false,
+        usedFlatFallback: false,
+        pendingDistanceSelection: false,
+        usedCarrierQuotes: true,
+      }
+    }
+    return estimateShippingTotal(shippingConfig, sellerCount, deliveryDistanceKm)
+  }, [
+    shippingConfig,
+    sellerCount,
+    deliveryDistanceKm,
+    paymentMethod,
+    isCarrierEngine,
+    sellerQuoteLineGroups,
+    carrierQuoteBySeller,
+  ])
 
   const shippingNumericForTotal =
     shippingEstimate?.amount != null ? shippingEstimate.amount : 0
@@ -159,9 +297,9 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
   const grandTotal = total + shippingNumericForTotal + tax
 
   const shippingRowPending =
-    shippingConfig?.mode === "distance" &&
     paymentMethod !== "pickup" &&
-    shippingEstimate?.pendingDistanceSelection === true
+    ((shippingConfig?.mode === "distance" && shippingEstimate?.pendingDistanceSelection === true) ||
+      (isCarrierEngine && shippingEstimate?.pendingCarrierQuotes === true))
 
   const handleDeliverySave = useCallback((payload: DeliveryLocationSavePayload) => {
     setDeliveryDropLatLng(payload.location)
@@ -325,9 +463,13 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
         if (orderDetails.couponCode) orderRequest.couponCode = orderDetails.couponCode
         if (paymentMethod) orderRequest.paymentMethod = paymentMethod
 
-        if (
+        const needsLegacyDistance =
+          shippingConfig?.shippingEngine !== "carrier_v1" &&
           shippingConfig?.mode === "distance" &&
-          paymentMethod !== "pickup" &&
+          paymentMethod !== "pickup"
+
+        if (
+          needsLegacyDistance &&
           (deliveryDistanceKm == null ||
             !Number.isFinite(deliveryDistanceKm) ||
             deliveryDistanceKm < 0)
@@ -341,6 +483,9 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
 
         if (deliveryDistanceKm != null && Number.isFinite(deliveryDistanceKm) && deliveryDistanceKm >= 0) {
           orderRequest.deliveryDistanceKm = deliveryDistanceKm
+        }
+        if (regionCode.trim()) {
+          orderRequest.regionCode = regionCode.trim()
         }
 
         // Create order from cart
@@ -421,9 +566,13 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
           return
         }
 
-        if (
+        const needsLegacyDistanceGuest =
+          shippingConfig?.shippingEngine !== "carrier_v1" &&
           shippingConfig?.mode === "distance" &&
-          paymentMethod !== "pickup" &&
+          paymentMethod !== "pickup"
+
+        if (
+          needsLegacyDistanceGuest &&
           (deliveryDistanceKm == null ||
             !Number.isFinite(deliveryDistanceKm) ||
             deliveryDistanceKm < 0)
@@ -435,7 +584,10 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
           return
         }
 
-        const response = await createGuestOrder(guestOrderRequest)
+        const response = await createGuestOrder({
+          ...guestOrderRequest,
+          ...(regionCode.trim() ? { regionCode: regionCode.trim() } : {}),
+        })
         
         // Store order data (convert to similar format as authenticated order)
         setOrderData({
@@ -689,6 +841,24 @@ const [paymentMethod, setPaymentMethod] = useState<"paynow_cards" | "paynow_zims
                     transition={{ duration: 0.4 }}
                   >
                     <h2 className="text-2xl font-light text-foreground dark:text-white mb-6">Shipping Information</h2>
+
+                    {paymentMethod !== "pickup" ? (
+                      <div className="glass-card dark:glass-card rounded-lg p-4 mb-6 border border-border dark:border-white/10">
+                        <label className="text-sm text-muted-foreground dark:text-muted font-light mb-2 block">
+                          Logistics region code (optional)
+                        </label>
+                        <Input
+                          value={regionCode}
+                          onChange={(e) => setRegionCode(e.target.value)}
+                          placeholder="DEFAULT"
+                          className="max-w-xs bg-background dark:bg-white/5 border-border dark:border-white/10"
+                        />
+                        <p className="text-xs text-muted-foreground dark:text-muted mt-2 font-light">
+                          Used for <span className="font-mono">carrier_v1</span> quotes and when creating your order. Leave as{" "}
+                          <span className="font-mono">DEFAULT</span> if unsure.
+                        </p>
+                      </div>
+                    ) : null}
                     
                     {/* Guest Buyer Information (only for non-authenticated users) */}
                     {!isAuthenticated && (
@@ -1367,7 +1537,11 @@ src={`/new/${id === 'ecocash' ? 'EcoCash.png' : id === 'telecash' ? 'Telecash.pn
                       <Button 
                         onClick={handlePlaceOrder} 
                         className="flex-1 bg-accent hover:bg-accent/90"
-                        disabled={isPlacingOrder}
+                        disabled={
+                          isPlacingOrder ||
+                          (shippingEstimate?.pendingCarrierQuotes ?? false) ||
+                          (shippingEstimate?.carrierQuoteError ?? false)
+                        }
                       >
                         {isPlacingOrder ? (
                           <>
@@ -1529,6 +1703,14 @@ src={`/new/${id === 'ecocash' ? 'EcoCash.png' : id === 'telecash' ? 'Telecash.pn
                       !shippingConfigLoading && (
                       <p className="text-xs text-muted-foreground dark:text-muted font-light -mt-1">
                         {shippingEstimate.hint}
+                      </p>
+                    )}
+                    {shippingEstimate?.carrierQuoteError &&
+                      !shippingConfigLoading &&
+                      !shippingConfigError && (
+                      <p className="text-xs text-destructive font-light -mt-1">
+                        One or more seller shipping quotes failed. Adjust the cart or region code, then refresh the
+                        page.
                       </p>
                     )}
                     {shippingConfigError && !shippingConfigLoading && (

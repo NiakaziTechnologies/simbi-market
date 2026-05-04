@@ -2,7 +2,7 @@
  * Admin Products API endpoints
  */
 
-import { apiClient } from './api-client'
+import { apiClient } from "./api-client"
 
 /**
  * Seller Product object
@@ -152,4 +152,12 @@ export async function getMasterProducts(page: number = 1, limit: number = 20): P
     return response.data
   }
   throw new Error('Failed to fetch master products')
+}
+
+/**
+ * Permanently remove a master product from the catalog (admin).
+ * DELETE /api/admin/products/:id/complete
+ */
+export async function deleteMasterProductComplete(productId: string): Promise<void> {
+  await apiClient.delete(`/api/admin/products/${encodeURIComponent(productId)}/complete`)
 }

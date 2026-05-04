@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { getOrders, getOrderPayment, type OrderResponse, type PaymentDetailsResponse } from "@/lib/api/orders"
+import { ShippingTrackingTimeline } from "@/components/orders/shipping-tracking-timeline"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Loader2, Package, Clock, CheckCircle2, Truck, X, MapPin, CreditCard, DollarSign, Calendar } from "lucide-react"
@@ -288,6 +289,23 @@ export default function OrdersPage() {
                   </p>
                 </div>
               </div>
+
+              {selectedOrder.shipping?.trackingEvents && selectedOrder.shipping.trackingEvents.length > 0 ? (
+                <div>
+                  <h3 className="text-lg font-light text-foreground mb-4 flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-accent" />
+                    Delivery tracking
+                    {selectedOrder.shipping.carrierName ? (
+                      <span className="text-sm text-muted-foreground font-light">
+                        · {selectedOrder.shipping.carrierName}
+                      </span>
+                    ) : null}
+                  </h3>
+                  <div className="glass-card rounded-lg p-4">
+                    <ShippingTrackingTimeline events={selectedOrder.shipping.trackingEvents} />
+                  </div>
+                </div>
+              ) : null}
 
               {/* Payment Details */}
               <div>

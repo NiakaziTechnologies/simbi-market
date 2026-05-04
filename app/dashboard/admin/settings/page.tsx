@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import Link from "next/link"
 import { motion } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
@@ -18,6 +19,7 @@ import {
   updateCommercePricing,
   normalizeCommercePricing,
   type CommercePricingData,
+  type CommerceShippingEngineSetting,
   type ShippingMode,
 } from "@/lib/api/admin-commerce-pricing"
 
@@ -34,6 +36,7 @@ function applySnapshotToForm(
     setDynamicPrice: (s: string) => void
     setDynamicKm: (s: string) => void
     setCommission: (s: string) => void
+    setShippingEngine: (e: CommerceShippingEngineSetting) => void
   }
 ) {
   setters.setShippingMode(d.shippingMode)
@@ -41,6 +44,7 @@ function applySnapshotToForm(
   setters.setDynamicPrice(String(d.shippingDynamicPrice))
   setters.setDynamicKm(String(d.shippingDynamicDistanceKm))
   setters.setCommission(String(d.commissionPercent))
+  setters.setShippingEngine(d.shippingEngine)
 }
 
 export default function AdminSettingsPage() {
@@ -54,6 +58,7 @@ export default function AdminSettingsPage() {
   const [dynamicPrice, setDynamicPrice] = useState("")
   const [dynamicKm, setDynamicKm] = useState("")
   const [commission, setCommission] = useState("")
+  const [shippingEngine, setShippingEngine] = useState<CommerceShippingEngineSetting>("legacy")
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -70,6 +75,7 @@ export default function AdminSettingsPage() {
         setDynamicPrice,
         setDynamicKm,
         setCommission,
+        setShippingEngine,
       })
     } catch (e: unknown) {
       const err = e as { message?: string; status?: number }
@@ -162,6 +168,10 @@ export default function AdminSettingsPage() {
       payload.shippingDynamicDistanceKm = dynK
     }
 
+    if (shippingEngine !== snapshot.shippingEngine) {
+      payload.shippingEngine = shippingEngine
+    }
+
     if (payload.shippingMode === "distance" && snapshot.shippingMode === "fixed") {
       payload.shippingDynamicPrice = dynP!
       payload.shippingDynamicDistanceKm = dynK!
@@ -184,6 +194,7 @@ export default function AdminSettingsPage() {
           setDynamicPrice,
           setDynamicKm,
           setCommission,
+          setShippingEngine,
         })
         toast({
           title: "Saved",
@@ -277,6 +288,33 @@ export default function AdminSettingsPage() {
             </div>
           ) : snapshot ? (
             <>
+              <div className="space-y-3 rounded-lg border border-border p-4 bg-muted/10">
+                <Label className="text-base">Shipping engine</Label>
+                <RadioGroup
+                  value={shippingEngine}
+                  onValueChange={(v) => setShippingEngine(v as CommerceShippingEngineSetting)}
+                  className="grid gap-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <RadioGroupItem value="legacy" id="engine-legacy" />
+                    <Label htmlFor="engine-legacy" className="font-normal cursor-pointer leading-snug">
+                      Legacy — storefront uses flat/distance settings below (no carrier quote API).
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <RadioGroupItem value="carrier_v1" id="engine-carrier" />
+                    <Label htmlFor="engine-carrier" className="font-normal cursor-pointer leading-snug">
+                      Carrier v1 — checkout calls live quotes; orders store quote snapshots. Configure carriers and
+                      regions under{" "}
+                      <Link href="/dashboard/admin/logistics" className="text-accent underline">
+                        Logistics
+                      </Link>
+                      .
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+
               <div className="space-y-3">
                 <Label className="text-base">Shipping mode</Label>
                 <RadioGroup

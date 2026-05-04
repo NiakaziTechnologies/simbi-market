@@ -14,6 +14,7 @@ import {
   RefreshCw,
   CheckCircle2,
   FileText,
+  ClipboardList,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -33,6 +34,8 @@ const notificationIcons: Record<string, typeof Package> = {
   RETURN_REQUESTED: AlertCircle,
   SELLER_RESPONDED_TO_RETURN: FileText,
   SELLER_UPLOADED_EVIDENCE: FileText,
+  CUSTOM_PRODUCT_REQUEST_SUBMITTED: ClipboardList,
+  CUSTOM_PRODUCT_REQUEST_RESUBMITTED: ClipboardList,
 }
 
 const notificationColors: Record<string, string> = {
@@ -40,6 +43,8 @@ const notificationColors: Record<string, string> = {
   RETURN_REQUESTED: "text-yellow-400",
   SELLER_RESPONDED_TO_RETURN: "text-blue-400",
   SELLER_UPLOADED_EVIDENCE: "text-blue-400",
+  CUSTOM_PRODUCT_REQUEST_SUBMITTED: "text-accent",
+  CUSTOM_PRODUCT_REQUEST_RESUBMITTED: "text-amber-400",
 }
 
 export default function AdminNotificationsPage() {
@@ -276,6 +281,20 @@ export default function AdminNotificationsPage() {
                               className="text-accent hover:underline flex items-center gap-1"
                             >
                               View Order
+                              <ExternalLink className="h-3 w-3" />
+                            </Link>
+                          )}
+                          {(notification.type === "CUSTOM_PRODUCT_REQUEST_SUBMITTED" ||
+                            notification.type === "CUSTOM_PRODUCT_REQUEST_RESUBMITTED") && (
+                            <Link
+                              href={
+                                notification.customProductRequestId
+                                  ? `/dashboard/admin/products/custom-requests/${notification.customProductRequestId}`
+                                  : "/dashboard/admin/products?tab=custom-requests"
+                              }
+                              className="text-accent hover:underline flex items-center gap-1"
+                            >
+                              {notification.customProductRequestId ? "View request" : "View queue"}
                               <ExternalLink className="h-3 w-3" />
                             </Link>
                           )}

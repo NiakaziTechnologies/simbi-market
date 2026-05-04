@@ -6,6 +6,7 @@
 import { API_CONFIG } from "../config"
 
 export type CommerceShippingMode = "fixed" | "distance"
+export type CommerceShippingEngine = "legacy" | "carrier_v1"
 
 export interface CommerceDistancePricing {
   pricePerBlock: number
@@ -16,6 +17,7 @@ export interface CommerceShippingConfigData {
   mode: CommerceShippingMode
   flatRatePerSellerOrder: number
   distancePricing: CommerceDistancePricing | null
+  shippingEngine: CommerceShippingEngine
 }
 
 export interface CommerceShippingConfigResponse {
@@ -42,9 +44,22 @@ export async function getCommerceShippingConfig(): Promise<CommerceShippingConfi
     )
   }
 
-  const json = (await response.json()) as CommerceShippingConfigResponse
+  const json = (await response.json()) as CommerceShippingConfigResponse & {
+    data?: Partial<CommerceShippingConfigData> & { shippingEngine?: string }
+  }
   if (!json.success || !json.data) {
     throw new Error("Invalid shipping config response")
   }
-  return json.data
+  const d = json.data
+  return {
+    mode: d.mode === "distance" ? "distance" : "fixed",
+    flatRatePerSellerOrder: Number(d.flatRatePerSellerOrder ?? 0),
+    distancePricing:
+      d.distancePricing &&
+      typeof d.distancePricing === "object" &&
+      typeof (d.distancePricing as CommerceDistancePricing).kilometersPerBlock === "number"
+        ? (d.distancePricing as CommerceDistancePricing)
+        : null,
+    shippingEngine: d.shippingEngine === "carrier_v1" ? "carrier_v1" : "legacy",
+  }
 }

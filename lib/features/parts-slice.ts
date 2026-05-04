@@ -29,6 +29,8 @@ export interface Part {
   partCategory?: string
   // API fields
   inventoryId?: string // Seller inventory ID (required for adding to cart)
+  /** Catalog master product id (for carrier shipping quotes); often same as `id` from listings. */
+  masterProductId?: string
   sellerId?: string
   sellerName?: string
   oemPartNumber?: string

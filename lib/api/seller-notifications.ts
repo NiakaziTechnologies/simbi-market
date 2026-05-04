@@ -7,13 +7,24 @@ import { apiClient } from './api-client'
 /**
  * Notification object from API
  */
+export type SellerNotificationType =
+  | 'NEW_ORDER'
+  | 'ORDER_SHIPPED'
+  | 'ORDER_DELIVERED'
+  | 'RETURN_REQUESTED'
+  | 'PAYOUT_PROCESSED'
+  | 'CUSTOM_PRODUCT_REQUEST_APPROVED'
+  | 'CUSTOM_PRODUCT_REQUEST_REJECTED'
+  | 'CUSTOM_PRODUCT_REQUEST_MORE_INFO'
+
 export interface SellerNotification {
   id: string
-  type: 'NEW_ORDER' | 'ORDER_SHIPPED' | 'ORDER_DELIVERED' | 'RETURN_REQUESTED' | 'PAYOUT_PROCESSED'
+  type: SellerNotificationType
   title: string
   message: string
   orderId: string | null
   returnId: string | null
+  customProductRequestId?: string | null
   isRead: boolean
   readAt: string | null
   createdAt: string

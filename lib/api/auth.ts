@@ -93,6 +93,7 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
       email: userEmail,
       name: userName,
       role: role,
+      ...(userType === "admin" && userData?.role ? { adminRole: String(userData.role) } : {}),
     }
     
     // Store token

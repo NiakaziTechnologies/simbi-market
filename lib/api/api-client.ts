@@ -46,6 +46,18 @@ class ApiClient {
   }
 
   /**
+   * Headers for multipart: Authorization only (browser sets Content-Type + boundary for FormData).
+   */
+  private getAuthHeadersOnly(customHeaders?: HeadersInit): HeadersInit {
+    const token = getAuthToken()
+    const headers: HeadersInit = { ...customHeaders }
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+    return headers
+  }
+
+  /**
    * Handle API response
    */
   private async handleResponse<T>(response: Response): Promise<T> {
@@ -143,7 +155,11 @@ class ApiClient {
       throw error
     }
 
-    return response.json()
+    const text = (await response.text()).trim()
+    if (!text) {
+      return undefined as T
+    }
+    return JSON.parse(text) as T
   }
 
   /**
@@ -178,6 +194,21 @@ class ApiClient {
       ...options,
     })
 
+    return this.handleResponse<T>(response)
+  }
+
+  /**
+   * POST multipart/form-data (FormData). Do not set Content-Type; boundary is set by the browser.
+   */
+  async postFormData<T = any>(endpoint: string, formData: FormData, options?: RequestInit): Promise<T> {
+    const url = `${this.baseURL}${endpoint}`
+    const { headers: optionHeaders, body: _ignoreBody, ...rest } = (options || {}) as RequestInit
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
+      ...rest,
+      headers: this.getAuthHeadersOnly(optionHeaders as HeadersInit),
+    })
     return this.handleResponse<T>(response)
   }
 

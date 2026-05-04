@@ -6,6 +6,7 @@
 import { apiClient } from "./api-client"
 
 export type ShippingMode = "fixed" | "distance"
+export type CommerceShippingEngineSetting = "legacy" | "carrier_v1"
 
 export interface CommercePricingData {
   shippingMode: ShippingMode
@@ -14,6 +15,7 @@ export interface CommercePricingData {
   shippingDynamicDistanceKm: number
   commissionPercent: number
   useAdvancedProductRules: boolean
+  shippingEngine: CommerceShippingEngineSetting
 }
 
 export interface CommercePricingGetResponse {
@@ -39,6 +41,7 @@ export function normalizeCommercePricing(raw: Partial<CommercePricingData>): Com
     shippingDynamicDistanceKm: Number(raw.shippingDynamicDistanceKm ?? 10),
     commissionPercent: Number(raw.commissionPercent ?? 10),
     useAdvancedProductRules: Boolean(raw.useAdvancedProductRules ?? true),
+    shippingEngine: raw.shippingEngine === "carrier_v1" ? "carrier_v1" : "legacy",
   }
 }
 
@@ -49,8 +52,19 @@ export async function getCommercePricing(): Promise<CommercePricingGetResponse> 
 export async function updateCommercePricing(
   body: Partial<CommercePricingData>
 ): Promise<CommercePricingPutResponse> {
-  return apiClient.put<CommercePricingPutResponse>(
-    "/api/admin/settings/commerce-pricing",
-    body
-  )
+  try {
+    return await apiClient.patch<CommercePricingPutResponse>(
+      "/api/admin/settings/commerce-pricing",
+      body
+    )
+  } catch (e: unknown) {
+    const err = e as { status?: number }
+    if (err.status === 404 || err.status === 405) {
+      return apiClient.put<CommercePricingPutResponse>(
+        "/api/admin/settings/commerce-pricing",
+        body
+      )
+    }
+    throw e
+  }
 }

@@ -8,6 +8,7 @@ import {
   CheckCheck,
   Trash2,
   Package,
+  ClipboardList,
   AlertCircle,
   Loader2,
   ExternalLink,
@@ -48,6 +49,9 @@ const notificationIcons: Record<string, typeof Package> = {
   ORDER_DELIVERED: CheckCircle2,
   RETURN_REQUESTED: RotateCcw,
   PAYOUT_PROCESSED: DollarSign,
+  CUSTOM_PRODUCT_REQUEST_APPROVED: ClipboardList,
+  CUSTOM_PRODUCT_REQUEST_REJECTED: ClipboardList,
+  CUSTOM_PRODUCT_REQUEST_MORE_INFO: ClipboardList,
 }
 
 const notificationColors: Record<string, string> = {
@@ -56,6 +60,9 @@ const notificationColors: Record<string, string> = {
   ORDER_DELIVERED: "text-green-400",
   RETURN_REQUESTED: "text-yellow-400",
   PAYOUT_PROCESSED: "text-green-400",
+  CUSTOM_PRODUCT_REQUEST_APPROVED: "text-green-400",
+  CUSTOM_PRODUCT_REQUEST_REJECTED: "text-destructive",
+  CUSTOM_PRODUCT_REQUEST_MORE_INFO: "text-amber-400",
 }
 
 export function SellerNotificationsDropdown() {
@@ -380,6 +387,22 @@ export function SellerNotificationsDropdown() {
                                     className="text-xs text-accent hover:underline flex items-center gap-1"
                                   >
                                     View Order
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Link>
+                                )}
+                                {(notification.type === "CUSTOM_PRODUCT_REQUEST_APPROVED" ||
+                                  notification.type === "CUSTOM_PRODUCT_REQUEST_REJECTED" ||
+                                  notification.type === "CUSTOM_PRODUCT_REQUEST_MORE_INFO") && (
+                                  <Link
+                                    href={
+                                      notification.customProductRequestId
+                                        ? `/dashboard/seller/inventory/custom-requests/${notification.customProductRequestId}`
+                                        : "/dashboard/seller/inventory/custom-requests"
+                                    }
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-xs text-accent hover:underline flex items-center gap-1"
+                                  >
+                                    View request
                                     <ExternalLink className="h-3 w-3" />
                                   </Link>
                                 )}

@@ -48,15 +48,19 @@ export default function SellerLoansPage() {
         listSellerLoanPartners(),
       ])
 
-      if (!appsRes.success || !Array.isArray(appsRes.data)) {
-        throw new Error(appsRes.message || "Invalid applications response")
+      if (appsRes.success === false) {
+        throw new Error(appsRes.message || "Could not load applications")
       }
-      if (!partnersRes.success || !Array.isArray(partnersRes.data)) {
-        throw new Error(partnersRes.message || "Invalid partners response")
+      if (partnersRes.success === false) {
+        throw new Error(partnersRes.message || "Could not load partners")
       }
 
-      setApplications(appsRes.data)
-      setPartners(partnersRes.data.filter((p) => p.isActive !== false))
+      setApplications(Array.isArray(appsRes.data) ? appsRes.data : [])
+      setPartners(
+        (Array.isArray(partnersRes.data) ? partnersRes.data : []).filter(
+          (p) => p.isActive !== false
+        )
+      )
     } catch (e: unknown) {
       const err = e as { message?: string }
       if (!silent) toast.error(err.message || "Could not load loans data")

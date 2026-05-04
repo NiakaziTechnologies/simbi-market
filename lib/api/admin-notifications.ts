@@ -12,6 +12,8 @@ export type AdminNotificationType =
   | 'RETURN_REQUESTED'
   | 'SELLER_RESPONDED_TO_RETURN'
   | 'SELLER_UPLOADED_EVIDENCE'
+  | 'CUSTOM_PRODUCT_REQUEST_SUBMITTED'
+  | 'CUSTOM_PRODUCT_REQUEST_RESUBMITTED'
 
 /**
  * Order object in notification
@@ -31,6 +33,7 @@ export interface AdminNotification {
   type: AdminNotificationType
   title: string
   message: string
+  customProductRequestId?: string | null
   orderId: string | null
   isRead: boolean
   readAt: string | null

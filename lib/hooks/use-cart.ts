@@ -36,6 +36,7 @@ function apiCartItemToCartItem(apiItem: ApiCartItem): Part & { quantity: number;
 
   return {
     id: apiItem.product.id,
+    masterProductId: apiItem.product.id,
     name: apiItem.product.name,
     category: apiItem.product.category || apiItem.product.subcategory || '',
     price: apiItem.pricing.displayPrice,
