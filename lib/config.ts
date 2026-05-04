@@ -2,12 +2,6 @@
  * Global configuration for backend API endpoints
  */
 
-// Check if we're in development mode
-// Use typeof window check for client-side, or check process.env for server-side
-const isDevelopment =
-  (typeof window !== 'undefined' && window.location.hostname === 'localhost') ||
-  (typeof process !== 'undefined' && process.env.NODE_ENV === 'development')
-
 /** Default production API host (no trailing slash). Override with `NEXT_PUBLIC_API_URL`. */
 export const DEFAULT_PRODUCTION_API_URL = "https://simbi-three.vercel.app"
 
