@@ -82,7 +82,7 @@ function SearchableSelect({ options, placeholder, value, onValueChange, classNam
                     role="combobox"
                     aria-expanded={open}
                     className={cn(
-                        "justify-between bg-white dark:bg-black/40 border border-accent/15 dark:border-white/10 text-foreground hover:bg-gray-50 dark:hover:bg-white/10 h-11 rounded-none first:rounded-l-xl last:rounded-r-xl border-r-0 last:border-r transition-all font-medium text-[13px]",
+                        "justify-between bg-white dark:bg-black/40 border border-black/10 dark:border-white/10 text-foreground hover:bg-gray-50 dark:hover:bg-white/10 h-11 rounded-none first:rounded-l-xl last:rounded-r-xl border-r-0 last:border-r transition-all font-medium text-[13px]",
                         className
                     )}
                 >
@@ -96,7 +96,7 @@ function SearchableSelect({ options, placeholder, value, onValueChange, classNam
                 <Command>
                     <CommandInput
                         placeholder={`Search ${placeholder.toLowerCase()}...`}
-                        className="h-9 bg-[#d6ebff] dark:bg-zinc-900 text-foreground dark:text-white placeholder:text-muted-foreground/50 dark:placeholder:text-white/50 border-b border-accent/15 dark:border-white/10"
+                        className="h-9 bg-white dark:bg-zinc-900 text-foreground dark:text-white placeholder:text-muted-foreground/50 dark:placeholder:text-white/50 border-b border-black/10 dark:border-white/10"
                         onValueChange={setSearchValue}
                     />
                     <CommandList>

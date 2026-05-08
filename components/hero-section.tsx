@@ -1,11 +1,12 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/lib/store"
-import { Play, Pause, Search, Scan } from "lucide-react"
+import { Search, Scan } from "lucide-react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SearchFilters } from "@/components/search-filters"
@@ -13,53 +14,22 @@ import { SearchFilters } from "@/components/search-filters"
 export function HeroSection() {
   const router = useRouter()
   const { filters } = useSelector((state: RootState) => state.parts)
-  const [isPlaying, setIsPlaying] = useState(true)
   const [searchType, setSearchType] = useState<"part" | "vin">("part")
   const [searchQuery, setSearchQuery] = useState("")
-  const videoRef = useRef<HTMLVideoElement>(null)
-
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause()
-      } else {
-        videoRef.current.play()
-      }
-      setIsPlaying(!isPlaying)
-    }
-  }
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      {/* Background Video */}
+      {/* Background Image */}
       <div className="absolute inset-0">
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover"
-        >
-          <source src="/home/video1.mp4" type="video/mp4" />
-        </video>
+        <Image
+          src="/home/hero.jpeg"
+          alt="Hero background"
+          fill
+          priority
+          className="object-cover"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black" />
       </div>
-
-      {/* Play/Pause Button */}
-      <motion.button
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        onClick={togglePlay}
-        className="absolute top-24 right-6 z-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all"
-      >
-        {isPlaying ? (
-          <Pause className="h-5 w-5 text-white" />
-        ) : (
-          <Play className="h-5 w-5 text-white ml-0.5" />
-        )}
-      </motion.button>
 
       {/* Search Form Integration */}
       <div className="relative h-full flex flex-col items-center justify-center pt-28">
@@ -91,25 +61,23 @@ export function HeroSection() {
           >
             {/* Search Type Toggle */}
             <div className="flex justify-center mb-10">
-              <div className="inline-flex p-1.5 bg-white/60 rounded-xl border border-accent/10">
-                <Button
-                  variant={searchType === "part" ? "default" : "ghost"}
+              <div className="inline-flex p-1.5 bg-white dark:bg-white/10 rounded-xl border border-black/10 dark:border-white/15">
+                <button
                   onClick={() => setSearchType("part")}
-                  className={`px-8 py-2 rounded-lg font-medium transition-all duration-300 ${searchType === "part" ? "bg-accent text-white shadow-lg" : "text-foreground hover:text-accent hover:bg-white/80"
+                  className={`flex items-center px-8 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${searchType === "part" ? "bg-accent text-white shadow-lg" : "text-gray-700 dark:text-white hover:text-accent hover:bg-gray-100 dark:hover:bg-white/15"
                     }`}
                 >
                   <Search className="mr-2 h-4 w-4" />
                   Part Search
-                </Button>
-                <Button
-                  variant={searchType === "vin" ? "default" : "ghost"}
+                </button>
+                <button
                   onClick={() => setSearchType("vin")}
-                  className={`px-8 py-2 rounded-lg font-medium transition-all duration-300 ${searchType === "vin" ? "bg-accent text-white shadow-lg" : "text-foreground hover:text-accent hover:bg-white/80"
+                  className={`flex items-center px-8 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${searchType === "vin" ? "bg-accent text-white shadow-lg" : "text-gray-700 dark:text-white hover:text-accent hover:bg-gray-100 dark:hover:bg-white/15"
                     }`}
                 >
                   <Scan className="mr-2 h-4 w-4" />
                   VIN Search
-                </Button>
+                </button>
               </div>
             </div>
 
@@ -152,7 +120,7 @@ export function HeroSection() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={searchType === "vin" ? "Enter your 17-digit VIN" : "Enter part name or number"}
-                    className={`catalog-search-input h-14 pl-12 pr-36 bg-white/80 border border-accent/10 text-foreground placeholder:text-muted-foreground/50 text-[15px] transition-all focus:ring-accent/30 focus:border-accent rounded-xl shadow-sm ${searchType === "vin" ? "font-mono tracking-widest uppercase" : ""
+                    className={`catalog-search-input h-14 pl-12 pr-36 bg-white border border-black/10 text-foreground placeholder:text-muted-foreground/50 text-[15px] transition-all focus:ring-accent/30 focus:border-accent rounded-xl shadow-sm ${searchType === "vin" ? "font-mono tracking-widest uppercase" : ""
                       }`}
                   />
                   <Button 
