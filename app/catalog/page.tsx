@@ -1,35 +1,54 @@
 import { Suspense } from "react"
-import Image from "next/image"
 import { Navigation } from "@/components/navigation"
 import { CatalogContent } from "@/components/catalog-content"
+import { CatalogSearchCard } from "@/components/catalog-search-card"
 
 export default function CatalogPage() {
   return (
     <main className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Catalog Hero Banner */}
-      <div className="relative h-[420px] md:h-[560px] w-full overflow-hidden">
-        <Image
-          src="/home/hero.jpeg"
-          alt="Catalog hero"
-          fill
-          priority
-          className="object-cover object-center"
-          style={{ zIndex: 0 }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" style={{ zIndex: 1 }} />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 pt-16" style={{ zIndex: 2 }}>
-          <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tighter mb-3">
-            PARTS <span className="text-accent">CATALOG</span>
-          </h1>
-          <p className="text-white/60 text-lg font-light max-w-xl">
-            Browse over 3 million premium automotive components
-          </p>
+      {/* Hero — image background with title + search card on top */}
+      <div
+        style={{
+          backgroundImage: "url('/home/hero.jpeg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          position: "relative",
+          width: "100%",
+        }}
+      >
+        {/* Dark overlay */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.85) 100%)", zIndex: 0 }} />
+
+        {/* Title + search card — all on top of the image */}
+        <div style={{ position: "relative", zIndex: 1, paddingTop: "180px", paddingBottom: "100px", paddingLeft: "24px", paddingRight: "24px" }}>
+          <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
+
+            {/* Title */}
+            <div style={{ textAlign: "center", marginBottom: "32px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", marginBottom: "12px" }}>
+                <div style={{ width: "32px", height: "3px", borderRadius: "9999px", background: "#007aff" }} />
+                <span style={{ color: "#007aff", fontSize: "11px", fontWeight: 600, letterSpacing: "0.2em", textTransform: "uppercase" }}>Premium Auto Parts</span>
+                <div style={{ width: "32px", height: "3px", borderRadius: "9999px", background: "#007aff" }} />
+              </div>
+              <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)", fontWeight: 700, color: "#ffffff", letterSpacing: "-0.02em", lineHeight: 1.2, marginBottom: "12px" }}>
+                Explore Parts <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 300 }}>Catalogue</span>
+              </h1>
+              <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "15px", maxWidth: "480px", margin: "0 auto", lineHeight: 1.6 }}>
+                Premium Autoparts delivered straight to your doorstep
+              </p>
+            </div>
+
+            {/* Search card — sits on the image */}
+            <CatalogSearchCard />
+          </div>
         </div>
       </div>
 
-      <Suspense fallback={<CatalogSkeleton />}>
+      {/* Results grid below the hero */}
+      <Suspense fallback={null}>
         <CatalogContent />
       </Suspense>
     </main>

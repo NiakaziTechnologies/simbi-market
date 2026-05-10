@@ -164,23 +164,10 @@ export function CatalogContent() {
   // Show loading state
   if (isLoading) {
     return (
-      <section className="pt-24 pb-16 px-6">
+      <section className="pb-16 px-6" style={{ background: "transparent" }}>
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="w-8 h-[3px] rounded-full bg-accent/50" />
-              <span className="text-accent text-[11px] font-semibold tracking-[0.2em] uppercase">Premium Auto Parts</span>
-              <div className="w-8 h-[3px] rounded-full bg-accent/50" />
-            </div>
-            <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-foreground leading-tight mb-3">
-              Explore Parts <span className="text-muted-foreground font-light">Catalogue</span>
-            </h1>
-            <p className="text-muted-foreground text-sm md:text-[15px] max-w-lg mx-auto leading-relaxed">
-              Premium Autoparts delivered straight to your doorstep
-            </p>
-          </div>
           <div className="flex items-center justify-center py-24">
-            <Loader2 className="h-8 w-8 animate-spin text-accent" />
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
           </div>
         </div>
       </section>
@@ -190,22 +177,9 @@ export function CatalogContent() {
   // Show error state
   if (error) {
     return (
-      <section className="pt-24 pb-16 px-6">
+      <section className="pb-16 px-6 bg-background">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="w-8 h-[3px] rounded-full bg-accent/50" />
-              <span className="text-accent text-[11px] font-semibold tracking-[0.2em] uppercase">Premium Auto Parts</span>
-              <div className="w-8 h-[3px] rounded-full bg-accent/50" />
-            </div>
-            <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-foreground leading-tight mb-3">
-              Explore Parts <span className="text-muted-foreground font-light">Catalogue</span>
-            </h1>
-            <p className="text-muted-foreground text-sm md:text-[15px] max-w-lg mx-auto leading-relaxed">
-              Premium Autoparts delivered straight to your doorstep
-            </p>
-          </div>
-          <div className="search-card rounded-xl p-12 max-w-md mx-auto border border-destructive/50 text-center">
+          <div className="search-card rounded-xl p-12 max-w-md mx-auto border border-destructive/50 text-center mt-8">
             <PackageX className="w-16 h-16 text-destructive mx-auto mb-6" />
             <h3 className="text-2xl font-light text-foreground mb-4">Error Loading Products</h3>
             <p className="text-muted-foreground font-light mb-8 leading-relaxed">{error}</p>
@@ -278,71 +252,10 @@ export function CatalogContent() {
   }
 
   return (
-    <section className="pt-24 pb-16 px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Hero Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-8"
-        >
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="w-8 h-[3px] rounded-full bg-accent/50" />
-            <span className="text-accent text-[11px] font-semibold tracking-[0.2em] uppercase">Premium Auto Parts</span>
-            <div className="w-8 h-[3px] rounded-full bg-accent/50" />
-          </div>
-
-          <h1 className="text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-foreground leading-tight mb-3">
-            Explore Parts <span className="text-muted-foreground font-light">Catalogue</span>
-          </h1>
-          <p className="text-muted-foreground text-sm md:text-[15px] max-w-lg mx-auto leading-relaxed mb-5">
-            Premium Autoparts delivered straight to your doorstep
-          </p>
-
-          {/* Quick stats */}
-          <div className="flex flex-wrap items-center justify-center gap-6">
-            {[
-              { num: totalResults > 0 ? `${totalResults}+` : "1000+", label: "Parts Available" },
-              { num: "100%", label: "Genuine Quality" },
-              { num: "24/7", label: "Support" },
-            ].map((stat) => (
-              <div key={stat.label} className="flex items-center gap-2">
-                <span className="text-foreground font-bold text-lg">{stat.num}</span>
-                <span className="text-muted-foreground text-xs">{stat.label}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Search & Filter Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="search-card glass-card rounded-2xl p-6 md:p-8 border border-accent/10 dark:border-white/10 shadow-[0_24px_80px_-20px_rgba(0,122,255,0.12)] mb-6"
-        >
-          <div className="space-y-5">
-            {/* Filter dropdowns */}
-            <div className="flex flex-col gap-0 overflow-hidden">
-              <SearchFilters />
-            </div>
-
-            {/* Search Input */}
-            <div className="relative group max-w-3xl mx-auto">
-              <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-muted-foreground/50 group-focus-within:text-accent transition-colors" />
-              </div>
-              <Input
-                type="text"
-                placeholder="Search by part name, OEM number, or keyword..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="catalog-search-input h-12 pl-12 pr-4 bg-white/80 dark:bg-white/5 border border-border dark:border-white/10 text-foreground placeholder:text-muted-foreground/50 text-[15px] transition-all focus:ring-accent/30 focus:border-accent rounded-xl shadow-sm"
-              />
-            </div>
-          </div>
-        </motion.div>
+    <div>
+      {/* ── Results section ── */}
+      <section className="pb-16 px-6 bg-background pt-8">
+        <div className="max-w-7xl mx-auto">
 
         {/* Results Count & View Toggle */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -936,7 +849,8 @@ export function CatalogContent() {
           </div>
         )}
       </div>
-    </section>
+      </section>
+    </div>
   )
 }
 
