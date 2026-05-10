@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import Image from "next/image"
 import { Navigation } from "@/components/navigation"
 import { CatalogContent } from "@/components/catalog-content"
 
@@ -6,6 +7,28 @@ export default function CatalogPage() {
   return (
     <main className="min-h-screen bg-background">
       <Navigation />
+
+      {/* Catalog Hero Banner */}
+      <div className="relative h-[420px] md:h-[560px] w-full overflow-hidden">
+        <Image
+          src="/home/hero.jpeg"
+          alt="Catalog hero"
+          fill
+          priority
+          className="object-cover object-center"
+          style={{ zIndex: 0 }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/60" style={{ zIndex: 1 }} />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 pt-16" style={{ zIndex: 2 }}>
+          <h1 className="text-4xl md:text-6xl font-bold text-white tracking-tighter mb-3">
+            PARTS <span className="text-accent">CATALOG</span>
+          </h1>
+          <p className="text-white/60 text-lg font-light max-w-xl">
+            Browse over 3 million premium automotive components
+          </p>
+        </div>
+      </div>
+
       <Suspense fallback={<CatalogSkeleton />}>
         <CatalogContent />
       </Suspense>

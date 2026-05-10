@@ -1,12 +1,11 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useSelector } from "react-redux"
 import type { RootState } from "@/lib/store"
-import { Search, Scan } from "lucide-react"
-import Image from "next/image"
+import { Play, Pause, Search, Scan } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SearchFilters } from "@/components/search-filters"
@@ -14,22 +13,53 @@ import { SearchFilters } from "@/components/search-filters"
 export function HeroSection() {
   const router = useRouter()
   const { filters } = useSelector((state: RootState) => state.parts)
+  const [isPlaying, setIsPlaying] = useState(true)
   const [searchType, setSearchType] = useState<"part" | "vin">("part")
   const [searchQuery, setSearchQuery] = useState("")
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause()
+      } else {
+        videoRef.current.play()
+      }
+      setIsPlaying(!isPlaying)
+    }
+  }
 
   return (
     <section className="relative h-screen w-full overflow-hidden">
-      {/* Background Image */}
+      {/* Background Video */}
       <div className="absolute inset-0">
-        <Image
-          src="/home/hero.jpeg"
-          alt="Hero background"
-          fill
-          priority
-          className="object-cover"
-        />
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-full object-cover"
+        >
+          <source src="/home/video1.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black" />
       </div>
+
+      {/* Play/Pause Button */}
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        onClick={togglePlay}
+        className="absolute top-24 right-6 z-20 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center hover:bg-white/20 transition-all"
+      >
+        {isPlaying ? (
+          <Pause className="h-5 w-5 text-white" />
+        ) : (
+          <Play className="h-5 w-5 text-white ml-0.5" />
+        )}
+      </motion.button>
 
       {/* Search Form Integration */}
       <div className="relative h-full flex flex-col items-center justify-center pt-28">
