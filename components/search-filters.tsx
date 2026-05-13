@@ -82,9 +82,10 @@ function SearchableSelect({ options, placeholder, value, onValueChange, classNam
                     role="combobox"
                     aria-expanded={open}
                     className={cn(
-                        "justify-between bg-white dark:bg-black/40 border border-black/10 dark:border-white/10 text-foreground hover:bg-gray-50 dark:hover:bg-white/10 h-11 rounded-none first:rounded-l-xl last:rounded-r-xl border-r-0 last:border-r transition-all font-medium text-[13px]",
+                        "justify-between border h-11 rounded-none first:rounded-l-xl last:rounded-r-xl border-r-0 last:border-r transition-all font-medium text-[13px]",
                         className
                     )}
+                    style={{ background: "rgba(255,255,255,0.08)", borderColor: "rgba(255,255,255,0.15)", color: "#ffffff" }}
                 >
                     {value
                         ? options.find((option) => option.value === value)?.label || value

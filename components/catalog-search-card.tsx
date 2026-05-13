@@ -47,7 +47,8 @@ export function CatalogSearchCard() {
               placeholder="Search by part name, OEM number, or keyword..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="catalog-search-input h-12 pl-12 pr-32 bg-white border border-black/10 text-foreground placeholder:text-muted-foreground/50 text-[15px] transition-all focus:ring-accent/30 focus:border-accent rounded-xl shadow-sm"
+              className="h-12 pl-12 pr-32 text-[15px] transition-all rounded-xl shadow-sm"
+              style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", color: "#ffffff" }}
             />
             <Button
               type="submit"

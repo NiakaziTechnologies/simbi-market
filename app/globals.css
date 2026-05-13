@@ -135,10 +135,12 @@
   border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-/* Search card - clean white */
+/* Search card — always dark, sits on dark hero backgrounds */
 .search-card {
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(15, 15, 20, 0.75) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   position: relative;
 }
 .search-card::before {
@@ -153,11 +155,8 @@
   border-radius: 0 0 2px 2px;
 }
 .dark .search-card {
-  background: rgba(29, 29, 31, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-.dark .search-card::before {
-  background: linear-gradient(90deg, transparent, rgba(0, 122, 255, 0.6), transparent);
+  background: rgba(15, 15, 20, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Dark mode glass card - dark grey */
