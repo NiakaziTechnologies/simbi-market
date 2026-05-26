@@ -3,7 +3,7 @@
  */
 
 /** Default production API host (no trailing slash). Override with `NEXT_PUBLIC_API_URL`. */
-export const DEFAULT_PRODUCTION_API_URL = "http://31.220.82.129:6000"
+export const DEFAULT_PRODUCTION_API_URL = "http://31.220.82.129:5003"
 
 // Get the appropriate base URL based on environment
 function getBaseURL(): string {
