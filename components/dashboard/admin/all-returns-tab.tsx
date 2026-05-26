@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table"
 import { Search, ChevronLeft, ChevronRight, Eye, RotateCcw, AlertCircle, Shield, Loader2 } from "lucide-react"
 import { getAllReturns, classifyFault, type AdminReturn } from "@/lib/api/admin-returns"
-import { DEFAULT_PRODUCTION_API_URL } from "@/lib/config"
+import { getApiBaseURL } from "@/lib/config"
 import { formatDistanceToNow, format } from "date-fns"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
@@ -118,7 +118,7 @@ export function AllReturnsTab() {
       return `https:${url}`
     }
     if (url.startsWith("/")) {
-      return `${process.env.NEXT_PUBLIC_API_URL || DEFAULT_PRODUCTION_API_URL}${url}`
+      return `${getApiBaseURL()}${url}`
     }
     return url
   }

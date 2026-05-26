@@ -2,7 +2,7 @@
  * Centralized API client with token management
  */
 
-import { API_CONFIG } from '../config'
+import { getApiBaseURL } from '../config'
 import { getAuthToken, clearAuth } from '../auth/auth-utils'
 
 export interface ApiResponse<T = any> {
@@ -22,10 +22,8 @@ export interface ApiError {
  * Centralized API client class
  */
 class ApiClient {
-  private baseURL: string
-
-  constructor() {
-    this.baseURL = API_CONFIG.baseURL
+  private resolveBaseURL(): string {
+    return getApiBaseURL()
   }
 
   /**
@@ -166,7 +164,7 @@ class ApiClient {
    * GET request
    */
   async get<T = any>(endpoint: string, options?: RequestInit): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`
+    const url = `${this.resolveBaseURL()}${endpoint}`
     console.log('apiClient: GET request to', url)
     const headers = this.getHeaders(options?.headers)
     console.log('apiClient: GET headers:', headers)
@@ -185,7 +183,7 @@ class ApiClient {
    * POST request
    */
   async post<T = any>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`
+    const url = `${this.resolveBaseURL()}${endpoint}`
     
     const response = await fetch(url, {
       method: 'POST',
@@ -201,7 +199,7 @@ class ApiClient {
    * POST multipart/form-data (FormData). Do not set Content-Type; boundary is set by the browser.
    */
   async postFormData<T = any>(endpoint: string, formData: FormData, options?: RequestInit): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`
+    const url = `${this.resolveBaseURL()}${endpoint}`
     const { headers: optionHeaders, body: _ignoreBody, ...rest } = (options || {}) as RequestInit
     const response = await fetch(url, {
       method: 'POST',
@@ -216,7 +214,7 @@ class ApiClient {
    * PUT request
    */
   async put<T = any>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`
+    const url = `${this.resolveBaseURL()}${endpoint}`
     
     const response = await fetch(url, {
       method: 'PUT',
@@ -232,7 +230,7 @@ class ApiClient {
    * PATCH request
    */
   async patch<T = any>(endpoint: string, data?: any, options?: RequestInit): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`
+    const url = `${this.resolveBaseURL()}${endpoint}`
     
     const response = await fetch(url, {
       method: 'PATCH',
@@ -248,7 +246,7 @@ class ApiClient {
    * DELETE request
    */
   async delete<T = any>(endpoint: string, options?: RequestInit): Promise<T> {
-    const url = `${this.baseURL}${endpoint}`
+    const url = `${this.resolveBaseURL()}${endpoint}`
     
     const response = await fetch(url, {
       method: 'DELETE',

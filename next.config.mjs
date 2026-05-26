@@ -1,4 +1,7 @@
 /** @type {import('next').NextConfig} */
+const backendUrl =
+  (process.env.BACKEND_URL || "http://31.220.82.129:5003").replace(/\/$/, "")
+
 const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
@@ -19,7 +22,15 @@ const nextConfig = {
   },
   // Empty turbopack config to silence the warning
   turbopack: {},
-  output: 'standalone',
+  output: "standalone",
+  async rewrites() {
+    return [
+      {
+        source: "/api/backend/:path*",
+        destination: `${backendUrl}/:path*`,
+      },
+    ]
+  },
 }
 
 export default nextConfig
