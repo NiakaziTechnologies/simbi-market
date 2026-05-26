@@ -61,6 +61,7 @@ export function AdminCustomRequestDetailView({
   const [reasonReject, setReasonReject] = useState("")
   const [notesInfo, setNotesInfo] = useState("")
   const [saving, setSaving] = useState(false)
+  const [savingAction, setSavingAction] = useState<"verify" | "approve" | "reject" | "info" | null>(null)
 
   const load = useCallback(async () => {
     if (!id) return
@@ -105,6 +106,7 @@ export function AdminCustomRequestDetailView({
       return
     }
     setSaving(true)
+    setSavingAction("verify")
     try {
       const res = await verifyCounterfeitDocumentation(id, { notes: notesVerify.trim() })
       if (!res.success) throw new Error(res.message)
@@ -116,12 +118,14 @@ export function AdminCustomRequestDetailView({
       toast({ title: errPayload(e), variant: "destructive" })
     } finally {
       setSaving(false)
+      setSavingAction(null)
     }
   }
 
   const onApprove = async () => {
     if (!id) return
     setSaving(true)
+    setSavingAction("approve")
     try {
       const res = await approveCustomProductRequest(
         id,
@@ -136,6 +140,7 @@ export function AdminCustomRequestDetailView({
       toast({ title: errPayload(e), variant: "destructive" })
     } finally {
       setSaving(false)
+      setSavingAction(null)
     }
   }
 
@@ -147,6 +152,7 @@ export function AdminCustomRequestDetailView({
       return
     }
     setSaving(true)
+    setSavingAction("reject")
     try {
       const res = await rejectCustomProductRequest(id, { rejectionReason: t })
       if (!res.success) throw new Error(res.message)
@@ -158,6 +164,7 @@ export function AdminCustomRequestDetailView({
       toast({ title: errPayload(e), variant: "destructive" })
     } finally {
       setSaving(false)
+      setSavingAction(null)
     }
   }
 
@@ -168,6 +175,7 @@ export function AdminCustomRequestDetailView({
       return
     }
     setSaving(true)
+    setSavingAction("info")
     try {
       const res = await requestMoreInfoCustomProduct(id, { adminNotes: notesInfo.trim() })
       if (!res.success) throw new Error(res.message)
@@ -179,6 +187,7 @@ export function AdminCustomRequestDetailView({
       toast({ title: errPayload(e), variant: "destructive" })
     } finally {
       setSaving(false)
+      setSavingAction(null)
     }
   }
 
@@ -333,9 +342,11 @@ export function AdminCustomRequestDetailView({
           <Button
             type="button"
             variant="secondary"
+            className="gap-2 border border-border/80 text-foreground dark:text-zinc-100 dark:bg-zinc-900/60 dark:hover:bg-zinc-800/70"
             disabled={saving}
             onClick={() => setOpenVerify(true)}
           >
+            {savingAction === "verify" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
             1. Verify documentation
           </Button>
 
@@ -346,7 +357,9 @@ export function AdminCustomRequestDetailView({
                   type="button"
                   onClick={() => setOpenApprove(true)}
                   disabled={!verified || saving}
+                  className="gap-2"
                 >
+                  {savingAction === "approve" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
                   2. Approve
                 </Button>
               </span>
@@ -361,7 +374,9 @@ export function AdminCustomRequestDetailView({
             variant="destructive"
             disabled={saving}
             onClick={() => setOpenReject(true)}
+            className="gap-2"
           >
+            {savingAction === "reject" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
             Reject
           </Button>
           <Button
@@ -369,7 +384,9 @@ export function AdminCustomRequestDetailView({
             variant="outline"
             disabled={saving}
             onClick={() => setOpenInfo(true)}
+            className="gap-2"
           >
+            {savingAction === "info" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
             Request more information
           </Button>
         </div>

@@ -3,7 +3,7 @@
  */
 
 /** Default production API host (no trailing slash). Override with `NEXT_PUBLIC_API_URL`. */
-export const DEFAULT_PRODUCTION_API_URL = "https://simbi-three.vercel.app"
+export const DEFAULT_PRODUCTION_API_URL = "http://31.220.82.129:6000"
 
 // Get the appropriate base URL based on environment
 function getBaseURL(): string {
@@ -13,21 +13,8 @@ function getBaseURL(): string {
       : ""
   if (fromEnv) return fromEnv
 
-  // Deployed storefront (not local): talk to production API unless env is set above
-  if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
-    return DEFAULT_PRODUCTION_API_URL
-  }
-
-  // SSR on production host (e.g. Vercel): avoid defaulting to localhost during prerender
-  if (
-    typeof window === "undefined" &&
-    typeof process !== "undefined" &&
-    process.env.NODE_ENV === "production"
-  ) {
-    return DEFAULT_PRODUCTION_API_URL
-  }
-
-  return "http://localhost:3006"
+  // Default to production API (override via env or switch to DEV_BASE_URL for local)
+  return DEFAULT_PRODUCTION_API_URL
 }
 
 export const API_CONFIG = {
