@@ -126,109 +126,125 @@ export function Navigation() {
           setActiveMenu(null)
         }}
       >
-        <div className="max-w-[1400px] mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <Link href="/" className="text-xl font-semibold tracking-tight text-foreground">
-              SIMBI<span className="text-accent">.</span>
-            </Link>
+        {/* Derive whether we're in "transparent over hero" mode */}
+        {(() => {
+          const isTransparent = !scrolled && !activeMenu
+          return (
+            <div className="max-w-[1400px] mx-auto px-6">
+              <div className="flex items-center justify-between h-16">
+                {/* Logo */}
+                <Link href="/" className={`text-xl font-semibold tracking-tight transition-colors ${isTransparent ? "text-white" : "text-foreground"}`}>
+                  SIMBI<span className="text-accent">.</span>
+                </Link>
 
-            {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-1">
-              {navItems.map((item) => (
-                <div key={item.label} onMouseEnter={() => item.megaMenu && setActiveMenu(item.label)} className="relative">
-                  {item.megaMenu ? (
-                    <button
-                      onClick={() => router.push(item.href)}
-                      className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${pathname === item.href
-                        ? "text-white bg-blue-600"
-                        : activeMenu === item.label
-                          ? "text-foreground bg-muted"
-                          : "text-foreground hover:text-foreground hover:bg-muted"
-                        }`}
-                    >
-                      {item.label}
-                      <ChevronDown
-                        className={`h-3.5 w-3.5 transition-transform duration-200 ${activeMenu === item.label ? "rotate-180" : ""
-                          }`}
-                      />
-                    </button>
-                  ) : (
-                    <Link
-                      href={item.href}
-                      className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${pathname === item.href
-                        ? "text-white bg-blue-600"
-                        : "text-foreground hover:text-foreground hover:bg-muted"
-                        }`}
-                    >
-                      {item.label}
-                    </Link>
-                  )}
+                {/* Desktop Nav */}
+                <div className="hidden lg:flex items-center gap-1">
+                  {navItems.map((item) => (
+                    <div key={item.label} onMouseEnter={() => item.megaMenu && setActiveMenu(item.label)} className="relative">
+                      {item.megaMenu ? (
+                        <button
+                          onClick={() => router.push(item.href)}
+                          className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${pathname === item.href
+                            ? "text-white bg-blue-600"
+                            : activeMenu === item.label
+                              ? "text-foreground bg-muted"
+                              : isTransparent
+                                ? "text-white hover:text-white hover:bg-white/15"
+                                : "text-foreground hover:text-foreground hover:bg-muted"
+                            }`}
+                        >
+                          {item.label}
+                          <ChevronDown
+                            className={`h-3.5 w-3.5 transition-transform duration-200 ${activeMenu === item.label ? "rotate-180" : ""
+                              }`}
+                          />
+                        </button>
+                      ) : (
+                        <Link
+                          href={item.href}
+                          className={`flex items-center gap-1 px-4 py-2 text-sm font-medium tracking-wide transition-colors rounded-full ${pathname === item.href
+                            ? "text-white bg-blue-600"
+                            : isTransparent
+                              ? "text-white hover:text-white hover:bg-white/15"
+                              : "text-foreground hover:text-foreground hover:bg-muted"
+                            }`}
+                        >
+                          {item.label}
+                        </Link>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
+
+                {/* Right Actions */}
+                <div className="flex items-center gap-2">
+                  {/* Login Button */}
+                  <Link href="/auth/login">
+                    <Button
+                      variant="ghost"
+                      className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isTransparent
+                        ? "text-white border-white/50 hover:bg-white/15 hover:border-white/70"
+                        : "text-foreground border-border hover:bg-muted hover:border-border"
+                        }`}
+                    >
+                      <span className="text-sm font-medium">Login</span>
+                    </Button>
+                  </Link>
+
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setIsSearchOpen(!isSearchOpen)
+                    }}
+                    className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isSearchOpen
+                      ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+                      : isTransparent
+                        ? "text-white border-white/50 hover:bg-white/15 hover:border-white/70"
+                        : "text-foreground border-border hover:bg-muted hover:border-border"
+                      }`}
+                  >
+                    <Search className="h-4 w-4" />
+                    <span className="text-sm font-medium">Search</span>
+                  </Button>
+
+                  <Link href="/checkout">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={`relative transition-colors ${isTransparent ? "text-white hover:text-white hover:bg-white/15" : "text-foreground/80 hover:text-foreground hover:bg-muted/50"}`}
+                    >
+                      <ShoppingCart className="h-5 w-5" />
+                      {cartItems.length > 0 && (
+                        <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-xs flex items-center justify-center text-white font-medium">
+                          {cartItems.length}
+                        </span>
+                      )}
+                    </Button>
+                  </Link>
+
+                  <ThemeToggle />
+
+                  <Link href="/dashboard/buyer">
+                    <Button variant="ghost" size="icon" className={`transition-colors ${isTransparent ? "text-white hover:text-white hover:bg-white/15" : "text-foreground/80 hover:text-foreground hover:bg-muted/50"}`}>
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </Link>
+
+                  {/* Mobile Menu Button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`lg:hidden transition-colors ${isTransparent ? "text-white hover:text-white hover:bg-white/15" : "text-foreground/80 hover:text-foreground hover:bg-muted/50"}`}
+                    onClick={() => setMobileOpen(true)}
+                  >
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
             </div>
+          )
+        })()}
 
-            {/* Right Actions */}
-            <div className="flex items-center gap-2">
-              {/* Login Button */}
-              <Link href="/auth/login">
-                <Button
-                  variant="ghost"
-                  className="hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 text-foreground border-border hover:bg-muted hover:border-border"
-                >
-                  <span className="text-sm font-medium">Login</span>
-                </Button>
-              </Link>
-
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setIsSearchOpen(!isSearchOpen)
-                }}
-                className={`hidden lg:flex items-center gap-2 px-6 h-10 rounded-full transition-all duration-300 border-2 ${isSearchOpen
-                  ? "bg-accent text-white border-accent scale-105 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
-                  : "text-foreground border-border hover:bg-muted hover:border-border"
-                  }`}
-              >
-                <Search className="h-4 w-4" />
-                <span className="text-sm font-medium">Search</span>
-              </Button>
-
-              <Link href="/checkout">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="relative text-foreground/80 hover:text-foreground hover:bg-muted/50"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  {cartItems.length > 0 && (
-                    <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-accent text-xs flex items-center justify-center text-white font-medium">
-                      {cartItems.length}
-                    </span>
-                  )}
-                </Button>
-              </Link>
-
-              <ThemeToggle />
-
-              <Link href="/dashboard/buyer">
-                <Button variant="ghost" size="icon" className="text-foreground/80 hover:text-foreground hover:bg-muted/50">
-                  <User className="h-5 w-5" />
-                </Button>
-              </Link>
-
-              {/* Mobile Menu Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="lg:hidden text-foreground/80 hover:text-foreground hover:bg-muted/50"
-                onClick={() => setMobileOpen(true)}
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-        </div>
 
         {/* Mega Menu Dropdown */}
         <AnimatePresence>

@@ -129,16 +129,18 @@
 
 /* Glassmorphism utilities for premium effects */
 .glass-card {
-  background: rgba(240, 247, 255, 0.95);
+  background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 122, 255, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-/* Search card - strong sky blue */
+/* Search card — always dark, sits on dark hero backgrounds */
 .search-card {
-  background: linear-gradient(135deg, #b3d9ff 0%, #ccebff 100%);
-  border: 1px solid rgba(0, 122, 255, 0.3);
+  background: rgba(15, 15, 20, 0.75) !important;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   position: relative;
 }
 .search-card::before {
@@ -149,15 +151,12 @@
   transform: translateX(-50%);
   width: 60%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(0, 122, 255, 0.7), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0, 122, 255, 0.5), transparent);
   border-radius: 0 0 2px 2px;
 }
 .dark .search-card {
-  background: linear-gradient(135deg, rgba(0, 80, 160, 0.4) 0%, rgba(0, 50, 100, 0.3) 100%);
-  border: 1px solid rgba(0, 122, 255, 0.35);
-}
-.dark .search-card::before {
-  background: linear-gradient(90deg, transparent, rgba(0, 122, 255, 0.6), transparent);
+  background: rgba(15, 15, 20, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 
 /* Dark mode glass card - dark grey */
@@ -179,11 +178,11 @@
   border: 1px solid rgba(0, 122, 255, 0.08) !important;
 }
 
-/* Catalog search input - Strong blue */
+/* Catalog search input - clean white */
 .light .catalog-search-input {
-  background: #b3d9ff !important;
+  background: #ffffff !important;
   color: #1a1a1a !important;
-  border: 1px solid rgba(0, 122, 255, 0.3) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
 }
 
 /* Pickup locations - Light mode dark text */
@@ -204,8 +203,8 @@
 }
 
 .light .catalog-search-input:focus {
-  background: #c4e0ff !important;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15) !important;
   border-color: #007aff !important;
 }
 
