@@ -18,6 +18,40 @@ export interface ApiError {
   data?: any
 }
 
+/** Read `message` from apiClient throws or Error instances (never hardcode over server text). */
+export function getApiErrorMessage(err: unknown, fallback = "Something went wrong"): string {
+  if (err && typeof err === "object") {
+    const api = err as ApiError
+    if (typeof api.message === "string" && api.message.trim()) {
+      return api.message
+    }
+    if (api.data && typeof api.data === "object") {
+      const data = api.data as { message?: string; error?: string }
+      if (typeof data.message === "string" && data.message.trim()) {
+        return data.message
+      }
+    }
+  }
+  if (err instanceof Error && err.message.trim()) {
+    return err.message
+  }
+  return fallback
+}
+
+export function getApiErrorCode(err: unknown): string | undefined {
+  if (err && typeof err === "object") {
+    const api = err as ApiError
+    if (api.data && typeof api.data === "object" && "error" in api.data) {
+      const code = (api.data as { error?: string }).error
+      if (code) return String(code)
+    }
+    if ("error" in api && typeof (api as { error?: string }).error === "string") {
+      return (api as { error: string }).error
+    }
+  }
+  return undefined
+}
+
 /**
  * Centralized API client class
  */
@@ -140,6 +174,24 @@ class ApiClient {
         }
         throw apiError
       }
+    }
+
+    // Handle 403 Forbidden — logged in but wrong role
+    if (response.status === 403) {
+      const errorData = await response.json().catch(() => ({}))
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('api:forbidden', {
+            detail: { message: errorData.message || "You don't have permission." },
+          })
+        )
+      }
+      const error: ApiError = {
+        message: errorData.message || "You don't have permission.",
+        status: 403,
+        data: errorData,
+      }
+      throw error
     }
 
     // Handle other errors

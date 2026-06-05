@@ -37,12 +37,12 @@ function getBaseURL(): string {
     if (backend) return backend
   }
 
-  // Local dev in browser (http://localhost) or fallback
+  // Default to production API (override via env or switch to DEV_BASE_URL for local)
   return DEFAULT_PRODUCTION_API_URL
 }
 
 export const API_CONFIG = {
-  DEV_BASE_URL: "http://localhost:3006",
+  DEV_BASE_URL: "http://127.0.0.1:5000",
 
   PROD_BASE_URL:
     trimUrl(process.env.NEXT_PUBLIC_API_URL ?? "") || DEFAULT_PRODUCTION_API_URL,

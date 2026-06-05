@@ -3,7 +3,7 @@
  */
 
 import { apiClient } from './api-client'
-import { setAuthToken, setUser, type User, type AuthTokens } from '../auth/auth-utils'
+import { setAuthToken, setUser, type User, type AuthTokens, ADMIN_MUST_CHANGE_PASSWORD_KEY } from '../auth/auth-utils'
 
 export interface LoginCredentials {
   email: string
@@ -13,6 +13,75 @@ export interface LoginCredentials {
 export interface LoginResponse {
   user: User
   tokens: AuthTokens
+}
+
+const ADMIN_JWT_ROLES = new Set([
+  'SUPER_ADMIN',
+  'FINOPS_ANALYST',
+  'COMPLIANCE_MANAGER',
+  'LOGISTICS_COORDINATOR',
+  'TECH_SUPPORT',
+])
+
+function syncAdminPasswordFlag(mustChange?: boolean) {
+  if (typeof window === 'undefined') return
+  if (mustChange) {
+    localStorage.setItem(ADMIN_MUST_CHANGE_PASSWORD_KEY, '1')
+  } else {
+    localStorage.removeItem(ADMIN_MUST_CHANGE_PASSWORD_KEY)
+  }
+}
+
+/** Normalize `/api/auth/me` payload into session User. */
+export function normalizeSessionUser(data: Record<string, unknown>): User {
+  const userType = String(data.userType ?? data.role ?? '').toLowerCase()
+  const rawRole = data.role != null ? String(data.role) : ''
+  const isAdminJwtRole = ADMIN_JWT_ROLES.has(rawRole)
+  const isAdmin = userType === 'admin' || isAdminJwtRole
+
+  const userTypeToRole: Record<string, 'buyer' | 'seller' | 'admin'> = {
+    buyer: 'buyer',
+    seller: 'seller',
+    admin: 'admin',
+    staff: 'seller',
+  }
+
+  const role = isAdmin
+    ? 'admin'
+    : userTypeToRole[userType] ||
+      (data.role === 'buyer' || data.role === 'seller' || data.role === 'admin'
+        ? (data.role as 'buyer' | 'seller' | 'admin')
+        : 'buyer')
+
+  const email = String(data.email ?? '')
+  const firstName = data.firstName != null ? String(data.firstName) : undefined
+  const lastName = data.lastName != null ? String(data.lastName) : undefined
+  const name =
+    (data.name != null ? String(data.name) : null) ||
+    (data.businessName != null ? String(data.businessName) : null) ||
+    (firstName && lastName ? `${firstName} ${lastName}` : null) ||
+    email.split('@')[0]
+
+  const user: User = {
+    id: String(data.id ?? ''),
+    email,
+    name,
+    role,
+    ...(firstName ? { firstName } : {}),
+    ...(lastName ? { lastName } : {}),
+    ...(isAdmin && isAdminJwtRole ? { adminRole: rawRole } : {}),
+    ...(isAdmin && data.status != null ? { status: String(data.status) } : {}),
+    ...(isAdmin && data.lastLoginAt !== undefined
+      ? { lastLoginAt: data.lastLoginAt as string | null }
+      : {}),
+    ...(isAdmin && data.mustChangePassword === true ? { mustChangePassword: true } : {}),
+  }
+
+  if (isAdmin) {
+    syncAdminPasswordFlag(Boolean(data.mustChangePassword))
+  }
+
+  return user
 }
 
 /**
@@ -69,16 +138,6 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
       expiresInSeconds = expiresIn
     }
     
-    // Map userType from API to role for internal use
-    const userTypeToRole: Record<string, 'buyer' | 'seller' | 'admin'> = {
-      'buyer': 'buyer',
-      'seller': 'seller',
-      'admin': 'admin',
-      'staff': 'seller', // Map staff to seller role for seller dashboard access
-    }
-    
-    const role = userTypeToRole[userType] || 'buyer'
-    
     // Extract user information
     const userId = userData?.id || response.data.id || ''
     const userEmail = userData?.email || response.data.email || credentials.email
@@ -88,13 +147,13 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
       || userEmail.split('@')[0]
     
     // Create user object from response data
-    const user: User = {
+    const user = normalizeSessionUser({
+      ...userData,
+      userType,
       id: userId,
       email: userEmail,
       name: userName,
-      role: role,
-      ...(userType === "admin" && userData?.role ? { adminRole: String(userData.role) } : {}),
-    }
+    })
     
     // Store token
     setAuthToken(accessToken, expiresInSeconds)
@@ -129,6 +188,9 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
       localStorage.removeItem('sellerUserRole')
       localStorage.removeItem('sellerProfile')
       localStorage.removeItem('staffProfile')
+      if (userType === 'admin') {
+        syncAdminPasswordFlag(Boolean(userData?.mustChangePassword))
+      }
     }
     
     return {
@@ -173,12 +235,13 @@ export async function getCurrentUser(): Promise<User | null> {
   try {
     const response = await apiClient.get<{
       success: boolean
-      data: User
+      data: Record<string, unknown>
     }>('/api/auth/me')
     
     if (response.success && response.data) {
-      setUser(response.data)
-      return response.data
+      const user = normalizeSessionUser(response.data)
+      setUser(user)
+      return user
     }
     
     return null

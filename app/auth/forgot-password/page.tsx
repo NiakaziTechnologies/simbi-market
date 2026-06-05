@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { forgotPassword } from '@/lib/api/auth-password'
+import { forgotPassword, forgotAdminPassword } from '@/lib/api/auth-password'
 import { Loader2, Mail, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
@@ -20,8 +20,10 @@ const forgotPasswordSchema = z.object({
 
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isAdminPortal = searchParams?.get('portal') === 'admin'
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,9 +41,11 @@ export default function ForgotPasswordPage() {
     setError(null)
 
     try {
-      await forgotPassword({
-        email: data.email,
-      })
+      if (isAdminPortal) {
+        await forgotAdminPassword(data.email)
+      } else {
+        await forgotPassword({ email: data.email })
+      }
       setIsSuccess(true)
     } catch (err: any) {
       // Even if there's an error, show success message for security
@@ -101,7 +105,7 @@ export default function ForgotPasswordPage() {
                   >
                     Send Another Email
                   </Button>
-                  <Link href="/auth/login">
+                  <Link href={isAdminPortal ? "/auth/login?portal=admin" : "/auth/login"}>
                     <Button variant="ghost" className="w-full">
                       <ArrowLeft className="h-4 w-4 mr-2" />
                       Back to Login
@@ -151,7 +155,10 @@ export default function ForgotPasswordPage() {
                 </Button>
 
                 <div className="text-center text-sm text-muted-foreground">
-                  <Link href="/auth/login" className="text-accent hover:underline">
+                  <Link
+                    href={isAdminPortal ? "/auth/login?portal=admin" : "/auth/login"}
+                    className="text-accent hover:underline"
+                  >
                     ← Back to Login
                   </Link>
                 </div>
@@ -161,5 +168,17 @@ export default function ForgotPasswordPage() {
         </Card>
       </motion.div>
     </div>
+  )
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Loader2 className="h-8 w-8 animate-spin text-accent" />
+      </div>
+    }>
+      <ForgotPasswordForm />
+    </Suspense>
   )
 }

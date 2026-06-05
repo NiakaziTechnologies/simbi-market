@@ -22,6 +22,11 @@ import {
   type CommerceShippingEngineSetting,
   type ShippingMode,
 } from "@/lib/api/admin-commerce-pricing"
+import { useAuth } from "@/lib/auth/auth-context"
+import {
+  canAccessTeamSettings,
+  canAccessAuditTrail,
+} from "@/lib/auth/admin-rbac"
 
 function parseNumber(value: string): number | null {
   const n = parseFloat(value.replace(/,/g, ""))
@@ -49,6 +54,7 @@ function applySnapshotToForm(
 
 export default function AdminSettingsPage() {
   const { toast } = useToast()
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState("commerce")
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -244,6 +250,28 @@ export default function AdminSettingsPage() {
           Commerce pricing, financial partners, and loan applications (admin API required).
         </p>
       </motion.div>
+
+      <Card className="border-border">
+        <CardHeader>
+          <CardTitle className="text-lg font-light">Account &amp; team</CardTitle>
+          <CardDescription>Password, admin users, and audit trail</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-3">
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/admin/settings/password">Password</Link>
+          </Button>
+          {canAccessTeamSettings(user?.adminRole) && (
+            <Button variant="outline" asChild>
+              <Link href="/dashboard/admin/settings/team">Team</Link>
+            </Button>
+          )}
+          {canAccessAuditTrail(user?.adminRole) && (
+            <Button variant="outline" asChild>
+              <Link href="/dashboard/admin/settings/audit">Audit trail</Link>
+            </Button>
+          )}
+        </CardContent>
+      </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="mb-6 grid w-full grid-cols-1 sm:grid-cols-3 bg-background/50 border border-border">

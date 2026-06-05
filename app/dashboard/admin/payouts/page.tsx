@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AdminRoleGuard } from "@/components/auth/admin-role-guard"
 import { PendingPayoutsTab } from "@/components/dashboard/admin/pending-payouts-tab"
 import { PayoutHistoryTab } from "@/components/dashboard/admin/payout-history-tab"
 import { motion } from "framer-motion"
@@ -10,6 +11,7 @@ import { DollarSign } from "lucide-react"
 export default function AdminPayoutsPage() {
   const [activeTab, setActiveTab] = useState("pending")
   return (
+    <AdminRoleGuard requiredAccess="payouts">
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -53,5 +55,6 @@ export default function AdminPayoutsPage() {
         </TabsContent>
       </Tabs>
     </motion.div>
+    </AdminRoleGuard>
   )
 }

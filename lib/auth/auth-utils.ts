@@ -13,6 +13,23 @@ export interface User {
   role: 'buyer' | 'seller' | 'admin'
   /** Admin JWT role when `role === 'admin'` (SUPER_ADMIN, FINOPS_ANALYST, …). */
   adminRole?: string
+  firstName?: string
+  lastName?: string
+  status?: string
+  lastLoginAt?: string | null
+  mustChangePassword?: boolean
+}
+
+export const ADMIN_MUST_CHANGE_PASSWORD_KEY = 'admin_must_change_password'
+
+export function adminMustChangePassword(): boolean {
+  if (typeof window === 'undefined') return false
+  return localStorage.getItem(ADMIN_MUST_CHANGE_PASSWORD_KEY) === '1'
+}
+
+export function clearAdminMustChangePassword(): void {
+  if (typeof window === 'undefined') return
+  localStorage.removeItem(ADMIN_MUST_CHANGE_PASSWORD_KEY)
 }
 
 export interface AuthTokens {
@@ -111,6 +128,7 @@ export function clearAuth(): void {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
   localStorage.removeItem(TOKEN_EXPIRY_KEY)
+  localStorage.removeItem(ADMIN_MUST_CHANGE_PASSWORD_KEY)
 }
 
 /**

@@ -52,17 +52,12 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   })
 
-  // Redirect if already authenticated (but not during initial load or if already redirected)
   useEffect(() => {
-    // Don't redirect if auth is still loading, if we've already redirected, or if we're not on login page
     if (authLoading || hasRedirectedRef.current || pathname !== '/auth/login') return
     
     if (isAuthenticated && role) {
-      // Check for seller/staff userType from localStorage
       const sellerUserType = localStorage.getItem('sellerUserType')
       
-      // Only redirect if user is actually a seller/staff, or if they're buyer/admin
-      // Don't redirect if they're authenticated but not seller/staff (might be buyer/admin)
       if (sellerUserType === 'staff' || sellerUserType === 'seller' || role === 'buyer' || role === 'admin') {
         hasRedirectedRef.current = true
         
@@ -76,7 +71,6 @@ export default function LoginPage() {
           ? '/dashboard/admin'
           : '/dashboard'
         
-        // Only redirect if we're not already going there
         if (redirectPath !== pathname) {
           router.push(redirectPath)
         }
@@ -84,22 +78,15 @@ export default function LoginPage() {
     }
   }, [isAuthenticated, role, router, returnUrl, authLoading, pathname])
 
-  /**
-   * Extract remaining minutes from error message
-   */
   const extractRemainingMinutes = (message: string): number | null => {
     const match = message.match(/(\d+)\s+minute/)
     return match ? parseInt(match[1], 10) : null
   }
 
-  /**
-   * Parse error message and determine error type and styling
-   */
   const parseError = (error: ApiError | Error): ErrorInfo => {
     const message = error.message || 'An unexpected error occurred'
     const lowerMessage = message.toLowerCase()
 
-    // Account locked
     if (lowerMessage.includes('locked') || lowerMessage.includes('lockout')) {
       const minutes = extractRemainingMinutes(message)
       return {
@@ -111,7 +98,6 @@ export default function LoginPage() {
       }
     }
 
-    // IP rate limit
     if (lowerMessage.includes('device') || lowerMessage.includes('too many login attempts')) {
       const minutes = extractRemainingMinutes(message)
       return {
@@ -123,7 +109,6 @@ export default function LoginPage() {
       }
     }
 
-    // Email verification required
     if (lowerMessage.includes('verify') || lowerMessage.includes('verification')) {
       return {
         message: message,
@@ -136,7 +121,6 @@ export default function LoginPage() {
       }
     }
 
-    // Account status issues (inactive, suspended, banned)
     if (lowerMessage.includes('inactive') || lowerMessage.includes('suspended') || lowerMessage.includes('banned') || lowerMessage.includes('pending')) {
       return {
         message: message,
@@ -145,7 +129,6 @@ export default function LoginPage() {
       }
     }
 
-    // Invalid credentials (wrong password attempts)
     if (lowerMessage.includes('invalid credentials') || lowerMessage.includes('attempts remaining')) {
       return {
         message: message,
@@ -154,7 +137,6 @@ export default function LoginPage() {
       }
     }
 
-    // Generic error
     return {
       message: message,
       type: 'error',
@@ -165,7 +147,7 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     setErrorInfo(null)
-    hasRedirectedRef.current = false // Reset redirect flag
+    hasRedirectedRef.current = false
 
     try {
       const response = await login({
@@ -173,13 +155,9 @@ export default function LoginPage() {
         password: data.password,
       })
 
-      // Set user in auth context
       setAuthUser(response.user)
 
-      // Get userType from localStorage (set by login function)
       const userType = localStorage.getItem('sellerUserType') || response.user.role
-      
-      // Redirect based on userType
       const redirectPath = returnUrl 
         ? decodeURIComponent(returnUrl)
         : userType === 'staff' || userType === 'seller'
@@ -190,13 +168,12 @@ export default function LoginPage() {
         ? '/dashboard/admin'
         : '/dashboard'
 
-      hasRedirectedRef.current = true // Mark as redirected before pushing
+      hasRedirectedRef.current = true
       router.push(redirectPath)
-    } catch (err: any) {
-      // Parse the error to get appropriate styling and icon
-      const parsedError = parseError(err)
+    } catch (err: unknown) {
+      const parsedError = parseError(err as ApiError | Error)
       setErrorInfo(parsedError)
-      hasRedirectedRef.current = false // Reset on error
+      hasRedirectedRef.current = false
     } finally {
       setIsLoading(false)
     }
@@ -211,7 +188,6 @@ export default function LoginPage() {
         className="w-full max-w-md"
       >
         <div className="glass-card rounded-xl p-8 border border-border">
-          {/* Logo */}
           <div className="text-center mb-8">
             <Link href="/" className="text-2xl font-semibold tracking-tight text-foreground inline-block">
               SIMBI<span className="text-accent">.</span>
@@ -220,7 +196,6 @@ export default function LoginPage() {
             <p className="text-muted-foreground font-light">Sign in to your account</p>
           </div>
 
-          {/* Error Message */}
           {errorInfo && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
@@ -268,7 +243,6 @@ export default function LoginPage() {
             </motion.div>
           )}
 
-          {/* Login Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -313,7 +287,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Footer Links */}
           <div className="mt-6 space-y-2 text-center text-sm text-muted-foreground">
             <p>
               <Link href="/auth/forgot-password" className="text-accent hover:underline">
@@ -321,7 +294,7 @@ export default function LoginPage() {
               </Link>
             </p>
             <p>
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/auth/register" className="text-accent hover:underline">
                 Sign up
               </Link>

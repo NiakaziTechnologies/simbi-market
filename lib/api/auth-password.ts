@@ -9,7 +9,7 @@ import { apiClient } from './api-client'
  */
 export interface ForgotPasswordRequest {
   email: string
-  userType?: "buyer" | "seller"
+  userType?: "buyer" | "seller" | "admin"
 }
 
 /**
@@ -42,6 +42,10 @@ export interface ResetPasswordResponse {
 /**
  * Request password reset
  */
+export async function forgotAdminPassword(email: string): Promise<ForgotPasswordResponse> {
+  return forgotPassword({ email, userType: "admin" })
+}
+
 export async function forgotPassword(
   request: ForgotPasswordRequest
 ): Promise<ForgotPasswordResponse> {

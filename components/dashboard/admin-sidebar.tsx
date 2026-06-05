@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
@@ -22,12 +22,23 @@ import {
   Settings,
   AlertTriangle,
   Warehouse,
+  UserCog,
+  ScrollText,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/auth/auth-context"
+import {
+  canAccessAdminNavItem,
+  type AdminNavItemId,
+} from "@/lib/auth/admin-rbac"
 
-const menuItems = [
+const menuItems: {
+  id: AdminNavItemId
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  href: string
+}[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/admin" },
   { id: "notifications", label: "Notifications", icon: Bell, href: "/dashboard/admin/notifications" },
   { id: "alerts", label: "Alerts", icon: AlertTriangle, href: "/dashboard/admin/alerts" },
@@ -41,8 +52,9 @@ const menuItems = [
   { id: "returns", label: "Returns", icon: RotateCcw, href: "/dashboard/admin/returns" },
   { id: "reviews", label: "Reviews", icon: Star, href: "/dashboard/admin/reviews" },
   { id: "reports", label: "Reports", icon: BarChart3, href: "/dashboard/admin/reports" },
-
   { id: "settings", label: "Settings", icon: Settings, href: "/dashboard/admin/settings" },
+  { id: "team", label: "Team", icon: UserCog, href: "/dashboard/admin/settings/team" },
+  { id: "audit", label: "Audit trail", icon: ScrollText, href: "/dashboard/admin/settings/audit" },
 ]
 
 interface AdminSidebarProps {
@@ -53,9 +65,20 @@ interface AdminSidebarProps {
 export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSidebarProps) {
   const pathname = usePathname()
   const [isCollapsed, setIsCollapsed] = useState(false)
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
+
+  const visibleItems = useMemo(
+    () =>
+      menuItems.filter((item) =>
+        canAccessAdminNavItem(item.id, user?.adminRole)
+      ),
+    [user?.adminRole]
+  )
 
   const getActiveTab = () => {
+    if (pathname?.includes("/settings/team")) return "team"
+    if (pathname?.includes("/settings/audit")) return "audit"
+    if (pathname?.includes("/settings")) return "settings"
     if (pathname?.includes("/alerts")) return "alerts"
     if (pathname?.includes("/notifications")) return "notifications"
     if (pathname?.includes("/users")) return "users"
@@ -68,8 +91,6 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
     if (pathname?.includes("/returns")) return "returns"
     if (pathname?.includes("/reviews")) return "reviews"
     if (pathname?.includes("/reports")) return "reports"
-
-    if (pathname?.includes("/settings")) return "settings"
     return "dashboard"
   }
 
@@ -77,7 +98,6 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
 
   return (
     <>
-      {/* Mobile Overlay */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -85,7 +105,6 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={cn(
           "fixed left-0 top-0 h-full bg-background border-r border-border z-50 transition-all duration-300",
@@ -95,7 +114,6 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo and Toggle */}
           <div className="flex items-center justify-between p-6 border-b border-border">
             {!isCollapsed && (
               <Link href="/dashboard/admin" className="text-xl font-semibold tracking-tight text-foreground">
@@ -114,11 +132,7 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 className="h-8 w-8"
               >
-                {isCollapsed ? (
-                  <Menu className="h-4 w-4" />
-                ) : (
-                  <X className="h-4 w-4" />
-                )}
+                {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
               </Button>
             </div>
             <Button
@@ -131,9 +145,8 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
             </Button>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-4 space-y-2">
-            {menuItems.map((item) => {
+            {visibleItems.map((item) => {
               const isActive = activeTab === item.id
               return (
                 <Link key={item.id} href={item.href} onClick={onMobileClose}>
@@ -162,7 +175,6 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
             })}
           </nav>
 
-          {/* Logout */}
           <div className="p-4 border-t border-border">
             <Button
               variant="ghost"
@@ -173,7 +185,7 @@ export function AdminSidebar({ isMobileOpen = false, onMobileClose }: AdminSideb
               onClick={logout}
             >
               <LogOut className="h-5 w-5 flex-shrink-0" />
-              {!isCollapsed && <span className="font-medium text-sm ml-3">Logout</span>}
+              {!isCollapsed && <span className="font-medium text-sm ml-3">Sign out</span>}
             </Button>
           </div>
         </div>

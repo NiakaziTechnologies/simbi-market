@@ -84,8 +84,10 @@ function ResetPasswordForm() {
       setIsSuccess(true)
       
       // Redirect to login after 3 seconds
+      const loginHref =
+        finalUserType === 'admin' ? '/auth/login?portal=admin' : '/auth/login'
       setTimeout(() => {
-        router.push('/auth/login')
+        router.push(loginHref)
       }, 3000)
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to reset password'
@@ -180,7 +182,13 @@ function ResetPasswordForm() {
                     Redirecting to login page...
                   </p>
                 </div>
-                <Link href="/auth/login">
+                <Link
+                  href={
+                    (userType || searchParams?.get('type')) === 'admin'
+                      ? '/auth/login?portal=admin'
+                      : '/auth/login'
+                  }
+                >
                   <Button className="w-full bg-accent hover:bg-accent/90 text-white">
                     Go to Login
                   </Button>
